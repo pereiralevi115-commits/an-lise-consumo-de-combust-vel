@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, Loader2, CheckCircle2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import TemplateDownload from './TemplateDownload';
 
 export default function UploadSection({ onReportCreated }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -61,6 +62,9 @@ export default function UploadSection({ onReportCreated }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="mb-4 flex justify-end">
+          <TemplateDownload />
+        </div>
         <div className="flex items-center gap-4">
           <label className="flex-1">
             <input
