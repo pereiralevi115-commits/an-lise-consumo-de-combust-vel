@@ -52,7 +52,7 @@ export default function UploadSection({ onReportCreated }) {
           <label className="flex-1">
             <input
               type="file"
-              accept=".pdf"
+              accept=".pdf,.csv,.xls,.xlsx"
               onChange={handleFileUpload}
               disabled={isLoading}
               className="hidden"
@@ -70,8 +70,8 @@ export default function UploadSection({ onReportCreated }) {
                 </div>
               ) : (
                 <div>
-                  <p className="text-slate-300 font-medium">Clique para selecionar um PDF</p>
-                  <p className="text-slate-500 text-sm mt-1">ou arraste o arquivo aqui</p>
+                   <p className="text-slate-300 font-medium">Clique para selecionar um arquivo</p>
+                   <p className="text-slate-500 text-sm mt-1">PDF, CSV, XLS ou XLSX</p>
                 </div>
               )}
             </div>
