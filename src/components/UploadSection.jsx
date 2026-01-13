@@ -33,7 +33,8 @@ export default function UploadSection({ onReportCreated }) {
       event.target.value = '';
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Erro ao processar o arquivo: ' + error.message);
+      const errorMsg = error.response?.data?.error || error.message || 'Erro desconhecido';
+      alert(errorMsg);
     } finally {
       setIsLoading(false);
     }
