@@ -1,0 +1,140 @@
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+
+Deno.serve(async (req) => {
+  try {
+    const base44 = createClientFromRequest(req);
+    const user = await base44.auth.me();
+
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const formData = await req.formData();
+    const file = formData.get('file');
+
+    if (!file) {
+      return Response.json({ error: 'No file provided' }, { status: 400 });
+    }
+
+    console.log(`Processing file: ${file.name}`);
+
+    // Upload the file
+    const uploadedFile = await base44.integrations.Core.UploadFile({ file });
+    console.log(`File uploaded: ${uploadedFile.file_url}`);
+
+    // Extract data from PDF
+    const extractionSchema = {
+      type: 'object',
+      properties: {
+        monthly_data: {
+          type: 'object',
+          properties: {
+            september: {
+              type: 'object',
+              properties: {
+                liters: { type: 'number' },
+                kilometers: { type: 'number' },
+                cost: { type: 'number' }
+              }
+            },
+            october: {
+              type: 'object',
+              properties: {
+                liters: { type: 'number' },
+                kilometers: { type: 'number' },
+                cost: { type: 'number' }
+              }
+            },
+            november: {
+              type: 'object',
+              properties: {
+                liters: { type: 'number' },
+                kilometers: { type: 'number' },
+                cost: { type: 'number' }
+              }
+            },
+            december: {
+              type: 'object',
+              properties: {
+                liters: { type: 'number' },
+                kilometers: { type: 'number' },
+                cost: { type: 'number' }
+              }
+            }
+          }
+        },
+        plants: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              total_cost: { type: 'number' }
+            }
+          }
+        },
+        vehicles: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              plate: { type: 'string' },
+              kilometers: { type: 'number' }
+            }
+          }
+        },
+        drivers: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              kilometers: { type: 'number' }
+            }
+          }
+        },
+        equipment_types: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              type: { type: 'string' },
+              production_m3: { type: 'number' }
+            }
+          }
+        }
+      }
+    };
+
+    const extractedData = await base44.integrations.Core.ExtractDataFromUploadedFile({
+      file_url: uploadedFile.file_url,
+      json_schema: extractionSchema
+    });
+
+    console.log('Data extracted successfully');
+
+    if (extractedData.status === 'error') {
+      return Response.json({ error: extractedData.details }, { status: 400 });
+    }
+
+    // Create DieselReport record
+    const report = await base44.entities.DieselReport.create({
+      file_name: file.name,
+      file_url: uploadedFile.file_url,
+      uploaded_at: new Date().toISOString(),
+      monthly_summary: extractedData.output.monthly_data,
+      by_plant: extractedData.output.plants || [],
+      by_vehicle: extractedData.output.vehicles || [],
+      by_driver: extractedData.output.drivers || [],
+      by_equipment_type: extractedData.output.equipment_types || [],
+      status: 'completed'
+    });
+
+    console.log(`Report created with ID: ${report.id}`);
+
+    return Response.json(report);
+  } catch (error) {
+    console.error('Error:', error.message);
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+});
