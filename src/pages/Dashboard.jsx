@@ -5,12 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, Loader2, TrendingUp } from 'lucide-react';
 
-import UploadSection from '../components/UploadSection';
-import MonthlyMetrics from '../components/MonthlyMetrics';
-import PlantAnalysis from '../components/PlantAnalysis';
-import VehicleAnalysis from '../components/VehicleAnalysis';
-import DriverAnalysis from '../components/DriverAnalysis';
-import EquipmentAnalysis from '../components/EquipmentAnalysis';
+import UploadSection from '../components/UploadSection.js';
+import MonthlyMetrics from '../components/MonthlyMetrics.js';
+import PlantAnalysis from '../components/PlantAnalysis.js';
+import VehicleAnalysis from '../components/VehicleAnalysis.js';
+import DriverAnalysis from '../components/DriverAnalysis.js';
+import EquipmentAnalysis from '../components/EquipmentAnalysis.js';
 
 export default function Dashboard() {
   const [selectedReport, setSelectedReport] = useState(null);
