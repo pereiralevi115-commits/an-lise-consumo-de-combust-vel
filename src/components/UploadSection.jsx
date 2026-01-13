@@ -18,24 +18,36 @@ export default function UploadSection({ onReportCreated }) {
     setUploadSuccess(false);
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      // Convert file to base64
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const fileContent = e.target.result;
+          const response = await base44.functions.invoke('extractDieselData', {
+            fileName: file.name,
+            fileContent: fileContent
+          });
+          
+          setUploadSuccess(true);
+          queryClient.invalidateQueries({ queryKey: ['dieselReports'] });
+          onReportCreated();
 
-      const response = await base44.functions.invoke('extractDieselData', formData);
-      
-      setUploadSuccess(true);
-      queryClient.invalidateQueries({ queryKey: ['dieselReports'] });
-      onReportCreated();
-
-      setTimeout(() => setUploadSuccess(false), 3000);
-      
-      // Reset input
-      event.target.value = '';
+          setTimeout(() => setUploadSuccess(false), 3000);
+          
+          // Reset input
+          event.target.value = '';
+        } catch (error) {
+          console.error('Upload error:', error);
+          const errorMsg = error.response?.data?.error || error.message || 'Erro desconhecido';
+          alert(errorMsg);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      reader.readAsArrayBuffer(file);
     } catch (error) {
       console.error('Upload error:', error);
-      const errorMsg = error.response?.data?.error || error.message || 'Erro desconhecido';
-      alert(errorMsg);
-    } finally {
+      alert('Erro ao ler o arquivo');
       setIsLoading(false);
     }
   };
