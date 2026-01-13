@@ -18,6 +18,15 @@ Deno.serve(async (req) => {
 
     console.log(`Processing file: ${file.name}`);
 
+    // Validate file type
+    const fileName = file.name.toLowerCase();
+    const validTypes = ['.pdf', '.csv', '.xls', '.xlsx'];
+    const hasValidType = validTypes.some(type => fileName.endsWith(type));
+    
+    if (!hasValidType) {
+      return Response.json({ error: 'Invalid file type. Please upload PDF, CSV, XLS or XLSX' }, { status: 400 });
+    }
+
     // Upload the file
     const uploadedFile = await base44.integrations.Core.UploadFile({ file });
     console.log(`File uploaded: ${uploadedFile.file_url}`);
@@ -106,15 +115,24 @@ Deno.serve(async (req) => {
       }
     };
 
-    const extractedData = await base44.integrations.Core.ExtractDataFromUploadedFile({
-      file_url: uploadedFile.file_url,
-      json_schema: extractionSchema
-    });
+    let extractedData;
+    try {
+      extractedData = await base44.integrations.Core.ExtractDataFromUploadedFile({
+        file_url: uploadedFile.file_url,
+        json_schema: extractionSchema
+      });
+    } catch (extractError) {
+      console.error('Extraction error:', extractError);
+      return Response.json({ 
+        error: 'Failed to extract data from file. Please ensure the file format is correct and contains the expected data structure.' 
+      }, { status: 400 });
+    }
 
     console.log('Data extracted successfully');
 
     if (extractedData.status === 'error') {
-      return Response.json({ error: extractedData.details }, { status: 400 });
+      console.error('Extraction status error:', extractedData.details);
+      return Response.json({ error: `Extraction failed: ${extractedData.details}` }, { status: 400 });
     }
 
     // Create DieselReport record
