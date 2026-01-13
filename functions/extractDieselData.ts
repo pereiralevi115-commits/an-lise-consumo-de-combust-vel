@@ -9,26 +9,26 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const formData = await req.formData();
-    const file = formData.get('file');
+    const body = await req.json();
+    const { fileName, fileContent } = body;
 
-    if (!file) {
+    if (!fileName || !fileContent) {
       return Response.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    console.log(`Processing file: ${file.name}`);
+    console.log(`Processing file: ${fileName}`);
 
     // Validate file type
-    const fileName = file.name.toLowerCase();
+    const fileNameLower = fileName.toLowerCase();
     const validTypes = ['.pdf', '.csv', '.xls', '.xlsx'];
-    const hasValidType = validTypes.some(type => fileName.endsWith(type));
+    const hasValidType = validTypes.some(type => fileNameLower.endsWith(type));
     
     if (!hasValidType) {
       return Response.json({ error: 'Invalid file type. Please upload PDF, CSV, XLS or XLSX' }, { status: 400 });
     }
 
     // Upload the file
-    const uploadedFile = await base44.integrations.Core.UploadFile({ file });
+    const uploadedFile = await base44.integrations.Core.UploadFile({ file: fileContent });
     console.log(`File uploaded: ${uploadedFile.file_url}`);
 
     // Extract data from PDF
