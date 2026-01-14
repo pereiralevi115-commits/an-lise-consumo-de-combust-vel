@@ -440,7 +440,7 @@ export default function Graficos() {
         </div>
 
         {/* Filters */}
-         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
           <select 
             value={filters.month} 
             onChange={(e) => setFilters({...filters, month: e.target.value})}
