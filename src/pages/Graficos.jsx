@@ -1,40 +1,25 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TrendingUp, Fuel, DollarSign, Gauge } from 'lucide-react';
-import { ComposedChart, Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+import { ComposedChart, Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const YELLOW = '#FCD34D';
 const GRAY = '#9CA3AF';
 const ORANGE = '#F59E0B';
-const BLUE = '#60A5FA';
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-slate-900 border border-slate-700 rounded-lg p-3">
+      <div className="bg-slate-900 border border-slate-700 rounded p-2">
         {payload.map((entry, index) => (
-          <p key={index} style={{ color: entry.color }} className="text-sm">
-            {entry.name}: {typeof entry.value === 'number' ? entry.value.toLocaleString('pt-BR', {maximumFractionDigits: 2}) : entry.value}
+          <p key={index} style={{ color: entry.color }} className="text-xs">
+            {entry.name}: {typeof entry.value === 'number' ? entry.value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) : entry.value}
           </p>
         ))}
       </div>
     );
   }
   return null;
-};
-
-const formatCurrency = (value) => {
-  if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
-  if (value >= 1000) return (value / 1000).toFixed(1) + 'K';
-  return value.toFixed(0);
-};
-
-const formatNumber = (value) => {
-  if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
-  if (value >= 1000) return (value / 1000).toFixed(1) + 'K';
-  return value.toLocaleString('pt-BR', {maximumFractionDigits: 1});
 };
 
 export default function Graficos() {
@@ -79,7 +64,7 @@ export default function Graficos() {
   });
   const chartData = Object.values(monthlyData).sort((a, b) => monthNames.indexOf(a.name) - monthNames.indexOf(b.name));
 
-  // By unit data
+  // By unit
   const byUnitData = units.map(unit => {
     const unitRecords = filteredRecords.filter(r => r.unit === unit);
     return {
@@ -87,12 +72,11 @@ export default function Graficos() {
       liters: unitRecords.reduce((sum, r) => sum + (r.liters || 0), 0),
       km: unitRecords.reduce((sum, r) => sum + (r.km_driven || 0), 0),
       cost: unitRecords.reduce((sum, r) => sum + (r.cost || 0), 0),
-      m3: unitRecords.reduce((sum, r) => sum + (r.cubic_meters || 0), 0),
       kmPerLiter: unitRecords.length > 0 ? (unitRecords.reduce((sum, r) => sum + (r.km_driven || 0), 0) / unitRecords.reduce((sum, r) => sum + (r.liters || 0), 0)) : 0
     };
   }).sort((a, b) => b.cost - a.cost);
 
-  // By equipment type
+  // By equipment
   const byEquipmentData = {};
   filteredRecords.forEach(r => {
     if (!byEquipmentData[r.vehicle_type]) {
@@ -122,7 +106,7 @@ export default function Graficos() {
     byVehicleData[r.vehicle_plate].km += r.km_driven || 0;
     byVehicleData[r.vehicle_plate].cost += r.cost || 0;
   });
-  const vehicleArray = Object.entries(byVehicleData)
+  const vehicleKmArray = Object.entries(byVehicleData)
     .map(([plate, data]) => ({
       placa: plate,
       km: data.km,
@@ -130,6 +114,22 @@ export default function Graficos() {
       costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0
     }))
     .sort((a, b) => b.km - a.km)
+    .slice(0, 15);
+
+  const vehicleKmLiterArray = Object.entries(byVehicleData)
+    .map(([plate, data]) => ({
+      placa: plate,
+      kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
+    }))
+    .sort((a, b) => b.kmPerLiter - a.kmPerLiter)
+    .slice(0, 15);
+
+  const vehicleCostArray = Object.entries(byVehicleData)
+    .map(([plate, data]) => ({
+      placa: plate,
+      costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0,
+    }))
+    .sort((a, b) => b.costPerKm - a.costPerKm)
     .slice(0, 15);
 
   // By driver
@@ -142,7 +142,7 @@ export default function Graficos() {
     byDriverData[r.driver].km += r.km_driven || 0;
     byDriverData[r.driver].cost += r.cost || 0;
   });
-  const driverArray = Object.entries(byDriverData)
+  const driverKmArray = Object.entries(byDriverData)
     .map(([driver, data]) => ({
       driver,
       km: data.km,
@@ -152,265 +152,257 @@ export default function Graficos() {
     .sort((a, b) => b.km - a.km)
     .slice(0, 15);
 
-  if (isLoading) {
-    return <div className="text-white text-center py-12">Carregando dados...</div>;
-  }
+  const driverKmLiterArray = Object.entries(byDriverData)
+    .map(([driver, data]) => ({
+      driver,
+      kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
+    }))
+    .sort((a, b) => b.kmPerLiter - a.kmPerLiter)
+    .slice(0, 15);
+
+  const driverCostArray = Object.entries(byDriverData)
+    .map(([driver, data]) => ({
+      driver,
+      costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0,
+    }))
+    .sort((a, b) => b.costPerKm - a.costPerKm)
+    .slice(0, 15);
+
+  if (isLoading) return <div className="text-white text-center py-12">Carregando dados...</div>;
 
   return (
     <div className="space-y-8">
-      <div className="border-b border-slate-700 pb-6">
-        <h1 className="text-4xl font-bold text-white mb-2">Fechamento Médias Diesel 2026</h1>
-        <p className="text-slate-400">Análise Completa de Combustível e Desempenho</p>
+      {/* Header com Filtros */}
+      <div className="bg-gradient-to-r from-yellow-300 to-yellow-200 p-6 rounded-lg shadow-lg">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">Fechamento Médias Diesel 2026</h1>
+        <div className="grid grid-cols-5 gap-4">
+          <div>
+            <label className="text-xs font-bold text-gray-700 block mb-2">MÊS</label>
+            <select value={filters.month} onChange={(e) => setFilters({...filters, month: e.target.value})} className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm">
+              <option value="">Todos</option>
+              {months.map(m => <option key={m} value={m}>{monthNames[m]}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-bold text-gray-700 block mb-2">TIPO</label>
+            <select value={filters.equipment} onChange={(e) => setFilters({...filters, equipment: e.target.value})} className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm">
+              <option value="">Todos</option>
+              {equipment.map(e => <option key={e} value={e}>{e}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-bold text-gray-700 block mb-2">USINA</label>
+            <select value={filters.unit} onChange={(e) => setFilters({...filters, unit: e.target.value})} className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm">
+              <option value="">Todos</option>
+              {units.map(u => <option key={u} value={u}>{u}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-bold text-gray-700 block mb-2">PLACA</label>
+            <select value={filters.plate} onChange={(e) => setFilters({...filters, plate: e.target.value})} className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm">
+              <option value="">Todos</option>
+              {plates.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-bold text-gray-700 block mb-2">MOTORISTA</label>
+            <select value={filters.driver} onChange={(e) => setFilters({...filters, driver: e.target.value})} className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm">
+              <option value="">Todos</option>
+              {drivers.map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+          </div>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
-        {[
-          { value: filters.month, onChange: (e) => setFilters({...filters, month: e.target.value}), label: 'Mês', options: months.map(m => ({ value: m, label: monthNames[m] })) },
-          { value: filters.equipment, onChange: (e) => setFilters({...filters, equipment: e.target.value}), label: 'Equipamento', options: equipment.map(e => ({ value: e, label: e })) },
-          { value: filters.unit, onChange: (e) => setFilters({...filters, unit: e.target.value}), label: 'Usina', options: units.map(u => ({ value: u, label: u })) },
-          { value: filters.plate, onChange: (e) => setFilters({...filters, plate: e.target.value}), label: 'Placa', options: plates.map(p => ({ value: p, label: p })) },
-          { value: filters.driver, onChange: (e) => setFilters({...filters, driver: e.target.value}), label: 'Motorista', options: drivers.map(d => ({ value: d, label: d })) }
-        ].map((filter, idx) => (
-          <select key={idx} value={filter.value} onChange={filter.onChange} className="bg-slate-800 text-white border border-slate-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-yellow-500">
-            <option value="">Todos {filter.label.toLowerCase()}s</option>
-            {filter.options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-          </select>
-        ))}
+      {/* KPI Cards */}
+      <div className="grid grid-cols-4 gap-4 bg-white p-6 rounded-lg shadow-sm">
+        <div className="text-center p-4 border-r border-gray-200">
+          <p className="text-sm text-gray-600 font-semibold mb-1">Total Litros</p>
+          <p className="text-2xl font-bold text-gray-900">{(totalLiters).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+        </div>
+        <div className="text-center p-4 border-r border-gray-200">
+          <p className="text-sm text-gray-600 font-semibold mb-1">Total Km</p>
+          <p className="text-2xl font-bold text-gray-900">{(totalKm).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+        </div>
+        <div className="text-center p-4 border-r border-gray-200">
+          <p className="text-sm text-gray-600 font-semibold mb-1">Custo Total</p>
+          <p className="text-2xl font-bold text-gray-900">R$ {(totalCost).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+        </div>
+        <div className="text-center p-4">
+          <p className="text-sm text-gray-600 font-semibold mb-1">Total M³</p>
+          <p className="text-2xl font-bold text-gray-900">{(totalM3).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+        </div>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 shadow-lg">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold text-slate-300">Total Litros</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-yellow-400">{formatNumber(totalLiters)}</p>
-            <p className="text-xs text-slate-500 mt-1">L</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 shadow-lg">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold text-slate-300">Total Km</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-blue-400">{formatNumber(totalKm)}</p>
-            <p className="text-xs text-slate-500 mt-1">km</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 shadow-lg">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold text-slate-300">Custo Total</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-orange-400">R$ {formatCurrency(totalCost)}</p>
-            <p className="text-xs text-slate-500 mt-1">Gasto total</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700 shadow-lg">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold text-slate-300">Total M³</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-gray-300">{formatNumber(totalM3)}</p>
-            <p className="text-xs text-slate-500 mt-1">m³</p>
-          </CardContent>
-        </Card>
+      {/* Chart 1: Monthly */}
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <h2 className="text-center font-bold text-gray-900 mb-6 text-base">LITROS ABASTECIDOS - QUILOMETROS PERCORRIDOS - CUSTOS DOS ABASTECIMENTOS (MÊS)</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <ComposedChart data={chartData} margin={{ top: 20, right: 40, left: 60, bottom: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+            <XAxis dataKey="name" stroke="#6b7280" />
+            <YAxis yAxisId="left" stroke="#6b7280" />
+            <YAxis yAxisId="right" orientation="right" stroke="#6b7280" />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar yAxisId="left" dataKey="liters" fill={YELLOW} name="Litros" />
+            <Bar yAxisId="left" dataKey="km" fill={GRAY} name="Km" />
+            <Bar yAxisId="right" dataKey="cost" fill={ORANGE} name="Custo (R$)" />
+          </ComposedChart>
+        </ResponsiveContainer>
       </div>
 
-      {/* Charts Grid */}
-      <div className="space-y-6">
-        {/* Chart 1: Monthly */}
-        <Card className="bg-slate-800 border-slate-700 shadow-lg">
-          <CardHeader className="border-b border-slate-700 pb-4">
-            <CardTitle className="text-lg font-semibold text-white">Litros, Km, Custos por Mês</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <ResponsiveContainer width="100%" height={350}>
-              <ComposedChart data={chartData} margin={{ top: 30, right: 50, left: 80, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#475569" opacity={0.3} vertical={false} />
-                <XAxis dataKey="name" stroke="#94a3b8" tick={{ fontSize: 12 }} />
-                <YAxis yAxisId="left" stroke="#94a3b8" tick={{ fontSize: 12 }} />
-                <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" tick={{ fontSize: 12 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                <Bar yAxisId="left" dataKey="liters" fill={YELLOW} name="Litros" radius={[8, 8, 0, 0]} />
-                <Bar yAxisId="left" dataKey="km" fill={GRAY} name="Km" radius={[8, 8, 0, 0]} />
-                <Bar yAxisId="right" dataKey="cost" fill={ORANGE} name="Custo (R$)" radius={[8, 8, 0, 0]} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {/* Chart 2: By Unit */}
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <h2 className="text-center font-bold text-gray-900 mb-6 text-base">LITROS ABASTECIDOS - QUILOMETROS PERCORRIDOS - CUSTOS DOS ABASTECIMENTOS (USINAS)</h2>
+        <ResponsiveContainer width="100%" height={350}>
+          <ComposedChart data={byUnitData} margin={{ top: 20, right: 40, left: 120, bottom: 80 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} stroke="#6b7280" />
+            <YAxis yAxisId="left" stroke="#6b7280" />
+            <YAxis yAxisId="right" orientation="right" stroke="#6b7280" />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar yAxisId="left" dataKey="liters" fill={YELLOW} name="Litros" />
+            <Bar yAxisId="left" dataKey="km" fill={GRAY} name="Km" />
+            <Bar yAxisId="right" dataKey="cost" fill={ORANGE} name="Custo (R$)" />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
 
-        {/* Chart 2: By Unit */}
-        <Card className="bg-slate-800 border-slate-700 shadow-lg">
-          <CardHeader className="border-b border-slate-700 pb-4">
-            <CardTitle className="text-lg font-semibold text-white">Litros, Km, Custos por Usina</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <ResponsiveContainer width="100%" height={450}>
-              <ComposedChart data={byUnitData} margin={{ top: 30, right: 50, left: 150, bottom: 80 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#475569" opacity={0.3} vertical={false} />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                <YAxis yAxisId="left" stroke="#94a3b8" tick={{ fontSize: 12 }} />
-                <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" tick={{ fontSize: 12 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                <Bar yAxisId="left" dataKey="liters" fill={YELLOW} name="Litros" radius={[8, 8, 0, 0]} />
-                <Bar yAxisId="left" dataKey="km" fill={GRAY} name="Km" radius={[8, 8, 0, 0]} />
-                <Bar yAxisId="right" dataKey="cost" fill={ORANGE} name="Custo (R$)" radius={[8, 8, 0, 0]} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {/* Chart 3: Km/L by Unit */}
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <h2 className="text-center font-bold text-gray-900 mb-6 text-base">MÉDIAS POR USINA E TIPO DE EQUIPAMENTO (KM/LT)</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={byUnitData} margin={{ top: 20, right: 40, left: 80, bottom: 80 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} stroke="#6b7280" />
+            <YAxis stroke="#6b7280" />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="kmPerLiter" fill={YELLOW} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
-        {/* Chart 3: Km/L by Unit */}
-        <Card className="bg-slate-800 border-slate-700 shadow-lg">
-          <CardHeader className="border-b border-slate-700 pb-4">
-            <CardTitle className="text-lg font-semibold text-white">Média Km/L por Usina</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={byUnitData} margin={{ top: 30, right: 50, left: 80, bottom: 80 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#475569" opacity={0.3} vertical={false} />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                <YAxis stroke="#94a3b8" tick={{ fontSize: 12 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {/* Charts 4 & 5: Two columns */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Km per Vehicle */}
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-center font-bold text-gray-900 mb-4 text-sm">KM PERCORRIDO POR VEÍCULO</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={vehicleKmArray} layout="vertical" margin={{ top: 10, right: 30, left: 90, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={true} />
+              <XAxis type="number" stroke="#6b7280" />
+              <YAxis dataKey="placa" type="category" width={85} stroke="#6b7280" />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="km" fill={YELLOW} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
 
-        {/* Chart 4: Production by Equipment */}
-        <Card className="bg-slate-800 border-slate-700 shadow-lg">
-          <CardHeader className="border-b border-slate-700 pb-4">
-            <CardTitle className="text-lg font-semibold text-white">Produção por Tipo de Equipamento (M³)</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={equipmentArray} margin={{ top: 30, right: 50, left: 80, bottom: 80 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#475569" opacity={0.3} vertical={false} />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                <YAxis stroke="#94a3b8" tick={{ fontSize: 12 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="m3" fill={YELLOW} radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        {/* Km per Driver */}
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-center font-bold text-gray-900 mb-4 text-sm">KM PERCORRIDO POR MOTORISTA</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={driverKmArray} layout="vertical" margin={{ top: 10, right: 30, left: 150, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={true} />
+              <XAxis type="number" stroke="#6b7280" />
+              <YAxis dataKey="driver" type="category" width={140} stroke="#6b7280" />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="km" fill={YELLOW} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
-        {/* Chart 5: Km per Vehicle (Top 15) */}
-        <Card className="bg-slate-800 border-slate-700 shadow-lg">
-          <CardHeader className="border-b border-slate-700 pb-4">
-            <CardTitle className="text-lg font-semibold text-white">Km Percorrido por Veículo (Top 15)</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={vehicleArray} layout="vertical" margin={{ top: 10, right: 50, left: 100, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#475569" opacity={0.3} vertical={true} />
-                <XAxis type="number" stroke="#94a3b8" tick={{ fontSize: 12 }} />
-                <YAxis dataKey="placa" type="category" width={90} stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="km" fill={YELLOW} radius={[0, 8, 8, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {/* Charts 6 & 7: Two columns */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Km/L per Vehicle */}
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-center font-bold text-gray-900 mb-4 text-sm">KM/LITRO POR VEÍCULO</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={vehicleKmLiterArray} layout="vertical" margin={{ top: 10, right: 30, left: 90, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={true} />
+              <XAxis type="number" stroke="#6b7280" />
+              <YAxis dataKey="placa" type="category" width={85} stroke="#6b7280" />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="kmPerLiter" fill={YELLOW} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
 
-        {/* Chart 6: Km per Driver (Top 15) */}
-        <Card className="bg-slate-800 border-slate-700 shadow-lg">
-          <CardHeader className="border-b border-slate-700 pb-4">
-            <CardTitle className="text-lg font-semibold text-white">Km Percorrido por Motorista (Top 15)</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={driverArray} layout="vertical" margin={{ top: 10, right: 50, left: 180, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#475569" opacity={0.3} vertical={true} />
-                <XAxis type="number" stroke="#94a3b8" tick={{ fontSize: 12 }} />
-                <YAxis dataKey="driver" type="category" width={170} stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="km" fill={YELLOW} radius={[0, 8, 8, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        {/* Km/L per Driver */}
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-center font-bold text-gray-900 mb-4 text-sm">KM/LITRO POR MOTORISTA</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={driverKmLiterArray} layout="vertical" margin={{ top: 10, right: 30, left: 150, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={true} />
+              <XAxis type="number" stroke="#6b7280" />
+              <YAxis dataKey="driver" type="category" width={140} stroke="#6b7280" />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="kmPerLiter" fill={YELLOW} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
-        {/* Chart 7: Km/L per Vehicle (Top 15) */}
-        <Card className="bg-slate-800 border-slate-700 shadow-lg">
-          <CardHeader className="border-b border-slate-700 pb-4">
-            <CardTitle className="text-lg font-semibold text-white">KM/LITRO por Veículo (Top 15)</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={vehicleArray} layout="vertical" margin={{ top: 10, right: 50, left: 100, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#475569" opacity={0.3} vertical={true} />
-                <XAxis type="number" stroke="#94a3b8" tick={{ fontSize: 12 }} />
-                <YAxis dataKey="placa" type="category" width={90} stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="kmPerLiter" fill={BLUE} radius={[0, 8, 8, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {/* Charts 8 & 9: Two columns */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* R$/Km per Vehicle */}
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-center font-bold text-gray-900 mb-4 text-sm">R$/KM POR VEÍCULO</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={vehicleCostArray} layout="vertical" margin={{ top: 10, right: 30, left: 90, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={true} />
+              <XAxis type="number" stroke="#6b7280" />
+              <YAxis dataKey="placa" type="category" width={85} stroke="#6b7280" />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="costPerKm" fill={ORANGE} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
 
-        {/* Chart 8: Km/L per Driver (Top 15) */}
-        <Card className="bg-slate-800 border-slate-700 shadow-lg">
-          <CardHeader className="border-b border-slate-700 pb-4">
-            <CardTitle className="text-lg font-semibold text-white">KM/LITRO por Motorista (Top 15)</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={driverArray} layout="vertical" margin={{ top: 10, right: 50, left: 180, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#475569" opacity={0.3} vertical={true} />
-                <XAxis type="number" stroke="#94a3b8" tick={{ fontSize: 12 }} />
-                <YAxis dataKey="driver" type="category" width={170} stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="kmPerLiter" fill={BLUE} radius={[0, 8, 8, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        {/* R$/Km per Driver */}
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-center font-bold text-gray-900 mb-4 text-sm">R$/KM POR MOTORISTA</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={driverCostArray} layout="vertical" margin={{ top: 10, right: 30, left: 150, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={true} />
+              <XAxis type="number" stroke="#6b7280" />
+              <YAxis dataKey="driver" type="category" width={140} stroke="#6b7280" />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="costPerKm" fill={ORANGE} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
 
-        {/* Chart 9: R$/Km per Vehicle (Top 15) */}
-        <Card className="bg-slate-800 border-slate-700 shadow-lg">
-          <CardHeader className="border-b border-slate-700 pb-4">
-            <CardTitle className="text-lg font-semibold text-white">R$/KM por Veículo (Top 15)</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={vehicleArray} layout="vertical" margin={{ top: 10, right: 50, left: 100, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#475569" opacity={0.3} vertical={true} />
-                <XAxis type="number" stroke="#94a3b8" tick={{ fontSize: 12 }} />
-                <YAxis dataKey="placa" type="category" width={90} stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="costPerKm" fill={ORANGE} radius={[0, 8, 8, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {/* Chart 10: Production by Equipment */}
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <h2 className="text-center font-bold text-gray-900 mb-6 text-base">PRODUÇÃO POR TIPO DE EQUIPAMENTO (M³)</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={equipmentArray} margin={{ top: 20, right: 40, left: 80, bottom: 80 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} stroke="#6b7280" />
+            <YAxis stroke="#6b7280" />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="m3" fill={YELLOW} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
-        {/* Chart 10: R$/Km per Driver (Top 15) */}
-        <Card className="bg-slate-800 border-slate-700 shadow-lg">
-          <CardHeader className="border-b border-slate-700 pb-4">
-            <CardTitle className="text-lg font-semibold text-white">R$/KM por Motorista (Top 15)</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <ResponsiveContainer width="100%" height={400}>
-              <BarChart data={driverArray} layout="vertical" margin={{ top: 10, right: 50, left: 180, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#475569" opacity={0.3} vertical={true} />
-                <XAxis type="number" stroke="#94a3b8" tick={{ fontSize: 12 }} />
-                <YAxis dataKey="driver" type="category" width={170} stroke="#94a3b8" tick={{ fontSize: 11 }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="costPerKm" fill={ORANGE} radius={[0, 8, 8, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {/* Chart 11: Equipment Averages */}
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <h2 className="text-center font-bold text-gray-900 mb-6 text-base">MÉDIAS POR EQUIPAMENTO (LT/M³ - R$/M³)</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <ComposedChart data={equipmentArray} margin={{ top: 20, right: 40, left: 80, bottom: 80 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={120} stroke="#6b7280" />
+            <YAxis yAxisId="left" stroke="#6b7280" />
+            <YAxis yAxisId="right" orientation="right" stroke="#6b7280" />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar yAxisId="left" dataKey="litersPerM3" fill={YELLOW} name="LT/M³" />
+            <Bar yAxisId="right" dataKey="costPerM3" fill={ORANGE} name="R$/M³" />
+          </ComposedChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
