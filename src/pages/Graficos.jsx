@@ -1,21 +1,491 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
+import { ComposedChart, Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
+import { parseISO } from 'date-fns';
+
+const YELLOW = '#F59E0B';
+const BLUE = '#3B82F6';
+const GREEN = '#10B981';
+
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white border border-gray-300 rounded-lg p-3 shadow-lg">
+        {payload.map((entry, index) => (
+          <p key={index} style={{ color: entry.color }} className="text-sm font-semibold">
+            {entry.name}: {typeof entry.value === 'number' ? entry.value.toLocaleString('pt-BR', {maximumFractionDigits: 2}) : entry.value}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
+const CustomLabel = (props) => {
+  const { x, y, width, height, value, position } = props;
+  if (!value) return null;
+  
+  const isVertical = position === 'top' || position === 'bottom';
+  const displayValue = typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 1}) : value;
+  
+  if (isVertical) {
+    return (
+      <text 
+        x={x + width / 2} 
+        y={y - 8} 
+        fill="#1f2937" 
+        textAnchor="middle" 
+        fontSize="11" 
+        fontWeight="600"
+      >
+        {displayValue}
+      </text>
+    );
+  }
+  
+  return (
+    <text 
+      x={x + width + 8} 
+      y={y + height / 2} 
+      fill="#1f2937" 
+      textAnchor="start" 
+      dominantBaseline="middle"
+      fontSize="11" 
+      fontWeight="600"
+    >
+      {displayValue}
+    </text>
+  );
+};
 
 export default function Graficos() {
-  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState({
+    month: '',
+    type: '',
+    unit: '',
+    plate: '',
+    driver: ''
+  });
 
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['fuelRecords'],
-    queryFn: () => base44.entities.FuelRecord.list('-date', 1000)
+    queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
   });
 
-  if (isLoading) return <div className="p-8 text-center">Carregando dados...</div>;
+  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  
+  // Get unique filter values
+  const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort();
+  const types = [...new Set(records.map(r => r.vehicle_type))].filter(Boolean).sort();
+  const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
+  const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
+  const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort();
+
+  // Apply filters
+  const filtered = records.filter(r => {
+    if (filters.month && parseISO(r.date).getMonth() !== parseInt(filters.month)) return false;
+    if (filters.type && r.vehicle_type !== filters.type) return false;
+    if (filters.unit && r.unit !== filters.unit) return false;
+    if (filters.plate && r.vehicle_plate !== filters.plate) return false;
+    if (filters.driver && r.driver !== filters.driver) return false;
+    return true;
+  });
+
+  const totalLiters = filtered.reduce((sum, r) => sum + (r.liters || 0), 0);
+  const totalCost = filtered.reduce((sum, r) => sum + (r.cost || 0), 0);
+  const totalKm = filtered.reduce((sum, r) => sum + (r.km_driven || 0), 0);
+  const totalM3 = filtered.reduce((sum, r) => sum + (r.cubic_meters || 0), 0);
+
+  // Monthly data
+  const monthlyData = {};
+  filtered.forEach(r => {
+    const monthName = monthNames[parseISO(r.date).getMonth()];
+    if (!monthlyData[monthName]) {
+      monthlyData[monthName] = { name: monthName, liters: 0, km: 0, cost: 0 };
+    }
+    monthlyData[monthName].liters += r.liters || 0;
+    monthlyData[monthName].km += r.km_driven || 0;
+    monthlyData[monthName].cost += r.cost || 0;
+  });
+  const chartData = Object.values(monthlyData)
+    .filter(d => d.liters > 0 || d.km > 0 || d.cost > 0)
+    .sort((a, b) => monthNames.indexOf(a.name) - monthNames.indexOf(b.name));
+
+  // By unit
+  const byUnitData = units.map(unit => {
+    const unitRecords = filtered.filter(r => r.unit === unit);
+    return {
+      name: unit,
+      liters: unitRecords.reduce((sum, r) => sum + (r.liters || 0), 0),
+      km: unitRecords.reduce((sum, r) => sum + (r.km_driven || 0), 0),
+      cost: unitRecords.reduce((sum, r) => sum + (r.cost || 0), 0),
+      kmPerLiter: unitRecords.length > 0 ? (unitRecords.reduce((sum, r) => sum + (r.km_driven || 0), 0) / unitRecords.reduce((sum, r) => sum + (r.liters || 0), 0)) : 0
+    };
+  })
+    .filter(d => d.liters > 0 || d.km > 0 || d.cost > 0)
+    .sort((a, b) => b.cost - a.cost);
+
+  // By equipment
+  const byEquipmentData = {};
+  filtered.forEach(r => {
+    if (!byEquipmentData[r.vehicle_type]) {
+      byEquipmentData[r.vehicle_type] = { liters: 0, km: 0, cost: 0, m3: 0 };
+    }
+    byEquipmentData[r.vehicle_type].liters += r.liters || 0;
+    byEquipmentData[r.vehicle_type].km += r.km_driven || 0;
+    byEquipmentData[r.vehicle_type].cost += r.cost || 0;
+    byEquipmentData[r.vehicle_type].m3 += r.cubic_meters || 0;
+  });
+  const equipmentArray = Object.entries(byEquipmentData)
+    .map(([type, data]) => ({
+      name: type,
+      m3: data.m3,
+      litersPerM3: data.m3 > 0 ? (data.liters / data.m3).toFixed(2) : 0,
+      costPerM3: data.m3 > 0 ? (data.cost / data.m3).toFixed(2) : 0
+    }))
+    .filter(d => d.m3 > 0)
+    .sort((a, b) => b.m3 - a.m3);
+
+  // By vehicle
+  const byVehicleData = {};
+  filtered.forEach(r => {
+    if (!byVehicleData[r.vehicle_plate]) {
+      byVehicleData[r.vehicle_plate] = { liters: 0, km: 0, cost: 0 };
+    }
+    byVehicleData[r.vehicle_plate].liters += r.liters || 0;
+    byVehicleData[r.vehicle_plate].km += r.km_driven || 0;
+    byVehicleData[r.vehicle_plate].cost += r.cost || 0;
+  });
+  const vehicleKmArray = Object.entries(byVehicleData)
+    .map(([plate, data]) => ({
+      placa: plate,
+      km: data.km,
+      kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
+      costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0
+    }))
+    .filter(d => d.km > 0)
+    .sort((a, b) => b.km - a.km)
+    .slice(0, 15);
+
+  const vehicleKmLiterArray = Object.entries(byVehicleData)
+    .map(([plate, data]) => ({
+      placa: plate,
+      kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
+    }))
+    .filter(d => d.kmPerLiter > 0)
+    .sort((a, b) => b.kmPerLiter - a.kmPerLiter)
+    .slice(0, 15);
+
+  const vehicleCostArray = Object.entries(byVehicleData)
+    .map(([plate, data]) => ({
+      placa: plate,
+      costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0,
+    }))
+    .filter(d => d.costPerKm > 0)
+    .sort((a, b) => b.costPerKm - a.costPerKm)
+    .slice(0, 15);
+
+  // By driver
+  const byDriverData = {};
+  filtered.forEach(r => {
+    if (!byDriverData[r.driver]) {
+      byDriverData[r.driver] = { liters: 0, km: 0, cost: 0 };
+    }
+    byDriverData[r.driver].liters += r.liters || 0;
+    byDriverData[r.driver].km += r.km_driven || 0;
+    byDriverData[r.driver].cost += r.cost || 0;
+  });
+  const driverKmArray = Object.entries(byDriverData)
+    .map(([driver, data]) => ({
+      driver,
+      km: data.km,
+      kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
+      costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0
+    }))
+    .filter(d => d.km > 0)
+    .sort((a, b) => b.km - a.km)
+    .slice(0, 15);
+
+  const driverKmLiterArray = Object.entries(byDriverData)
+    .map(([driver, data]) => ({
+      driver,
+      kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
+    }))
+    .filter(d => d.kmPerLiter > 0)
+    .sort((a, b) => b.kmPerLiter - a.kmPerLiter)
+    .slice(0, 15);
+
+  const driverCostArray = Object.entries(byDriverData)
+    .map(([driver, data]) => ({
+      driver,
+      costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0,
+    }))
+    .filter(d => d.costPerKm > 0)
+    .sort((a, b) => b.costPerKm - a.costPerKm)
+    .slice(0, 15);
+
+  if (isLoading) return <div className="text-white text-center py-12">Carregando dados...</div>;
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-8">Gráficos</h1>
-      <p className="text-gray-600 mb-4">Total de {records.length} registros</p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-white mb-6">Gráficos de Combustível</h1>
+        
+        {/* Filters */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+          <select 
+            value={filters.month} 
+            onChange={(e) => setFilters({...filters, month: e.target.value})}
+            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+          >
+            <option value="">Todos meses</option>
+            {months.map(m => <option key={m} value={m}>{monthNames[m]}</option>)}
+          </select>
+
+          <select 
+            value={filters.type} 
+            onChange={(e) => setFilters({...filters, type: e.target.value})}
+            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+          >
+            <option value="">Todos tipos</option>
+            {types.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+
+          <select 
+            value={filters.unit} 
+            onChange={(e) => setFilters({...filters, unit: e.target.value})}
+            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+          >
+            <option value="">Todas usinas</option>
+            {units.map(u => <option key={u} value={u}>{u}</option>)}
+          </select>
+
+          <select 
+            value={filters.plate} 
+            onChange={(e) => setFilters({...filters, plate: e.target.value})}
+            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+          >
+            <option value="">Todas placas</option>
+            {plates.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+
+          <select 
+            value={filters.driver} 
+            onChange={(e) => setFilters({...filters, driver: e.target.value})}
+            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+          >
+            <option value="">Todos motoristas</option>
+            {drivers.map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
+        </div>
+
+        <p className="text-slate-400 mb-6">Total de {filtered.length} registros</p>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-4 gap-6">
+        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+          <p className="text-slate-400 text-sm mb-2">Total Litros</p>
+          <p className="text-2xl font-bold text-white">{(totalLiters).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+        </div>
+        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+          <p className="text-slate-400 text-sm mb-2">Total Km</p>
+          <p className="text-2xl font-bold text-white">{(totalKm).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+        </div>
+        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+          <p className="text-slate-400 text-sm mb-2">Custo Total</p>
+          <p className="text-2xl font-bold text-white">R$ {(totalCost).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+        </div>
+        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+          <p className="text-slate-400 text-sm mb-2">Total M³</p>
+          <p className="text-2xl font-bold text-white">{(totalM3).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+        </div>
+      </div>
+
+      {/* Chart 1: Monthly */}
+      <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+        <ResponsiveContainer width="100%" height={350}>
+          <ComposedChart data={chartData} margin={{ top: 30, right: 80, left: 70, bottom: 20 }}>
+            <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
+            <XAxis dataKey="name" stroke="#94a3b8" />
+            <YAxis yAxisId="left" stroke="#94a3b8" />
+            <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend wrapperStyle={{ paddingTop: '20px' }} />
+            <Bar yAxisId="left" dataKey="liters" fill={BLUE} name="Litros" radius={[4, 4, 0, 0]}>
+              <LabelList dataKey="liters" position="top" content={<CustomLabel />} />
+            </Bar>
+            <Bar yAxisId="left" dataKey="km" fill={GREEN} name="Km" radius={[4, 4, 0, 0]}>
+              <LabelList dataKey="km" position="top" content={<CustomLabel />} />
+            </Bar>
+            <Bar yAxisId="right" dataKey="cost" fill={YELLOW} name="Custo (R$)" radius={[4, 4, 0, 0]}>
+              <LabelList dataKey="cost" position="top" content={<CustomLabel />} />
+            </Bar>
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Chart 2: By Unit */}
+      <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+        <ResponsiveContainer width="100%" height={400}>
+          <ComposedChart data={byUnitData} margin={{ top: 30, right: 80, left: 120, bottom: 100 }}>
+            <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
+            <YAxis yAxisId="left" stroke="#94a3b8" />
+            <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend wrapperStyle={{ paddingTop: '20px' }} />
+            <Bar yAxisId="left" dataKey="liters" fill={BLUE} name="Litros" radius={[4, 4, 0, 0]} />
+            <Bar yAxisId="left" dataKey="km" fill={GREEN} name="Km" radius={[4, 4, 0, 0]} />
+            <Bar yAxisId="right" dataKey="cost" fill={YELLOW} name="Custo (R$)" radius={[4, 4, 0, 0]} />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Chart 3: Km/L by Unit */}
+      <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+        <ResponsiveContainer width="100%" height={350}>
+          <BarChart data={byUnitData} margin={{ top: 30, right: 50, left: 70, bottom: 100 }}>
+            <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
+            <YAxis stroke="#94a3b8" />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="kmPerLiter" fill={BLUE} radius={[4, 4, 0, 0]}>
+              <LabelList dataKey="kmPerLiter" position="top" content={<CustomLabel />} />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Charts 4 & 5: Two columns */}
+      <div className="grid grid-cols-2 gap-6">
+        <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={vehicleKmArray} layout="vertical" margin={{ top: 10, right: 50, left: 90, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
+              <XAxis type="number" stroke="#94a3b8" />
+              <YAxis dataKey="placa" type="category" width={85} stroke="#94a3b8" />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="km" fill={BLUE} radius={[0, 4, 4, 0]}>
+                <LabelList dataKey="km" position="right" content={<CustomLabel />} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={driverKmArray} layout="vertical" margin={{ top: 10, right: 50, left: 150, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
+              <XAxis type="number" stroke="#94a3b8" />
+              <YAxis dataKey="driver" type="category" width={140} stroke="#94a3b8" />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="km" fill={BLUE} radius={[0, 4, 4, 0]}>
+                <LabelList dataKey="km" position="right" content={<CustomLabel />} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Charts 6 & 7: Two columns */}
+      <div className="grid grid-cols-2 gap-6">
+        <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={vehicleKmLiterArray} layout="vertical" margin={{ top: 10, right: 50, left: 90, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
+              <XAxis type="number" stroke="#94a3b8" />
+              <YAxis dataKey="placa" type="category" width={85} stroke="#94a3b8" />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="kmPerLiter" fill={BLUE} radius={[0, 4, 4, 0]}>
+                <LabelList dataKey="kmPerLiter" position="right" content={<CustomLabel />} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={driverKmLiterArray} layout="vertical" margin={{ top: 10, right: 50, left: 150, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
+              <XAxis type="number" stroke="#94a3b8" />
+              <YAxis dataKey="driver" type="category" width={140} stroke="#94a3b8" />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="kmPerLiter" fill={BLUE} radius={[0, 4, 4, 0]}>
+                <LabelList dataKey="kmPerLiter" position="right" content={<CustomLabel />} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Charts 8 & 9: Two columns */}
+      <div className="grid grid-cols-2 gap-6">
+        <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={vehicleCostArray} layout="vertical" margin={{ top: 10, right: 50, left: 90, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
+              <XAxis type="number" stroke="#94a3b8" />
+              <YAxis dataKey="placa" type="category" width={85} stroke="#94a3b8" />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]}>
+                <LabelList dataKey="costPerKm" position="right" content={<CustomLabel />} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={driverCostArray} layout="vertical" margin={{ top: 10, right: 50, left: 150, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
+              <XAxis type="number" stroke="#94a3b8" />
+              <YAxis dataKey="driver" type="category" width={140} stroke="#94a3b8" />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]}>
+                <LabelList dataKey="costPerKm" position="right" content={<CustomLabel />} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Chart 10: Production by Equipment */}
+      <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+        <ResponsiveContainer width="100%" height={350}>
+          <BarChart data={equipmentArray} margin={{ top: 30, right: 50, left: 70, bottom: 100 }}>
+            <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
+            <YAxis stroke="#94a3b8" />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="m3" fill={GREEN} radius={[4, 4, 0, 0]}>
+              <LabelList dataKey="m3" position="top" content={<CustomLabel />} />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Chart 11: Equipment Averages */}
+      <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+        <ResponsiveContainer width="100%" height={350}>
+          <ComposedChart data={equipmentArray} margin={{ top: 30, right: 80, left: 70, bottom: 100 }}>
+            <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
+            <YAxis yAxisId="left" stroke="#94a3b8" />
+            <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend wrapperStyle={{ paddingTop: '20px' }} />
+            <Bar yAxisId="left" dataKey="litersPerM3" fill={GREEN} name="LT/M³" radius={[4, 4, 0, 0]}>
+              <LabelList dataKey="litersPerM3" position="top" content={<CustomLabel />} />
+            </Bar>
+            <Bar yAxisId="right" dataKey="costPerM3" fill={YELLOW} name="R$/M³" radius={[4, 4, 0, 0]}>
+              <LabelList dataKey="costPerM3" position="top" content={<CustomLabel />} />
+            </Bar>
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }
