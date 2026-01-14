@@ -376,11 +376,11 @@ export default function Graficos() {
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
           <h3 className="text-white font-bold mb-6 text-center">KM PERCORRIDO POR VEÍCULO</h3>
           <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={vehicleKmArray} layout="vertical" margin={{ top: 10, right: 30, left: 90, bottom: 10 }}>
-              <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
-              <XAxis type="number" stroke="#94a3b8" />
-              <YAxis dataKey="placa" type="category" width={85} stroke="#94a3b8" />
-              <Tooltip content={<CustomTooltip />} />
+            <BarChart data={vehicleKmArray} layout="vertical" margin={{ top: 10, right: 30, left: 30, bottom: 10 }}>
+             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
+             <XAxis type="number" stroke="#94a3b8" />
+             <YAxis type="category" hide={true} />
+             <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]} />
               </BarChart>
               </ResponsiveContainer>
