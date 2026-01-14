@@ -422,7 +422,7 @@ export default function Graficos() {
       </div>
 
       {/* Charts 4 & 5: Km per Vehicle and Driver */}
-      <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-6">
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
           <h3 className="text-white font-bold mb-6 text-center">KM PERCORRIDO POR VEÍCULO</h3>
           <ResponsiveContainer width="100%" height={500}>
@@ -455,7 +455,7 @@ export default function Graficos() {
       </div>
 
       {/* Charts 6 & 7: Km/L per Vehicle and Driver */}
-      <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-6">
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
           <h3 className="text-white font-bold mb-6 text-center">KM/LITRO POR VEÍCULO</h3>
           <ResponsiveContainer width="100%" height={500}>
@@ -488,7 +488,7 @@ export default function Graficos() {
       </div>
 
       {/* Charts 8 & 9: R$/Km per Vehicle and Driver */}
-      <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-6">
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
           <h3 className="text-white font-bold mb-6 text-center">R$/KM POR VEÍCULO</h3>
           <ResponsiveContainer width="100%" height={500}>
