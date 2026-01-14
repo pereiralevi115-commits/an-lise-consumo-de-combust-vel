@@ -156,8 +156,8 @@ export default function Graficos() {
       kmPerLiter: d.liters > 0 ? (d.km / d.liters).toFixed(2) : 0
     }))
     .filter(d => d.km > 0)
-    .sort((a, b) => b.kmPerLiter - a.kmPerLiter)
-    .slice(0, 10);
+    .sort((a, b) => a.kmPerLiter - b.kmPerLiter)
+    .slice(0, 7);
 
   const equipmentArray = Object.entries(byEquipmentData)
     .map(([type, data]) => ({
