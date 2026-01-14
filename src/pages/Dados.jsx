@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Search } from 'lucide-react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 export default function Dados() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -100,7 +102,9 @@ export default function Dados() {
                 ) : (
                   filteredRecords.map((record) => (
                     <TableRow key={record.id} className="border-slate-700 hover:bg-slate-700/30">
-                      <TableCell className="text-white">{record.date}</TableCell>
+                      <TableCell className="text-white">
+                        {record.date ? format(new Date(record.date), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
+                      </TableCell>
                       <TableCell className="text-white">{record.time}</TableCell>
                       <TableCell className="text-white font-mono">{record.vehicle_plate}</TableCell>
                       <TableCell className="text-slate-300">{record.vehicle_type}</TableCell>
