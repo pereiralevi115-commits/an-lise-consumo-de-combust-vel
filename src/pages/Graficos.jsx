@@ -369,7 +369,7 @@ export default function Graficos() {
           <BarChart data={unitEquipmentArray} margin={{ top: 50, right: 30, left: 50, bottom: 150 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={200} stroke="#94a3b8" />
-            <YAxis stroke="#94a3b8" />
+            <YAxis stroke="#94a3b8" hide={true} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[4, 4, 0, 0]}>
               <LabelList dataKey="kmPerLiter" position="top" formatter={(value) => typeof value === 'number' ? value.toFixed(2) : value} />
