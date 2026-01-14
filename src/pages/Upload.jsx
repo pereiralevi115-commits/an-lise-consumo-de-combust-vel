@@ -199,18 +199,18 @@ export default function Upload() {
         <CardContent className="text-slate-300 space-y-3">
           <p className="text-sm">Colunas obrigatórias:</p>
           <div className="flex flex-wrap gap-2 text-xs mt-3">
-            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">date</span>
-            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">time</span>
-            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">vehicle_plate</span>
-            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">vehicle_type</span>
-            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">unit</span>
-            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">attendant</span>
-            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">driver</span>
-            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">fuel_type</span>
-            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">liters</span>
-            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">km_driven</span>
-            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">cost</span>
-            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">cubic_meters</span>
+            <span className="bg-slate-900 px-2 py-1 rounded text-slate-300">Data</span>
+            <span className="bg-slate-900 px-2 py-1 rounded text-slate-300">Hora</span>
+            <span className="bg-slate-900 px-2 py-1 rounded text-slate-300">Placa</span>
+            <span className="bg-slate-900 px-2 py-1 rounded text-slate-300">Tipo</span>
+            <span className="bg-slate-900 px-2 py-1 rounded text-slate-300">Usina</span>
+            <span className="bg-slate-900 px-2 py-1 rounded text-slate-300">Frentista</span>
+            <span className="bg-slate-900 px-2 py-1 rounded text-slate-300">Motorista</span>
+            <span className="bg-slate-900 px-2 py-1 rounded text-slate-300">Combustível</span>
+            <span className="bg-slate-900 px-2 py-1 rounded text-slate-300">Litros</span>
+            <span className="bg-slate-900 px-2 py-1 rounded text-slate-300">Km Rodado</span>
+            <span className="bg-slate-900 px-2 py-1 rounded text-slate-300">Valor</span>
+            <span className="bg-slate-900 px-2 py-1 rounded text-slate-300">M³</span>
           </div>
           <p className="text-xs text-slate-400 mt-4">
             💡 Baixe o template acima para ter a estrutura correta.
