@@ -9,20 +9,14 @@ export default function TemplateDownload() {
   const handleDownloadTemplate = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('https://api.base44.com/apps/' + window.APP_ID + '/functions/generateTemplate/invoke', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + localStorage.getItem('base44_token')
-        },
-        body: JSON.stringify({})
+      const result = await base44.functions.invoke('generateTemplate', {}, {
+        responseType: 'arraybuffer'
       });
       
-      if (!response.ok) {
-        throw new Error('Erro ao gerar template');
-      }
+      const blob = new Blob([result.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
       
-      const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -33,7 +27,7 @@ export default function TemplateDownload() {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Erro ao baixar template:', error);
-      alert('Erro ao baixar template');
+      alert('Erro ao baixar template: ' + (error.message || 'erro desconhecido'));
     } finally {
       setIsLoading(false);
     }
