@@ -109,7 +109,7 @@ export default function Graficos() {
   const totalLiters = filtered.reduce((sum, r) => sum + (r.liters || 0), 0);
   const totalCost = filtered.reduce((sum, r) => sum + (r.cost || 0), 0);
   const totalKm = filtered.reduce((sum, r) => sum + (r.km_driven || 0), 0);
-  const totalM3 = filtered.filter(r => r.vehicle_type && r.vehicle_type.includes('Betoneira')).reduce((sum, r) => sum + (r.cubic_meters || 0), 0);
+  const totalM3 = filtered.filter(r => r.vehicle_type === 'CAMINHÃO BETONEIRA').reduce((sum, r) => sum + (r.cubic_meters || 0), 0);
 
   // Monthly data
   const monthlyData = {};
