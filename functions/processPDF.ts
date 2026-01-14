@@ -18,47 +18,33 @@ Deno.serve(async (req) => {
 
     console.log(`Processando PDF: ${fileUrl}`);
 
-    // Use LLM to extract data from PDF
+    // Use LLM to extract ALL data from PDF
     const extractionResult = await base44.integrations.Core.InvokeLLM({
-      prompt: `Extraia ABSOLUTAMENTE TODOS os dados deste PDF de abastecimento de combustível, linha por linha, TODAS as páginas.
+      prompt: `Extraia TODOS os dados deste PDF de abastecimento de combustível.
       
-      O PDF contém uma tabela com dados de abastecimento. Extraia CADA LINHA da tabela completa.
+      O arquivo contém uma tabela com dados de abastecimento. Extraia TODAS as linhas de TODAS as páginas.
       
-      Colunas:
-      - DATA (número serial Excel, ex: 46010)
-      - HORA
-      - PLACA
-      - TIPO
-      - USINA
-      - FRENTISTA
-      - MOTORISTA
-      - COMBUSTIVEL
-      - LITROS
-      - RODADO (KM)
-      - VALOR (R$)
-      - M³
-      
-      Retorne todos os dados no formato:
+      Formato de retorno:
       {
         "records": [
           {
-            "date": "YYYY-MM-DD" (converter serial Excel para data: 46010=2026-01-10, 45992=2025-12-23, etc),
-            "time": "HH:MM:SS",
-            "vehicle_plate": "placa",
+            "date": "YYYY-MM-DD" (converter serial Excel: 45992=2025-12-23, 45993=2025-12-24, 45994=2025-12-25... 46021=2026-01-21),
+            "time": "HH:MM:SS" (se hora estiver incompleta como "07:33" completar como "07:33:00", se for só número como "0,75" use null),
+            "vehicle_plate": "placa do veículo",
             "vehicle_type": "tipo",
             "unit": "usina",
             "attendant": "frentista",
             "driver": "motorista",
-            "fuel_type": "combustível",
-            "liters": número,
-            "km_driven": número ou null,
-            "cost": número,
-            "cubic_meters": número ou null
+            "fuel_type": "S10 ou S500",
+            "liters": número decimal,
+            "km_driven": número inteiro ou null se vazio/zero,
+            "cost": número decimal,
+            "cubic_meters": número decimal ou null se vazio
           }
         ]
       }
       
-      CRÍTICO: Não pule nenhuma linha. O PDF tem centenas de registros. Extraia TODOS.`,
+      IMPORTANTE: Este PDF tem muitos registros (centenas). Extraia TODOS sem exceção.`,
       file_urls: [fileUrl],
       response_json_schema: {
         type: "object",
