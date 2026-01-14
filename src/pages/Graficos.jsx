@@ -464,7 +464,7 @@ export default function Graficos() {
             {/* Chart 2: By Unit - Litros, Km, Custos */}
             <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6">
              <h3 className="text-white font-bold mb-6 text-center">LITROS ABASTECIDOS - QUILOMETROS PERCORRIDOS - CUSTOS DOS ABASTECIMENTOS (USINAS)</h3>
-             <ResponsiveContainer width="100%" height={350}>
+             <ResponsiveContainer width="100%" height={420}>
             <BarChart data={byUnitData} margin={{ top: 30, right: 30, left: 30, bottom: 20 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" label={false} />
