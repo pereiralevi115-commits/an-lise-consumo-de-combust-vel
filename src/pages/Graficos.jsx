@@ -3,7 +3,7 @@ import React, { useState } from 'react';
       import { useQuery, useQueryClient } from '@tanstack/react-query';
       import { ComposedChart, Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
       import { parseISO } from 'date-fns';
-      import { RefreshCw } from 'lucide-react';
+      
 
 const YELLOW = '#FCD34D';
 const BLUE = '#E5E7EB';
@@ -70,6 +70,7 @@ const CustomLabel = (props) => {
 
 export default function Graficos() {
         const [filters, setFilters] = useState({
+          year: '',
           month: '',
           type: '',
           unit: '',
@@ -77,19 +78,15 @@ export default function Graficos() {
           driver: ''
         });
 
-        const queryClient = useQueryClient();
         const { data: records = [], isLoading } = useQuery({
           queryKey: ['fuelRecords'],
           queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
         });
 
-        const handleRecalculate = () => {
-          queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
-        };
-
   const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   
   // Get unique filter values
+  const years = [...new Set(records.map(r => r.date ? parseISO(r.date).getFullYear() : null))].filter(y => y !== null).sort((a, b) => b - a);
   const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort();
   const types = [...new Set(records.map(r => r.vehicle_type))].filter(Boolean).sort();
   const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
@@ -98,6 +95,7 @@ export default function Graficos() {
 
   // Apply filters
   const filtered = records.filter(r => {
+    if (filters.year && parseISO(r.date).getFullYear() !== parseInt(filters.year)) return false;
     if (filters.month && parseISO(r.date).getMonth() !== parseInt(filters.month)) return false;
     if (filters.type && r.vehicle_type !== filters.type) return false;
     if (filters.unit && r.unit !== filters.unit) return false;
@@ -431,18 +429,18 @@ export default function Graficos() {
       <div>
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-white">Gráficos de Combustível</h1>
-          <button
-            onClick={handleRecalculate}
-            disabled={isLoading}
-            className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition"
+          <select 
+            value={filters.year} 
+            onChange={(e) => setFilters({...filters, year: e.target.value})}
+            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
           >
-            <RefreshCw className="w-4 h-4" />
-            Recalcular
-          </button>
+            <option value="">Todos anos</option>
+            {years.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <select 
             value={filters.month} 
             onChange={(e) => setFilters({...filters, month: e.target.value})}
