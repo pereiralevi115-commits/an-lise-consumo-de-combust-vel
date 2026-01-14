@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { TrendingUp, Fuel, DollarSign, Gauge } from 'lucide-react';
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ComposedChart, Bar, Line, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 
 export default function Graficos() {
   const [selectedUnit, setSelectedUnit] = useState('all');
@@ -221,10 +221,10 @@ export default function Graficos() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 gap-6">
-        {/* Combined Monthly Chart */}
+        {/* Monthly Chart */}
         <Card className="bg-slate-800 border-slate-700">
           <CardHeader>
-            <CardTitle className="text-white">Litros Abastecidos - Quilômetros Percorridos - Custos dos Abastecimentos (Mês)</CardTitle>
+            <CardTitle className="text-white">Litros - Km - Custos por Mês</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={350}>
@@ -242,6 +242,69 @@ export default function Graficos() {
                 <Bar yAxisId="left" dataKey="km" fill="#9ca3af" name="Km" />
                 <Bar yAxisId="right" dataKey="cost" fill="#3b82f6" name="Custo (R$)" />
               </ComposedChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Cost by Unit */}
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white">Custos por Usina</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={costByUnit} layout="vertical" margin={{ top: 5, right: 30, left: 200, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
+                <XAxis type="number" stroke="#64748b" />
+                <YAxis dataKey="name" type="category" stroke="#64748b" width={190} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }}
+                  formatter={(value) => `R$ ${value.toLocaleString('pt-BR', {maximumFractionDigits: 2})}`}
+                />
+                <Bar dataKey="custo" fill="#fbbf24" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Km/L by Unit */}
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white">Média Km/L por Usina</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={costByUnit} margin={{ top: 5, right: 30, left: 0, bottom: 50 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
+                <XAxis dataKey="name" stroke="#64748b" angle={-45} textAnchor="end" height={100} />
+                <YAxis stroke="#64748b" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }}
+                  formatter={(value) => value.toFixed(2)}
+                />
+                <Bar dataKey="custo" fill="#10b981" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Km by Vehicle */}
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white">Km Percorrido por Veículo</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={costData.slice(0, 8)} layout="vertical" margin={{ top: 5, right: 30, left: 120, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
+                <XAxis type="number" stroke="#64748b" />
+                <YAxis dataKey="placa" type="category" stroke="#64748b" width={110} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }}
+                  formatter={(value) => `${value.toLocaleString('pt-BR', {maximumFractionDigits: 0})} km`}
+                />
+                <Bar dataKey="custo" fill="#8b5cf6" />
+              </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
