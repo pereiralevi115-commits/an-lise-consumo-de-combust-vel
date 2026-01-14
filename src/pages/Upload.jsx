@@ -197,59 +197,23 @@ export default function Upload() {
           <CardTitle className="text-white">Formato do Arquivo</CardTitle>
         </CardHeader>
         <CardContent className="text-slate-300 space-y-3">
-          <p>O arquivo deve conter as seguintes colunas (exatamente com estes nomes):</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mt-4">
-            <div className="flex items-start gap-2">
-              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">date</span>
-              <span className="text-slate-400">Data (ex: 2026-01-14)</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">time</span>
-              <span className="text-slate-400">Hora (ex: 08:30)</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">vehicle_plate</span>
-              <span className="text-slate-400">Placa do veículo</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">vehicle_type</span>
-              <span className="text-slate-400">Tipo de veículo</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">unit</span>
-              <span className="text-slate-400">Usina</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">attendant</span>
-              <span className="text-slate-400">Frentista</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">driver</span>
-              <span className="text-slate-400">Motorista</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">fuel_type</span>
-              <span className="text-slate-400">Tipo de combustível</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">liters</span>
-              <span className="text-slate-400">Quantidade em litros</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">km_driven</span>
-              <span className="text-slate-400">Quilômetros rodados</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">cost</span>
-              <span className="text-slate-400">Valor em reais</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">cubic_meters</span>
-              <span className="text-slate-400">Metros cúbicos (M³)</span>
-            </div>
+          <p className="text-sm">Colunas obrigatórias:</p>
+          <div className="flex flex-wrap gap-2 text-xs mt-3">
+            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">date</span>
+            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">time</span>
+            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">vehicle_plate</span>
+            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">vehicle_type</span>
+            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">unit</span>
+            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">attendant</span>
+            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">driver</span>
+            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">fuel_type</span>
+            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">liters</span>
+            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">km_driven</span>
+            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">cost</span>
+            <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400">cubic_meters</span>
           </div>
-          <p className="text-xs text-slate-400 mt-4 bg-slate-900 p-3 rounded">
-            💡 <strong>Dica:</strong> Baixe o template Excel acima para ter um arquivo com a estrutura correta e exemplos de dados.
+          <p className="text-xs text-slate-400 mt-4">
+            💡 Baixe o template acima para ter a estrutura correta.
           </p>
         </CardContent>
       </Card>
