@@ -617,7 +617,7 @@ export default function Graficos() {
       {/* Chart 11: Equipment Averages */}
       <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6">
         <h3 className="text-white font-bold mb-6 text-center">MÉDIAS POR EQUIPAMENTO (LT/M³ - R$/M³)</h3>
-        <ResponsiveContainer width="100%" height={350}>
+        <ResponsiveContainer width="100%" height={420}>
           <BarChart data={equipmentArray} margin={{ top: 30, right: 30, left: 70, bottom: 100 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
