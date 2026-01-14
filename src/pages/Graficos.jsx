@@ -23,12 +23,13 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-const CustomLabel = (props) => {
+const CustomLabel = (props, label = '') => {
   const { x, y, width, height, value, position } = props;
   if (!value) return null;
   
   const isVertical = position === 'top' || position === 'bottom';
   const displayValue = typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 1}) : value;
+  const text = label ? `${label}: ${displayValue}` : displayValue;
   
   if (isVertical) {
     return (
@@ -37,10 +38,10 @@ const CustomLabel = (props) => {
         y={y - 8} 
         fill="#1f2937" 
         textAnchor="middle" 
-        fontSize="11" 
+        fontSize="10" 
         fontWeight="600"
       >
-        {displayValue}
+        {text}
       </text>
     );
   }
@@ -52,10 +53,10 @@ const CustomLabel = (props) => {
       fill="#1f2937" 
       textAnchor="start" 
       dominantBaseline="middle"
-      fontSize="11" 
+      fontSize="10" 
       fontWeight="600"
     >
-      {displayValue}
+      {text}
     </text>
   );
 };
@@ -308,7 +309,6 @@ export default function Graficos() {
 
       {/* Chart 1: Monthly */}
       <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-        <h2 className="font-bold text-gray-900 mb-8 text-sm tracking-widest text-gray-700">LITROS - QUILOMETROS - CUSTOS (MÊS)</h2>
         <ResponsiveContainer width="100%" height={350}>
           <ComposedChart data={chartData} margin={{ top: 30, right: 80, left: 70, bottom: 20 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#d1d5db" vertical={false} opacity={0.6} />
@@ -332,7 +332,6 @@ export default function Graficos() {
 
       {/* Chart 2: By Unit */}
       <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-        <h2 className="font-bold text-gray-900 mb-8 text-sm tracking-widest text-gray-700">LITROS - QUILOMETROS - CUSTOS (USINAS)</h2>
         <ResponsiveContainer width="100%" height={400}>
           <ComposedChart data={byUnitData} margin={{ top: 30, right: 80, left: 120, bottom: 100 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#d1d5db" vertical={false} opacity={0.6} />
@@ -350,7 +349,6 @@ export default function Graficos() {
 
       {/* Chart 3: Km/L by Unit */}
       <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-        <h2 className="font-bold text-gray-900 mb-8 text-sm tracking-widest text-gray-700">MÉDIAS KM/LT (USINAS E EQUIPAMENTOS)</h2>
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={byUnitData} margin={{ top: 30, right: 50, left: 70, bottom: 100 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#d1d5db" vertical={false} opacity={0.6} />
@@ -368,7 +366,6 @@ export default function Graficos() {
       <div className="grid grid-cols-2 gap-6">
         {/* Km per Vehicle */}
         <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-          <h2 className="font-bold text-gray-900 mb-6 text-sm tracking-widest text-gray-700">KM PERCORRIDO POR VEÍCULO (TOP 15)</h2>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={vehicleKmArray} layout="vertical" margin={{ top: 10, right: 50, left: 90, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#d1d5db" vertical={true} opacity={0.4} />
@@ -384,7 +381,6 @@ export default function Graficos() {
 
         {/* Km per Driver */}
         <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-          <h2 className="font-bold text-gray-900 mb-6 text-sm tracking-widest text-gray-700">KM PERCORRIDO POR MOTORISTA (TOP 15)</h2>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={driverKmArray} layout="vertical" margin={{ top: 10, right: 50, left: 150, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#d1d5db" vertical={true} opacity={0.4} />
@@ -403,7 +399,6 @@ export default function Graficos() {
       <div className="grid grid-cols-2 gap-6">
         {/* Km/L per Vehicle */}
         <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-          <h2 className="font-bold text-gray-900 mb-6 text-sm tracking-widest text-gray-700">KM/LITRO POR VEÍCULO (TOP 15)</h2>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={vehicleKmLiterArray} layout="vertical" margin={{ top: 10, right: 50, left: 90, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#d1d5db" vertical={true} opacity={0.4} />
@@ -419,7 +414,6 @@ export default function Graficos() {
 
         {/* Km/L per Driver */}
         <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-          <h2 className="font-bold text-gray-900 mb-6 text-sm tracking-widest text-gray-700">KM/LITRO POR MOTORISTA (TOP 15)</h2>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={driverKmLiterArray} layout="vertical" margin={{ top: 10, right: 50, left: 150, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#d1d5db" vertical={true} opacity={0.4} />
@@ -438,7 +432,6 @@ export default function Graficos() {
       <div className="grid grid-cols-2 gap-6">
         {/* R$/Km per Vehicle */}
         <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-          <h2 className="font-bold text-gray-900 mb-6 text-sm tracking-widest text-gray-700">R$/KM POR VEÍCULO (TOP 15)</h2>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={vehicleCostArray} layout="vertical" margin={{ top: 10, right: 50, left: 90, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#d1d5db" vertical={true} opacity={0.4} />
@@ -454,7 +447,6 @@ export default function Graficos() {
 
         {/* R$/Km per Driver */}
         <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-          <h2 className="font-bold text-gray-900 mb-6 text-sm tracking-widest text-gray-700">R$/KM POR MOTORISTA (TOP 15)</h2>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={driverCostArray} layout="vertical" margin={{ top: 10, right: 50, left: 150, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#d1d5db" vertical={true} opacity={0.4} />
@@ -471,7 +463,6 @@ export default function Graficos() {
 
       {/* Chart 10: Production by Equipment */}
       <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-        <h2 className="font-bold text-gray-900 mb-8 text-sm tracking-widest text-gray-700">PRODUÇÃO POR EQUIPAMENTO (M³)</h2>
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={equipmentArray} margin={{ top: 30, right: 50, left: 70, bottom: 100 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#d1d5db" vertical={false} opacity={0.6} />
@@ -487,7 +478,6 @@ export default function Graficos() {
 
       {/* Chart 11: Equipment Averages */}
       <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-        <h2 className="font-bold text-gray-900 mb-8 text-sm tracking-widest text-gray-700">MÉDIAS POR EQUIPAMENTO (LT/M³ - R$/M³)</h2>
         <ResponsiveContainer width="100%" height={350}>
           <ComposedChart data={equipmentArray} margin={{ top: 30, right: 80, left: 70, bottom: 100 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#d1d5db" vertical={false} opacity={0.6} />
