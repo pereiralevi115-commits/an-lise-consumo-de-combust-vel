@@ -221,7 +221,7 @@ export default function Graficos() {
         fontSize="11"
         fontWeight="600"
       >
-        {typeof value === 'number' ? value.toFixed(2) : value}
+        {typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 2}) + ' Km' : value}
       </text>
     );
   };
