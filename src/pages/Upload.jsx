@@ -45,14 +45,12 @@ export default function Upload() {
     if (!file) return;
 
     // Validate file type
-    const validTypes = ['.xlsx', '.xls', '.csv'];
     const fileName = file.name.toLowerCase();
-    const isValid = validTypes.some(type => fileName.endsWith(type));
     
-    if (!isValid) {
+    if (!fileName.endsWith('.csv')) {
       setResult({
         success: false,
-        message: 'Tipo de arquivo inválido. Use apenas arquivos Excel (.xlsx, .xls) ou CSV'
+        message: 'Tipo de arquivo inválido. Use apenas arquivos CSV'
       });
       return;
     }
@@ -94,7 +92,7 @@ export default function Upload() {
     <div className="space-y-6 max-w-3xl mx-auto">
       <div>
         <h1 className="text-3xl font-bold text-white mb-2">Upload de Dados</h1>
-        <p className="text-slate-400">Carregue planilhas Excel ou CSV com os dados de combustível</p>
+        <p className="text-slate-400">Carregue arquivos CSV com os dados de combustível</p>
       </div>
 
       {/* Download Template */}
@@ -145,7 +143,7 @@ export default function Upload() {
           <label className="block">
             <input
               type="file"
-              accept=".xlsx,.xls,.csv"
+              accept=".csv"
               onChange={handleFileUpload}
               disabled={isUploading}
               className="hidden"
@@ -162,7 +160,7 @@ export default function Upload() {
                   <UploadIcon className="w-12 h-12 text-slate-400" />
                   <div>
                     <p className="text-white font-medium mb-1">Clique para selecionar um arquivo</p>
-                    <p className="text-slate-400 text-sm">Excel (.xlsx, .xls) ou CSV</p>
+                    <p className="text-slate-400 text-sm">Apenas arquivos CSV</p>
                   </div>
                 </div>
               )}
