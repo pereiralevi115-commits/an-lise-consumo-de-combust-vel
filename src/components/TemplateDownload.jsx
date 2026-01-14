@@ -9,11 +9,20 @@ export default function TemplateDownload() {
   const handleDownloadTemplate = async () => {
     setIsLoading(true);
     try {
-      const response = await base44.functions.invoke('generateTemplate');
-      
-      const blob = new Blob([response.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      const response = await fetch('https://api.base44.com/apps/' + window.APP_ID + '/functions/generateTemplate/invoke', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('base44_token')
+        },
+        body: JSON.stringify({})
       });
+      
+      if (!response.ok) {
+        throw new Error('Erro ao gerar template');
+      }
+      
+      const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
