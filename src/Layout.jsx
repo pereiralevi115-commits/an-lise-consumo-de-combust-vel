@@ -31,7 +31,7 @@ export default function Layout({ children, currentPageName }) {
                     to={createPageUrl(item.page)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
                       isActive
-                        ? 'bg-amber-700 text-white'
+                        ? 'bg-yellow-400 text-slate-900'
                           : 'text-slate-300 hover:bg-slate-700'
                     }`}
                   >
