@@ -486,7 +486,7 @@ export default function Graficos() {
       {/* Chart 3: Km/L by Equipment Type */}
       <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6 mt-8">
         <h3 className="text-white font-bold mb-6 text-center">MÉDIAS POR TIPO DE EQUIPAMENTO (KM/LT)</h3>
-        <ResponsiveContainer width="100%" height={450}>
+        <ResponsiveContainer width="100%" height={420}>
           <BarChart data={unitEquipmentArray} margin={{ top: 40, right: 30, left: 30, bottom: 100 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={200} stroke="#94a3b8" />
