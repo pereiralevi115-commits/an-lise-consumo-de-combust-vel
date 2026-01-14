@@ -111,7 +111,7 @@ export default function Graficos() {
   });
   const chartData = Object.values(monthlyData)
     .filter(d => d.liters > 0 || d.km > 0 || d.cost > 0)
-    .sort((a, b) => monthNames.indexOf(a.name) - monthNames.indexOf(b.name));
+    .sort((a, b) => a.cost - b.cost);
 
   // By unit
   const byUnitData = units.map(unit => {
