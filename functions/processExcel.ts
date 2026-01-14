@@ -31,18 +31,18 @@ Deno.serve(async (req) => {
       items: {
         type: "object",
         properties: {
-          month: { type: "string" },
           date: { type: "string" },
+          time: { type: "string" },
           vehicle_plate: { type: "string" },
           vehicle_type: { type: "string" },
           unit: { type: "string" },
+          attendant: { type: "string" },
           driver: { type: "string" },
           fuel_type: { type: "string" },
           liters: { type: "number" },
-          km_start: { type: "number" },
-          km_end: { type: "number" },
           km_driven: { type: "number" },
-          cost: { type: "number" }
+          cost: { type: "number" },
+          cubic_meters: { type: "number" }
         }
       }
     };
@@ -63,18 +63,10 @@ Deno.serve(async (req) => {
     const records = extractionResult.output;
     console.log(`${records.length} registros extraídos`);
 
-    // Calculate efficiency and save records
+    // Save records
     const savedRecords = [];
     for (const record of records) {
-      const efficiency = record.km_driven && record.liters > 0 
-        ? record.km_driven / record.liters 
-        : 0;
-      
-      const saved = await base44.asServiceRole.entities.FuelRecord.create({
-        ...record,
-        efficiency: parseFloat(efficiency.toFixed(2))
-      });
-      
+      const saved = await base44.asServiceRole.entities.FuelRecord.create(record);
       savedRecords.push(saved);
     }
 

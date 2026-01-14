@@ -7,7 +7,6 @@ import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Cart
 import { TrendingUp, Fuel, DollarSign, Gauge } from 'lucide-react';
 
 export default function Graficos() {
-  const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedUnit, setSelectedUnit] = useState('all');
 
   const { data: records = [], isLoading } = useQuery({
@@ -17,22 +16,18 @@ export default function Graficos() {
 
   // Filter records
   const filteredRecords = records.filter(r => {
-    if (selectedMonth !== 'all' && r.month !== selectedMonth) return false;
     if (selectedUnit !== 'all' && r.unit !== selectedUnit) return false;
     return true;
   });
 
-  // Get unique months and units
-  const months = [...new Set(records.map(r => r.month))].filter(Boolean);
+  // Get unique units
   const units = [...new Set(records.map(r => r.unit))].filter(Boolean);
 
   // Calculate metrics
   const totalLiters = filteredRecords.reduce((sum, r) => sum + (r.liters || 0), 0);
   const totalCost = filteredRecords.reduce((sum, r) => sum + (r.cost || 0), 0);
   const totalKm = filteredRecords.reduce((sum, r) => sum + (r.km_driven || 0), 0);
-  const avgEfficiency = filteredRecords.length > 0
-    ? filteredRecords.reduce((sum, r) => sum + (r.efficiency || 0), 0) / filteredRecords.length
-    : 0;
+  const totalM3 = filteredRecords.reduce((sum, r) => sum + (r.cubic_meters || 0), 0);
 
   // Cost by unit
   const costByUnit = units.map(unit => ({
@@ -51,34 +46,28 @@ export default function Graficos() {
   });
   const typeData = Object.entries(litersByType).map(([name, value]) => ({ name, value }));
 
-  // Efficiency by vehicle
-  const vehicleEfficiency = {};
+  // Cost by vehicle
+  const vehicleCost = {};
   filteredRecords.forEach(r => {
-    if (r.vehicle_plate && r.efficiency) {
-      if (!vehicleEfficiency[r.vehicle_plate]) {
-        vehicleEfficiency[r.vehicle_plate] = { total: 0, count: 0 };
-      }
-      vehicleEfficiency[r.vehicle_plate].total += r.efficiency;
-      vehicleEfficiency[r.vehicle_plate].count += 1;
+    if (r.vehicle_plate) {
+      vehicleCost[r.vehicle_plate] = (vehicleCost[r.vehicle_plate] || 0) + (r.cost || 0);
     }
   });
-  const efficiencyData = Object.entries(vehicleEfficiency)
-    .map(([plate, data]) => ({
+  const costData = Object.entries(vehicleCost)
+    .map(([plate, cost]) => ({
       placa: plate,
-      eficiencia: (data.total / data.count).toFixed(2)
+      custo: cost
     }))
-    .sort((a, b) => b.eficiencia - a.eficiencia)
+    .sort((a, b) => b.custo - a.custo)
     .slice(0, 10);
 
-  // Monthly trend
-  const monthlyData = months.map(month => {
-    const monthRecords = records.filter(r => r.month === month);
-    return {
-      mes: month,
-      litros: monthRecords.reduce((sum, r) => sum + (r.liters || 0), 0),
-      custo: monthRecords.reduce((sum, r) => sum + (r.cost || 0), 0)
-    };
-  });
+  // M³ by unit
+  const m3ByUnit = units.map(unit => ({
+    name: unit,
+    m3: filteredRecords
+      .filter(r => r.unit === unit)
+      .reduce((sum, r) => sum + (r.cubic_meters || 0), 0)
+  })).sort((a, b) => b.m3 - a.m3);
 
   const COLORS = ['#f97316', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
 
@@ -92,18 +81,8 @@ export default function Graficos() {
         <h1 className="text-3xl font-bold text-white">Análise de Desempenho</h1>
         
         <div className="flex gap-3">
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-40 bg-slate-800 text-white border-slate-700">
-              <SelectValue placeholder="Mês" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os meses</SelectItem>
-              {months.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-            </SelectContent>
-          </Select>
-
           <Select value={selectedUnit} onValueChange={setSelectedUnit}>
-            <SelectTrigger className="w-40 bg-slate-800 text-white border-slate-700">
+            <SelectTrigger className="w-48 bg-slate-800 text-white border-slate-700">
               <SelectValue placeholder="Unidade" />
             </SelectTrigger>
             <SelectContent>
@@ -156,11 +135,11 @@ export default function Graficos() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-slate-400 flex items-center gap-2">
               <Gauge className="w-4 h-4 text-purple-500" />
-              Eficiência Média
+              Total M³
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-white">{avgEfficiency.toFixed(2)} km/l</p>
+            <p className="text-2xl font-bold text-white">{totalM3.toFixed(2)}</p>
           </CardContent>
         </Card>
       </div>
@@ -213,40 +192,38 @@ export default function Graficos() {
           </CardContent>
         </Card>
 
-        {/* Vehicle Efficiency */}
+        {/* Cost by Vehicle */}
         <Card className="bg-slate-800 border-slate-700">
           <CardHeader>
-            <CardTitle className="text-white">Eficiência por Veículo (Top 10)</CardTitle>
+            <CardTitle className="text-white">Custo por Veículo (Top 10)</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={efficiencyData} layout="vertical">
+              <BarChart data={costData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
                 <XAxis type="number" stroke="#94a3b8" />
                 <YAxis type="category" dataKey="placa" stroke="#94a3b8" width={80} />
                 <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none' }} />
-                <Bar dataKey="eficiencia" fill="#10b981" />
+                <Bar dataKey="custo" fill="#10b981" />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        {/* Monthly Trend */}
+        {/* M³ by Unit */}
         <Card className="bg-slate-800 border-slate-700">
           <CardHeader>
-            <CardTitle className="text-white">Tendência Mensal</CardTitle>
+            <CardTitle className="text-white">M³ por Unidade</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={monthlyData}>
+              <BarChart data={m3ByUnit}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                <XAxis dataKey="mes" stroke="#94a3b8" />
+                <XAxis dataKey="name" stroke="#94a3b8" />
                 <YAxis stroke="#94a3b8" />
                 <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none' }} />
-                <Legend />
-                <Line type="monotone" dataKey="litros" stroke="#0ea5e9" name="Litros" />
-                <Line type="monotone" dataKey="custo" stroke="#f59e0b" name="Custo (R$)" />
-              </LineChart>
+                <Bar dataKey="m3" fill="#8b5cf6" />
+              </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>

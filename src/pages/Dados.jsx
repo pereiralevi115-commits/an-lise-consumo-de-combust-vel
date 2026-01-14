@@ -9,7 +9,6 @@ import { Search } from 'lucide-react';
 
 export default function Dados() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedMonth, setSelectedMonth] = useState('all');
   const [selectedUnit, setSelectedUnit] = useState('all');
 
   const { data: records = [], isLoading } = useQuery({
@@ -17,13 +16,11 @@ export default function Dados() {
     queryFn: () => base44.entities.FuelRecord.list('-date', 1000)
   });
 
-  // Get unique months and units
-  const months = [...new Set(records.map(r => r.month))].filter(Boolean);
+  // Get unique units
   const units = [...new Set(records.map(r => r.unit))].filter(Boolean);
 
   // Filter records
   const filteredRecords = records.filter(r => {
-    if (selectedMonth !== 'all' && r.month !== selectedMonth) return false;
     if (selectedUnit !== 'all' && r.unit !== selectedUnit) return false;
     if (searchTerm && !JSON.stringify(r).toLowerCase().includes(searchTerm.toLowerCase())) return false;
     return true;
@@ -59,16 +56,6 @@ export default function Dados() {
               </div>
             </div>
 
-            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-              <SelectTrigger className="w-48 bg-slate-900 text-white border-slate-700">
-                <SelectValue placeholder="Mês" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os meses</SelectItem>
-                {months.map(m => <SelectItem key={m} value={m}>{m}</SelectItem>)}
-              </SelectContent>
-            </Select>
-
             <Select value={selectedUnit} onValueChange={setSelectedUnit}>
               <SelectTrigger className="w-48 bg-slate-900 text-white border-slate-700">
                 <SelectValue placeholder="Unidade" />
@@ -89,40 +76,42 @@ export default function Dados() {
             <Table>
               <TableHeader>
                 <TableRow className="border-slate-700 hover:bg-slate-700/50">
-                  <TableHead className="text-slate-300">Mês</TableHead>
                   <TableHead className="text-slate-300">Data</TableHead>
+                  <TableHead className="text-slate-300">Hora</TableHead>
                   <TableHead className="text-slate-300">Placa</TableHead>
                   <TableHead className="text-slate-300">Tipo</TableHead>
-                  <TableHead className="text-slate-300">Unidade</TableHead>
+                  <TableHead className="text-slate-300">Usina</TableHead>
+                  <TableHead className="text-slate-300">Frentista</TableHead>
                   <TableHead className="text-slate-300">Motorista</TableHead>
                   <TableHead className="text-slate-300">Combustível</TableHead>
                   <TableHead className="text-slate-300 text-right">Litros</TableHead>
                   <TableHead className="text-slate-300 text-right">Km</TableHead>
-                  <TableHead className="text-slate-300 text-right">Km/L</TableHead>
-                  <TableHead className="text-slate-300 text-right">Custo</TableHead>
+                  <TableHead className="text-slate-300 text-right">Valor</TableHead>
+                  <TableHead className="text-slate-300 text-right">M³</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredRecords.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={11} className="text-center text-slate-400 py-8">
+                    <TableCell colSpan={12} className="text-center text-slate-400 py-8">
                       Nenhum registro encontrado
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredRecords.map((record) => (
                     <TableRow key={record.id} className="border-slate-700 hover:bg-slate-700/30">
-                      <TableCell className="text-white">{record.month}</TableCell>
                       <TableCell className="text-white">{record.date}</TableCell>
+                      <TableCell className="text-white">{record.time}</TableCell>
                       <TableCell className="text-white font-mono">{record.vehicle_plate}</TableCell>
                       <TableCell className="text-slate-300">{record.vehicle_type}</TableCell>
                       <TableCell className="text-slate-300">{record.unit}</TableCell>
+                      <TableCell className="text-slate-300">{record.attendant}</TableCell>
                       <TableCell className="text-slate-300">{record.driver}</TableCell>
                       <TableCell className="text-slate-300">{record.fuel_type}</TableCell>
                       <TableCell className="text-white text-right">{record.liters?.toFixed(1)}</TableCell>
                       <TableCell className="text-white text-right">{record.km_driven?.toFixed(0)}</TableCell>
-                      <TableCell className="text-white text-right">{record.efficiency?.toFixed(2)}</TableCell>
                       <TableCell className="text-white text-right">R$ {record.cost?.toFixed(2)}</TableCell>
+                      <TableCell className="text-white text-right">{record.cubic_meters?.toFixed(2)}</TableCell>
                     </TableRow>
                   ))
                 )}

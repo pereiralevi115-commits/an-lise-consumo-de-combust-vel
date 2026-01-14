@@ -134,22 +134,19 @@ export default function Upload() {
         <CardContent className="text-slate-300 space-y-3">
           <p>O arquivo deve conter as seguintes colunas:</p>
           <ul className="list-disc list-inside space-y-2 text-sm">
-            <li><strong>month</strong> - Mês de referência (ex: Janeiro, Fevereiro)</li>
             <li><strong>date</strong> - Data do abastecimento</li>
+            <li><strong>time</strong> - Hora do abastecimento</li>
             <li><strong>vehicle_plate</strong> - Placa do veículo</li>
             <li><strong>vehicle_type</strong> - Tipo de veículo (ex: Caminhão, Betoneira)</li>
-            <li><strong>unit</strong> - Unidade/Usina</li>
-            <li><strong>driver</strong> - Nome do motorista</li>
+            <li><strong>unit</strong> - Usina</li>
+            <li><strong>attendant</strong> - Frentista</li>
+            <li><strong>driver</strong> - Motorista</li>
             <li><strong>fuel_type</strong> - Tipo de combustível</li>
             <li><strong>liters</strong> - Quantidade em litros</li>
-            <li><strong>km_start</strong> - Quilometragem inicial</li>
-            <li><strong>km_end</strong> - Quilometragem final</li>
             <li><strong>km_driven</strong> - Quilômetros rodados</li>
             <li><strong>cost</strong> - Valor gasto em reais</li>
+            <li><strong>cubic_meters</strong> - Metros cúbicos (M³)</li>
           </ul>
-          <p className="text-xs text-slate-400 mt-4">
-            💡 A eficiência (km/l) será calculada automaticamente
-          </p>
         </CardContent>
       </Card>
     </div>
