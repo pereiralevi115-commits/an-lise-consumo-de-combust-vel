@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Fuel, DollarSign, Gauge } from 'lucide-react';
+import { TrendingUp, Fuel, DollarSign, Gauge, Droplet } from 'lucide-react';
 
 export default function Graficos() {
   const [selectedUnit, setSelectedUnit] = useState('all');
@@ -146,53 +146,49 @@ export default function Graficos() {
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-slate-800 border-slate-700">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-slate-400 flex items-center gap-2">
-              <Fuel className="w-4 h-4 text-orange-500" />
-              Total de Litros
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">{totalLiters.toFixed(0)}</p>
-          </CardContent>
-        </Card>
+        <div className="bg-gradient-to-br from-orange-600/20 to-orange-900/20 border border-orange-600/50 rounded-xl p-6 backdrop-blur-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-orange-400 text-sm font-medium mb-1">Total de Litros</p>
+              <p className="text-3xl font-bold text-white">{totalLiters.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+              <p className="text-orange-300/70 text-xs mt-1">L</p>
+            </div>
+            <Fuel className="w-12 h-12 text-orange-500/30" />
+          </div>
+        </div>
 
-        <Card className="bg-slate-800 border-slate-700">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-slate-400 flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-green-500" />
-              Custo Total
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">R$ {totalCost.toFixed(2)}</p>
-          </CardContent>
-        </Card>
+        <div className="bg-gradient-to-br from-green-600/20 to-green-900/20 border border-green-600/50 rounded-xl p-6 backdrop-blur-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-400 text-sm font-medium mb-1">Custo Total</p>
+              <p className="text-3xl font-bold text-white">R$ {totalCost.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+              <p className="text-green-300/70 text-xs mt-1">Gasto total</p>
+            </div>
+            <DollarSign className="w-12 h-12 text-green-500/30" />
+          </div>
+        </div>
 
-        <Card className="bg-slate-800 border-slate-700">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-slate-400 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-blue-500" />
-              Km Rodados
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">{totalKm.toFixed(0)}</p>
-          </CardContent>
-        </Card>
+        <div className="bg-gradient-to-br from-blue-600/20 to-blue-900/20 border border-blue-600/50 rounded-xl p-6 backdrop-blur-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-400 text-sm font-medium mb-1">Km Rodados</p>
+              <p className="text-3xl font-bold text-white">{totalKm.toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+              <p className="text-blue-300/70 text-xs mt-1">km</p>
+            </div>
+            <TrendingUp className="w-12 h-12 text-blue-500/30" />
+          </div>
+        </div>
 
-        <Card className="bg-slate-800 border-slate-700">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-slate-400 flex items-center gap-2">
-              <Gauge className="w-4 h-4 text-purple-500" />
-              Total M³
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-white">{totalM3.toFixed(2)}</p>
-          </CardContent>
-        </Card>
+        <div className="bg-gradient-to-br from-purple-600/20 to-purple-900/20 border border-purple-600/50 rounded-xl p-6 backdrop-blur-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-400 text-sm font-medium mb-1">Total M³</p>
+              <p className="text-3xl font-bold text-white">{totalM3.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+              <p className="text-purple-300/70 text-xs mt-1">metros cúbicos</p>
+            </div>
+            <Droplet className="w-12 h-12 text-purple-500/30" />
+          </div>
+        </div>
       </div>
 
       {/* Charts */}
