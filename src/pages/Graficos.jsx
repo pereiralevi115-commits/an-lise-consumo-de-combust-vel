@@ -240,7 +240,7 @@ export default function Graficos() {
                 <Legend wrapperStyle={{ paddingTop: '20px' }} />
                 <Bar yAxisId="left" dataKey="liters" fill="#fbbf24" name="Litros" />
                 <Bar yAxisId="left" dataKey="km" fill="#9ca3af" name="Km" />
-                <Line yAxisId="right" type="monotone" dataKey="cost" stroke="#3b82f6" name="Custo" strokeWidth={2} />
+                <Bar yAxisId="right" dataKey="cost" fill="#3b82f6" name="Custo (R$)" />
               </ComposedChart>
             </ResponsiveContainer>
           </CardContent>
