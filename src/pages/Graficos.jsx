@@ -338,6 +338,7 @@ export default function Graficos() {
           <BarChart data={chartData} margin={{ top: 30, right: 30, left: 70, bottom: 20 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" stroke="#94a3b8" label={false} />
+            <YAxis stroke="#94a3b8" hide={true} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="liters" fill={YELLOW} name="Litros" radius={[4, 4, 0, 0]} />
             <Bar dataKey="km" fill={BLUE} name="Km" radius={[4, 4, 0, 0]} />
@@ -484,7 +485,7 @@ export default function Graficos() {
           <BarChart data={equipmentArray} margin={{ top: 30, right: 50, left: 70, bottom: 100 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
-            <YAxis stroke="#94a3b8" />
+            <YAxis stroke="#94a3b8" hide={true} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="m3" fill={YELLOW} radius={[4, 4, 0, 0]} />
           </BarChart>
@@ -498,7 +499,7 @@ export default function Graficos() {
           <BarChart data={equipmentArray} margin={{ top: 30, right: 30, left: 70, bottom: 100 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
-            <YAxis stroke="#94a3b8" />
+            <YAxis stroke="#94a3b8" hide={true} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="litersPerM3" fill={YELLOW} name="LT/M³" radius={[4, 4, 0, 0]} />
             <Bar dataKey="costPerM3" fill={GRAY} name="R$/M³" radius={[4, 4, 0, 0]} />
