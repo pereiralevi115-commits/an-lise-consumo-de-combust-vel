@@ -487,7 +487,9 @@ export default function Graficos() {
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" hide={true} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="m3" fill={YELLOW} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="m3" fill={YELLOW} radius={[4, 4, 0, 0]}>
+              <LabelList dataKey="m3" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) : value} fontSize={9} />
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -501,8 +503,12 @@ export default function Graficos() {
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" hide={true} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="litersPerM3" fill={YELLOW} name="LT/M³" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="costPerM3" fill={GRAY} name="R$/M³" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="litersPerM3" fill={YELLOW} name="LT/M³" radius={[4, 4, 0, 0]}>
+              <LabelList dataKey="litersPerM3" position="top" formatter={(value) => typeof value === 'number' ? value.toFixed(2) : value} fontSize={9} />
+            </Bar>
+            <Bar dataKey="costPerM3" fill={GRAY} name="R$/M³" radius={[4, 4, 0, 0]}>
+              <LabelList dataKey="costPerM3" position="top" formatter={(value) => typeof value === 'number' ? value.toFixed(2) : value} fontSize={9} />
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
