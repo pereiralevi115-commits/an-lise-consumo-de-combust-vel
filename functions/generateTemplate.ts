@@ -16,27 +16,30 @@ Deno.serve(async (req) => {
 
     // Define columns
     worksheet.columns = [
-      { header: 'date', key: 'date', width: 12 },
-      { header: 'time', key: 'time', width: 10 },
-      { header: 'vehicle_plate', key: 'vehicle_plate', width: 15 },
-      { header: 'vehicle_type', key: 'vehicle_type', width: 15 },
-      { header: 'unit', key: 'unit', width: 15 },
-      { header: 'attendant', key: 'attendant', width: 20 },
-      { header: 'driver', key: 'driver', width: 20 },
-      { header: 'fuel_type', key: 'fuel_type', width: 15 },
-      { header: 'liters', key: 'liters', width: 10 },
-      { header: 'km_driven', key: 'km_driven', width: 12 },
-      { header: 'cost', key: 'cost', width: 12 },
-      { header: 'cubic_meters', key: 'cubic_meters', width: 12 }
+      { header: 'Data', key: 'date', width: 12 },
+      { header: 'Hora', key: 'time', width: 10 },
+      { header: 'Placa', key: 'vehicle_plate', width: 15 },
+      { header: 'Tipo', key: 'vehicle_type', width: 15 },
+      { header: 'Usina', key: 'unit', width: 15 },
+      { header: 'Frentista', key: 'attendant', width: 20 },
+      { header: 'Motorista', key: 'driver', width: 20 },
+      { header: 'Combustível', key: 'fuel_type', width: 15 },
+      { header: 'Litros', key: 'liters', width: 10 },
+      { header: 'Km Rodado', key: 'km_driven', width: 12 },
+      { header: 'Valor', key: 'cost', width: 12 },
+      { header: 'M³', key: 'cubic_meters', width: 12 }
     ];
 
-    // Style header
-    worksheet.getRow(1).font = { bold: true };
-    worksheet.getRow(1).fill = {
+    // Style header row
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    headerRow.fill = {
       type: 'pattern',
       pattern: 'solid',
       fgColor: { argb: 'FFF97316' }
     };
+    headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+    headerRow.height = 20;
 
     // Add example rows
     worksheet.addRow({
