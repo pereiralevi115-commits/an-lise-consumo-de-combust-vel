@@ -117,7 +117,7 @@ export default function Graficos() {
   const byUnitData = units.map(unit => {
     const unitRecords = filtered.filter(r => r.unit === unit);
     return {
-      name: unit,
+      name: unit.replace('CONCRETAR ', ''),
       liters: unitRecords.reduce((sum, r) => sum + (r.liters || 0), 0),
       km: unitRecords.reduce((sum, r) => sum + (r.km_driven || 0), 0),
       cost: unitRecords.reduce((sum, r) => sum + (r.cost || 0), 0),
