@@ -197,21 +197,60 @@ export default function Upload() {
           <CardTitle className="text-white">Formato do Arquivo</CardTitle>
         </CardHeader>
         <CardContent className="text-slate-300 space-y-3">
-          <p>O arquivo deve conter as seguintes colunas:</p>
-          <ul className="list-disc list-inside space-y-2 text-sm">
-            <li><strong>date</strong> - Data do abastecimento</li>
-            <li><strong>time</strong> - Hora do abastecimento</li>
-            <li><strong>vehicle_plate</strong> - Placa do veículo</li>
-            <li><strong>vehicle_type</strong> - Tipo de veículo (ex: Caminhão, Betoneira)</li>
-            <li><strong>unit</strong> - Usina</li>
-            <li><strong>attendant</strong> - Frentista</li>
-            <li><strong>driver</strong> - Motorista</li>
-            <li><strong>fuel_type</strong> - Tipo de combustível</li>
-            <li><strong>liters</strong> - Quantidade em litros</li>
-            <li><strong>km_driven</strong> - Quilômetros rodados</li>
-            <li><strong>cost</strong> - Valor gasto em reais</li>
-            <li><strong>cubic_meters</strong> - Metros cúbicos (M³)</li>
-          </ul>
+          <p>O arquivo deve conter as seguintes colunas (exatamente com estes nomes):</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mt-4">
+            <div className="flex items-start gap-2">
+              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">date</span>
+              <span className="text-slate-400">Data (ex: 2026-01-14)</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">time</span>
+              <span className="text-slate-400">Hora (ex: 08:30)</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">vehicle_plate</span>
+              <span className="text-slate-400">Placa do veículo</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">vehicle_type</span>
+              <span className="text-slate-400">Tipo de veículo</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">unit</span>
+              <span className="text-slate-400">Usina</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">attendant</span>
+              <span className="text-slate-400">Frentista</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">driver</span>
+              <span className="text-slate-400">Motorista</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">fuel_type</span>
+              <span className="text-slate-400">Tipo de combustível</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">liters</span>
+              <span className="text-slate-400">Quantidade em litros</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">km_driven</span>
+              <span className="text-slate-400">Quilômetros rodados</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">cost</span>
+              <span className="text-slate-400">Valor em reais</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="font-mono bg-slate-900 px-2 py-1 rounded text-orange-400 text-xs">cubic_meters</span>
+              <span className="text-slate-400">Metros cúbicos (M³)</span>
+            </div>
+          </div>
+          <p className="text-xs text-slate-400 mt-4 bg-slate-900 p-3 rounded">
+            💡 <strong>Dica:</strong> Baixe o template Excel acima para ter um arquivo com a estrutura correta e exemplos de dados.
+          </p>
         </CardContent>
       </Card>
     </div>
