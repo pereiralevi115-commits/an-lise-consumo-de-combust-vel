@@ -13,67 +13,67 @@ Deno.serve(async (req) => {
     // Create workbook
     const workbook = new ExcelJS.Workbook();
 
-    // Sheet 1: Dados Mensais
-    const monthlySheet = workbook.addWorksheet('Dados Mensais');
-    monthlySheet.columns = [
-      { header: 'MÊS', key: 'month', width: 15 },
-      { header: 'LITROS', key: 'liters', width: 15 },
-      { header: 'QUILÔMETROS', key: 'kilometers', width: 15 },
-      { header: 'CUSTO', key: 'cost', width: 15 }
+    // Main sheet with all columns
+    const dataSheet = workbook.addWorksheet('Dados de Combustível');
+    dataSheet.columns = [
+      { header: 'MÊS', key: 'month', width: 12 },
+      { header: 'DATA', key: 'date', width: 12 },
+      { header: 'HORA', key: 'time', width: 10 },
+      { header: 'PLACA', key: 'plate', width: 12 },
+      { header: 'TIPO', key: 'type', width: 18 },
+      { header: 'USINA', key: 'plant', width: 15 },
+      { header: 'FRENTISTA', key: 'attendant', width: 18 },
+      { header: 'MOTORISTA', key: 'driver', width: 18 },
+      { header: 'COMBUSTÍVEL', key: 'fuel', width: 14 },
+      { header: 'LITROS', key: 'liters', width: 10 },
+      { header: 'MENOR (KM)', key: 'km_start', width: 12 },
+      { header: 'MAIOR (KM)', key: 'km_end', width: 12 },
+      { header: 'KM RODADO', key: 'km_driven', width: 12 },
+      { header: 'VALOR', key: 'value', width: 12 },
+      { header: 'M³', key: 'm3', width: 10 }
     ];
-    monthlySheet.headerRow = 1;
-    monthlySheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    monthlySheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } };
-    monthlySheet.addRow({ month: 'Setembro', liters: 5000, kilometers: 12000, cost: 15000 });
-    monthlySheet.addRow({ month: 'Outubro', liters: 5200, kilometers: 13000, cost: 16000 });
-
-    // Sheet 2: Usinas
-    const plantsSheet = workbook.addWorksheet('Usinas');
-    plantsSheet.columns = [
-      { header: 'USINA', key: 'plant', width: 20 },
-      { header: 'CUSTO TOTAL', key: 'total_cost', width: 15 }
-    ];
-    plantsSheet.headerRow = 1;
-    plantsSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    plantsSheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF70AD47' } };
-    plantsSheet.addRow({ plant: 'Usina A', total_cost: 25000 });
-    plantsSheet.addRow({ plant: 'Usina B', total_cost: 20000 });
-
-    // Sheet 3: Veículos
-    const vehiclesSheet = workbook.addWorksheet('Veículos');
-    vehiclesSheet.columns = [
-      { header: 'PLACA', key: 'plate', width: 15 },
-      { header: 'QUILÔMETROS', key: 'kilometers', width: 15 }
-    ];
-    vehiclesSheet.headerRow = 1;
-    vehiclesSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    vehiclesSheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC55A11' } };
-    vehiclesSheet.addRow({ plate: 'ABC-1234', kilometers: 15000 });
-    vehiclesSheet.addRow({ plate: 'XYZ-5678', kilometers: 12000 });
-
-    // Sheet 4: Motoristas
-    const driversSheet = workbook.addWorksheet('Motoristas');
-    driversSheet.columns = [
-      { header: 'MOTORISTA', key: 'driver', width: 20 },
-      { header: 'QUILÔMETROS', key: 'kilometers', width: 15 }
-    ];
-    driversSheet.headerRow = 1;
-    driversSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    driversSheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF44546A' } };
-    driversSheet.addRow({ driver: 'João Silva', kilometers: 15000 });
-    driversSheet.addRow({ driver: 'Maria Santos', kilometers: 12000 });
-
-    // Sheet 5: Equipamentos
-    const equipmentSheet = workbook.addWorksheet('Equipamentos');
-    equipmentSheet.columns = [
-      { header: 'TIPO EQUIPAMENTO', key: 'equipment_type', width: 20 },
-      { header: 'PRODUÇÃO (M³)', key: 'production_m3', width: 15 }
-    ];
-    equipmentSheet.headerRow = 1;
-    equipmentSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-    equipmentSheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFA5A5A5' } };
-    equipmentSheet.addRow({ equipment_type: 'Escavadeira', production_m3: 500 });
-    equipmentSheet.addRow({ equipment_type: 'Retroescavadeira', production_m3: 450 });
+    
+    // Style header
+    dataSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    dataSheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } };
+    dataSheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+    
+    // Add example rows
+    dataSheet.addRow({
+      month: 'Setembro',
+      date: '01/09/2025',
+      time: '08:30',
+      plate: 'ABC-1234',
+      type: 'Escavadeira',
+      plant: 'Usina A',
+      attendant: 'Carlos Silva',
+      driver: 'João Santos',
+      fuel: 'Diesel S10',
+      liters: 120,
+      km_start: 10000,
+      km_end: 10150,
+      km_driven: 150,
+      value: 720,
+      m3: 50
+    });
+    
+    dataSheet.addRow({
+      month: 'Setembro',
+      date: '02/09/2025',
+      time: '14:15',
+      plate: 'XYZ-5678',
+      type: 'Retroescavadeira',
+      plant: 'Usina B',
+      attendant: 'Maria Costa',
+      driver: 'Pedro Oliveira',
+      fuel: 'Diesel S10',
+      liters: 95,
+      km_start: 8500,
+      km_end: 8620,
+      km_driven: 120,
+      value: 570,
+      m3: 35
+    });
 
     // Generate buffer
     const buffer = await workbook.xlsx.writeBuffer();
