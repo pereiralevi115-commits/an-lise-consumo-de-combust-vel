@@ -227,20 +227,20 @@ export default function Graficos() {
             <CardTitle className="text-white">Litros Abastecidos - Quilômetros Percorridos - Custos dos Abastecimentos (Mês)</CardTitle>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={400}>
-              <ComposedChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                <XAxis dataKey="name" stroke="#94a3b8" />
-                <YAxis yAxisId="left" stroke="#94a3b8" label={{ value: 'Litros / Km', angle: -90, position: 'insideLeft' }} />
-                <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" label={{ value: 'Custo (R$)', angle: 90, position: 'insideRight' }} />
+            <ResponsiveContainer width="100%" height={350}>
+              <ComposedChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
+                <XAxis dataKey="name" stroke="#64748b" />
+                <YAxis yAxisId="left" stroke="#64748b" />
+                <YAxis yAxisId="right" orientation="right" stroke="#64748b" />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#1e293b', border: 'none' }}
-                  formatter={(value) => value.toLocaleString('pt-BR', {maximumFractionDigits: 2})}
+                  contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #475569' }}
+                  formatter={(value) => value.toLocaleString('pt-BR', {maximumFractionDigits: 1})}
                 />
-                <Legend />
-                <Bar yAxisId="left" dataKey="liters" fill="#fbbf24" name="Litros Abastecidos" />
-                <Bar yAxisId="left" dataKey="km" fill="#9ca3af" name="Quilômetros Percorridos" />
-                <Line yAxisId="right" type="monotone" dataKey="cost" stroke="#3b82f6" name="Custos (R$)" strokeWidth={3} />
+                <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                <Bar yAxisId="left" dataKey="liters" fill="#fbbf24" name="Litros" />
+                <Bar yAxisId="left" dataKey="km" fill="#9ca3af" name="Km" />
+                <Line yAxisId="right" type="monotone" dataKey="cost" stroke="#3b82f6" name="Custo" strokeWidth={2} />
               </ComposedChart>
             </ResponsiveContainer>
           </CardContent>
