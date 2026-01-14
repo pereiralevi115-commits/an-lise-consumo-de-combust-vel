@@ -417,9 +417,7 @@ export default function Graficos() {
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis dataKey="placa" type="category" width={85} stroke="#94a3b8" />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]}>
-                <LabelList dataKey="costPerKm" position="right" content={<CustomLabel />} />
-              </Bar>
+              <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -432,9 +430,7 @@ export default function Graficos() {
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis dataKey="driver" type="category" width={140} stroke="#94a3b8" />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]}>
-                <LabelList dataKey="costPerKm" position="right" content={<CustomLabel />} />
-              </Bar>
+              <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
