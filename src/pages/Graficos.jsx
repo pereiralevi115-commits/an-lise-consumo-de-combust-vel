@@ -381,7 +381,9 @@ export default function Graficos() {
              <XAxis type="number" stroke="#94a3b8" />
              <YAxis type="category" hide={true} />
              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]} />
+              <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]}>
+                <LabelList dataKey="placa" position="insideLeft" fill="white" fontSize={12} fontWeight="600" />
+              </Bar>
               </BarChart>
               </ResponsiveContainer>
               </div>
