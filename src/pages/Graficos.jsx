@@ -431,7 +431,8 @@ export default function Graficos() {
              <XAxis type="number" stroke="#94a3b8" />
              <YAxis type="category" hide={true} />
              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]}>
+             <Legend />
+              <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]} name="km">
                 <LabelList dataKey="placa" position="insideLeft" fill="#1f2937" fontSize={10} fontWeight="600" />
               </Bar>
               </BarChart>
@@ -446,7 +447,8 @@ export default function Graficos() {
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]}>
+              <Legend />
+              <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]} name="km">
                 <LabelList dataKey="driver" position="insideLeft" fill="#1f2937" fontSize={10} fontWeight="600" />
               </Bar>
             </BarChart>
@@ -464,7 +466,8 @@ export default function Graficos() {
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]}>
+              <Legend />
+              <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]} name="Km/Lt">
                 <LabelList dataKey="placa" position="insideLeft" fill="#1f2937" fontSize={10} fontWeight="600" />
               </Bar>
             </BarChart>
@@ -479,7 +482,8 @@ export default function Graficos() {
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]}>
+              <Legend />
+              <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]} name="Km/Lt">
                 <LabelList dataKey="driver" position="insideLeft" fill="#1f2937" fontSize={10} fontWeight="600" />
               </Bar>
             </BarChart>
@@ -497,7 +501,8 @@ export default function Graficos() {
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]}>
+              <Legend />
+              <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]} name="R$/Km">
                 <LabelList dataKey="placa" position="insideLeft" fill="#1f2937" fontSize={10} fontWeight="600" />
               </Bar>
             </BarChart>
@@ -512,7 +517,8 @@ export default function Graficos() {
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]}>
+              <Legend />
+              <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]} name="R$/Km">
                 <LabelList dataKey="driver" position="insideLeft" fill="#1f2937" fontSize={10} fontWeight="600" />
               </Bar>
             </BarChart>
