@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export default function Dados() {
@@ -57,7 +57,7 @@ export default function Dados() {
                     records.map((record) => (
                     <TableRow key={record.id} className="border-slate-700 hover:bg-slate-700/30">
                       <TableCell className="text-white">
-                        {record.date ? format(new Date(record.date), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
+                        {record.date ? format(parseISO(record.date), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
                       </TableCell>
                       <TableCell className="text-white">{record.time}</TableCell>
                       <TableCell className="text-white font-mono">{record.vehicle_plate}</TableCell>
