@@ -565,7 +565,7 @@ export default function Graficos() {
              <YAxis type="category" hide={true} />
              <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]} label={<HorizontalBarLabel />}>
-                <LabelList dataKey="placa" position="insideLeft" fill="#ffffff" fontSize={10} fontWeight="600" />
+                <LabelList dataKey="placa" position="insideLeft" fill="#000000" fontSize={10} fontWeight="600" />
               </Bar>
               </BarChart>
               </ResponsiveContainer>
