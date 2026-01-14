@@ -113,7 +113,6 @@ export default function Dados() {
                   <TableHead className="text-slate-300">Placa</TableHead>
                   <TableHead className="text-slate-300">Tipo</TableHead>
                   <TableHead className="text-slate-300">Usina</TableHead>
-                  <TableHead className="text-slate-300">Frentista</TableHead>
                   <TableHead className="text-slate-300">Motorista</TableHead>
                   <TableHead className="text-slate-300">Combustível</TableHead>
                   <TableHead className="text-slate-300 text-right">Litros</TableHead>
@@ -139,7 +138,6 @@ export default function Dados() {
                       <TableCell className="text-white font-mono">{record.vehicle_plate}</TableCell>
                       <TableCell className="text-slate-300">{record.vehicle_type}</TableCell>
                       <TableCell className="text-slate-300">{record.unit}</TableCell>
-                      <TableCell className="text-slate-300">{record.attendant}</TableCell>
                       <TableCell className="text-slate-300">{record.driver}</TableCell>
                       <TableCell className="text-slate-300">{record.fuel_type}</TableCell>
                       <TableCell className="text-white text-right">{record.liters?.toFixed(1)}</TableCell>
