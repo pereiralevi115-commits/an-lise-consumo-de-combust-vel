@@ -445,9 +445,7 @@ export default function Graficos() {
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="m3" fill={YELLOW} radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="m3" position="top" content={<CustomLabel />} />
-            </Bar>
+            <Bar dataKey="m3" fill={YELLOW} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
