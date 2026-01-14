@@ -385,8 +385,7 @@ export default function Graficos() {
             <YAxis stroke="#94a3b8" hide={true} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="kmPerLiter" position="center" formatter={(value) => typeof value === 'number' ? value.toFixed(2) : value} fill="#1f2937" fontSize={11} fontWeight="600" />
-              <LabelList dataKey="kmPerLiter" position="center" formatter={() => 'Km/Lt'} fill="#1f2937" fontSize={9} offset={20} />
+              <LabelList dataKey="kmPerLiter" position="center" formatter={(value) => typeof value === 'number' ? value.toFixed(2) + '\nKm/Lt' : value} fill="#1f2937" fontSize={10} fontWeight="600" />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
