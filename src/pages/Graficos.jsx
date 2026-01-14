@@ -23,6 +23,13 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
+const getFirstAndLastName = (fullName) => {
+  if (!fullName) return '';
+  const parts = fullName.trim().split(' ');
+  if (parts.length === 1) return fullName;
+  return `${parts[0]} ${parts[parts.length - 1]}`;
+};
+
 const CustomLabel = (props) => {
   const { x, y, width, height, value, position } = props;
   if (!value) return null;
@@ -219,7 +226,7 @@ export default function Graficos() {
   });
   const driverKmArray = Object.entries(byDriverData)
     .map(([driver, data]) => ({
-      driver,
+      driver: getFirstAndLastName(driver),
       km: data.km,
       kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
       costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0
@@ -230,7 +237,7 @@ export default function Graficos() {
 
   const driverKmLiterArray = Object.entries(byDriverData)
     .map(([driver, data]) => ({
-      driver,
+      driver: getFirstAndLastName(driver),
       kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
     }))
     .filter(d => d.kmPerLiter > 0)
@@ -239,7 +246,7 @@ export default function Graficos() {
 
   const driverCostArray = Object.entries(byDriverData)
     .map(([driver, data]) => ({
-      driver,
+      driver: getFirstAndLastName(driver),
       costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0,
     }))
     .filter(d => d.costPerKm > 0)
