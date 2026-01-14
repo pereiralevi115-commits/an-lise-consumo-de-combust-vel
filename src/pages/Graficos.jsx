@@ -150,14 +150,13 @@ export default function Graficos() {
     byUnitAndEquipmentData[key].km += r.km_driven || 0;
     byUnitAndEquipmentData[key].cost += r.cost || 0;
   });
-  const unitEquipmentArray = Object.values(byUnitAndEquipmentData)
-    .map(d => ({
-      ...d,
-      kmPerLiter: d.liters > 0 ? (d.km / d.liters).toFixed(2) : 0
+  const unitEquipmentArray = Object.entries(byEquipmentData)
+    .map(([type, data]) => ({
+      name: type,
+      kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0
     }))
-    .filter(d => d.km > 0)
-    .sort((a, b) => a.kmPerLiter - b.kmPerLiter)
-    .slice(0, 7);
+    .filter(d => d.kmPerLiter > 0)
+    .sort((a, b) => a.kmPerLiter - b.kmPerLiter);
 
   const equipmentArray = Object.entries(byEquipmentData)
     .map(([type, data]) => ({
