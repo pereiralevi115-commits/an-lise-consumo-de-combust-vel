@@ -355,17 +355,17 @@ export default function Graficos() {
         </ResponsiveContainer>
       </div>
 
-      {/* Chart 3: Km/L by Unit and Equipment */}
+      {/* Chart 3: Km/L by Equipment Type */}
       <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
-        <h3 className="text-white font-bold mb-6 text-center">MÉDIAS POR USINA E TIPO DE EQUIPAMENTO (KM/LT)</h3>
-        <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={unitEquipmentArray} margin={{ top: 50, right: 50, left: 70, bottom: 120 }}>
+        <h3 className="text-white font-bold mb-6 text-center">MÉDIAS POR TIPO DE EQUIPAMENTO (KM/LT)</h3>
+        <ResponsiveContainer width="100%" height={500}>
+          <BarChart data={unitEquipmentArray} margin={{ top: 50, right: 50, left: 70, bottom: 150 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
-            <XAxis dataKey="name" angle={-45} textAnchor="end" height={180} stroke="#94a3b8" />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={200} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="kmPerLiter" position="top" formatter={(value) => typeof value === 'number' ? value.toFixed(2) + ' Km/Lt' : value} />
+              <LabelList dataKey="kmPerLiter" position="top" formatter={(value) => typeof value === 'number' ? value.toFixed(2) : value} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
