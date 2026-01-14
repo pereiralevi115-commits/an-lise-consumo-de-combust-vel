@@ -354,9 +354,9 @@ export default function Graficos() {
             </div>
 
             {/* Chart 2: By Unit - Litros, Km, Custos */}
-            <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
-            <h3 className="text-white font-bold mb-6 text-center">LITROS ABASTECIDOS - QUILOMETROS PERCORRIDOS - CUSTOS DOS ABASTECIMENTOS (USINAS)</h3>
-            <ResponsiveContainer width="100%" height={450}>
+            <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6">
+              <h3 className="text-white font-bold mb-6 text-center">LITROS ABASTECIDOS - QUILOMETROS PERCORRIDOS - CUSTOS DOS ABASTECIMENTOS (USINAS)</h3>
+              <ResponsiveContainer width="100%" height={350}>
             <BarChart data={byUnitData} margin={{ top: 30, right: 30, left: 30, bottom: 20 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" label={false} />
@@ -376,9 +376,9 @@ export default function Graficos() {
       </div>
 
       {/* Chart 3: Km/L by Equipment Type */}
-      <div className="bg-slate-800 p-8 rounded-xl border border-slate-700 mt-8">
-        <h3 className="text-white font-bold mb-8 text-center">MÉDIAS POR TIPO DE EQUIPAMENTO (KM/LT)</h3>
-        <ResponsiveContainer width="100%" height={600}>
+      <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6 mt-8">
+        <h3 className="text-white font-bold mb-6 text-center">MÉDIAS POR TIPO DE EQUIPAMENTO (KM/LT)</h3>
+        <ResponsiveContainer width="100%" height={350}>
           <BarChart data={unitEquipmentArray} margin={{ top: 30, right: 30, left: 30, bottom: 150 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={200} stroke="#94a3b8" />
@@ -491,7 +491,7 @@ export default function Graficos() {
       </div>
 
       {/* Chart 10: Production by Equipment */}
-      <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+      <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6">
         <h3 className="text-white font-bold mb-6 text-center">PRODUÇÃO POR TIPO DE EQUIPAMENTO (M³)</h3>
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={equipmentArray} margin={{ top: 30, right: 50, left: 70, bottom: 100 }}>
@@ -507,7 +507,7 @@ export default function Graficos() {
       </div>
 
       {/* Chart 11: Equipment Averages */}
-      <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+      <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6">
         <h3 className="text-white font-bold mb-6 text-center">MÉDIAS POR EQUIPAMENTO (LT/M³ - R$/M³)</h3>
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={equipmentArray} margin={{ top: 30, right: 30, left: 70, bottom: 100 }}>
