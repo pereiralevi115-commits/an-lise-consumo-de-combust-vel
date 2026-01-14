@@ -77,12 +77,14 @@ Deno.serve(async (req) => {
 
     // Generate buffer
     const buffer = await workbook.xlsx.writeBuffer();
+    const uint8Array = new Uint8Array(buffer);
     
-    return new Response(buffer, {
+    return new Response(uint8Array, {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': 'attachment; filename=template_relatorio_diesel.xlsx'
+        'Content-Disposition': 'attachment; filename="template_relatorio_diesel.xlsx"',
+        'Content-Length': uint8Array.length.toString()
       }
     });
   } catch (error) {
