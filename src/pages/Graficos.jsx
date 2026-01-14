@@ -382,7 +382,7 @@ export default function Graficos() {
              <YAxis type="category" hide={true} />
              <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]}>
-                <LabelList dataKey="placa" position="insideLeft" fill="white" fontSize={12} fontWeight="600" />
+                <LabelList dataKey="placa" position="insideLeft" fill="white" fontSize={10} fontWeight="600" />
               </Bar>
               </BarChart>
               </ResponsiveContainer>
@@ -397,7 +397,7 @@ export default function Graficos() {
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]}>
-                <LabelList dataKey="driver" position="insideLeft" fill="white" fontSize={12} fontWeight="600" />
+                <LabelList dataKey="driver" position="insideLeft" fill="white" fontSize={10} fontWeight="600" />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -415,7 +415,7 @@ export default function Graficos() {
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]}>
-                <LabelList dataKey="placa" position="insideLeft" fill="white" fontSize={12} fontWeight="600" />
+                <LabelList dataKey="placa" position="insideLeft" fill="white" fontSize={10} fontWeight="600" />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -430,7 +430,7 @@ export default function Graficos() {
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]}>
-                <LabelList dataKey="driver" position="insideLeft" fill="white" fontSize={12} fontWeight="600" />
+                <LabelList dataKey="driver" position="insideLeft" fill="white" fontSize={10} fontWeight="600" />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -448,7 +448,7 @@ export default function Graficos() {
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]}>
-                <LabelList dataKey="placa" position="insideLeft" fill="white" fontSize={12} fontWeight="600" />
+                <LabelList dataKey="placa" position="insideLeft" fill="white" fontSize={10} fontWeight="600" />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -463,7 +463,7 @@ export default function Graficos() {
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]}>
-                <LabelList dataKey="driver" position="insideLeft" fill="white" fontSize={12} fontWeight="600" />
+                <LabelList dataKey="driver" position="insideLeft" fill="white" fontSize={10} fontWeight="600" />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
