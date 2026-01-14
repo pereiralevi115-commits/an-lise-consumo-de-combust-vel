@@ -448,15 +448,9 @@ export default function Graficos() {
             <XAxis dataKey="name" stroke="#94a3b8" label={false} />
             <YAxis stroke="#94a3b8" hide={true} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="liters" fill={YELLOW} name="Litros" radius={[4, 4, 0, 0]}>
-             <LabelList dataKey="liters" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nL' : value} fontSize={8} fill="#ffffff" />
-            </Bar>
-            <Bar dataKey="km" fill={BLUE} name="Km" radius={[4, 4, 0, 0]}>
-             <LabelList dataKey="km" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nKm' : value} fontSize={8} fill="#ffffff" />
-            </Bar>
-            <Bar dataKey="cost" fill={GRAY} name="Custo (R$)" radius={[4, 4, 0, 0]}>
-             <LabelList dataKey="cost" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nR$' : value} fontSize={8} fill="#ffffff" />
-            </Bar>
+            <Bar dataKey="liters" fill={YELLOW} name="Litros" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="km" fill={BLUE} name="Km" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="cost" fill={GRAY} name="Custo (R$)" radius={[4, 4, 0, 0]} />
             </BarChart>
             </ResponsiveContainer>
             </div>
@@ -470,18 +464,12 @@ export default function Graficos() {
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" label={false} />
             <YAxis stroke="#94a3b8" label={false} hide={true} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="liters" fill={YELLOW} name="Litros" radius={[4, 4, 0, 0]}>
-             <LabelList dataKey="liters" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nL' : value} fontSize={8} fill="#ffffff" />
-            </Bar>
-            <Bar dataKey="km" fill={BLUE} name="Km" radius={[4, 4, 0, 0]}>
-             <LabelList dataKey="km" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nKm' : value} fontSize={8} fill="#ffffff" />
-            </Bar>
-            <Bar dataKey="cost" fill={GRAY} name="Custo (R$)" radius={[4, 4, 0, 0]}>
-             <LabelList dataKey="cost" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nR$' : value} fontSize={8} fill="#ffffff" />
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+            <Bar dataKey="liters" fill={YELLOW} name="Litros" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="km" fill={BLUE} name="Km" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="cost" fill={GRAY} name="Custo (R$)" radius={[4, 4, 0, 0]} />
+            </BarChart>
+            </ResponsiveContainer>
+            </div>
 
       {/* Chart 3: Km/L by Equipment Type */}
       <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6 mt-8">
