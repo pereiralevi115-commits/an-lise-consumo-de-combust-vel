@@ -363,13 +363,13 @@ export default function Graficos() {
             <YAxis stroke="#94a3b8" label={false} hide={true} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="liters" fill={YELLOW} name="Litros" radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="liters" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + ' L' : value} fontSize={9} />
+              <LabelList dataKey="liters" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nL' : value} fontSize={8} />
             </Bar>
             <Bar dataKey="km" fill={BLUE} name="Km" radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="km" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + ' Km' : value} fontSize={9} />
+              <LabelList dataKey="km" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nKm' : value} fontSize={8} />
             </Bar>
             <Bar dataKey="cost" fill={GRAY} name="Custo (R$)" radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="cost" position="top" formatter={(value) => typeof value === 'number' ? 'R$ ' + value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) : value} fontSize={9} />
+              <LabelList dataKey="cost" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nR$' : value} fontSize={8} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
