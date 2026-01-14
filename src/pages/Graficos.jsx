@@ -646,8 +646,8 @@ export default function Graficos() {
                 <YAxis type="category" hide={true} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]} label={<CostPerKmLabel />}>
-                 <LabelList dataKey="driver" position="insideLeft" fill="#ffffff" fontSize={10} fontWeight="600" />
-               </Bar>
+                 <LabelList dataKey="driver" position="insideLeft" fill="#000000" fontSize={10} fontWeight="600" />
+                </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
