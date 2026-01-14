@@ -492,7 +492,9 @@ export default function Graficos() {
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={200} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" hide={true} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[4, 4, 0, 0]} label={<CustomBarLabel />} />
+            <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[4, 4, 0, 0]} label={<CustomBarLabel />} >
+              <LabelList fill="#ffffff" />
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -605,7 +607,9 @@ export default function Graficos() {
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" hide={true} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="m3" fill={YELLOW} radius={[4, 4, 0, 0]} label={<InsideBarLabel />} />
+            <Bar dataKey="m3" fill={YELLOW} radius={[4, 4, 0, 0]} label={<InsideBarLabel />}>
+              <LabelList fill="#ffffff" />
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -619,8 +623,12 @@ export default function Graficos() {
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" hide={true} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="litersPerM3" fill={YELLOW} name="LT/M³" radius={[4, 4, 0, 0]} label={<LitersPerM3Label />} />
-            <Bar dataKey="costPerM3" fill={GRAY} name="R$/M³" radius={[4, 4, 0, 0]} label={<CostPerM3Label />} />
+            <Bar dataKey="litersPerM3" fill={YELLOW} name="LT/M³" radius={[4, 4, 0, 0]} label={<LitersPerM3Label />}>
+              <LabelList fill="#ffffff" />
+            </Bar>
+            <Bar dataKey="costPerM3" fill={GRAY} name="R$/M³" radius={[4, 4, 0, 0]} label={<CostPerM3Label />}>
+              <LabelList fill="#ffffff" />
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
