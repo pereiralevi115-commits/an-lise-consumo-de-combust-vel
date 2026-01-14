@@ -138,6 +138,26 @@ export default function Graficos() {
     byEquipmentData[r.vehicle_type].cost += r.cost || 0;
     byEquipmentData[r.vehicle_type].m3 += r.cubic_meters || 0;
   });
+
+  // By unit and equipment type
+  const byUnitAndEquipmentData = {};
+  filtered.forEach(r => {
+    const key = `${r.unit.replace('CONCRETAR ', '')} - ${r.vehicle_type}`;
+    if (!byUnitAndEquipmentData[key]) {
+      byUnitAndEquipmentData[key] = { name: key, liters: 0, km: 0, cost: 0 };
+    }
+    byUnitAndEquipmentData[key].liters += r.liters || 0;
+    byUnitAndEquipmentData[key].km += r.km_driven || 0;
+    byUnitAndEquipmentData[key].cost += r.cost || 0;
+  });
+  const unitEquipmentArray = Object.values(byUnitAndEquipmentData)
+    .map(d => ({
+      ...d,
+      kmPerLiter: d.liters > 0 ? (d.km / d.liters).toFixed(2) : 0
+    }))
+    .filter(d => d.km > 0)
+    .sort((a, b) => a.kmPerLiter - b.kmPerLiter);
+
   const equipmentArray = Object.entries(byEquipmentData)
     .map(([type, data]) => ({
       name: type,
