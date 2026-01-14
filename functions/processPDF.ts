@@ -20,22 +20,27 @@ Deno.serve(async (req) => {
 
     // Define schema for extraction
     const schema = {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          date: { type: "string" },
-          time: { type: "string" },
-          vehicle_plate: { type: "string" },
-          vehicle_type: { type: "string" },
-          unit: { type: "string" },
-          attendant: { type: "string" },
-          driver: { type: "string" },
-          fuel_type: { type: "string" },
-          liters: { type: "number" },
-          km_driven: { type: "number" },
-          cost: { type: "number" },
-          cubic_meters: { type: "number" }
+      type: "object",
+      properties: {
+        records: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              date: { type: "string" },
+              time: { type: "string" },
+              vehicle_plate: { type: "string" },
+              vehicle_type: { type: "string" },
+              unit: { type: "string" },
+              attendant: { type: "string" },
+              driver: { type: "string" },
+              fuel_type: { type: "string" },
+              liters: { type: "number" },
+              km_driven: { type: "number" },
+              cost: { type: "number" },
+              cubic_meters: { type: "number" }
+            }
+          }
         }
       }
     };
@@ -53,7 +58,7 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    const records = extractionResult.output;
+    const records = extractionResult.output.records || extractionResult.output;
     console.log(`${records.length} registros extraídos`);
 
     // Save records
