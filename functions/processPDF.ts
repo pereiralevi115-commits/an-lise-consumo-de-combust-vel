@@ -53,19 +53,14 @@ Deno.serve(async (req) => {
     const records = extractionResult.output;
     console.log(`${records.length} registros extraídos`);
 
-    // Save records
-    const savedRecords = [];
-    for (const record of records) {
-      const saved = await base44.asServiceRole.entities.FuelRecord.create(record);
-      savedRecords.push(saved);
-    }
+    // Save all records in bulk (much faster)
+    const savedRecords = await base44.asServiceRole.entities.FuelRecord.bulkCreate(records);
 
     console.log(`${savedRecords.length} registros salvos`);
 
     return Response.json({ 
       success: true,
-      count: savedRecords.length,
-      records: savedRecords
+      count: savedRecords.length
     });
 
   } catch (error) {
