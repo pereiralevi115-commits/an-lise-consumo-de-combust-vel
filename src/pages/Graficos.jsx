@@ -253,7 +253,7 @@ export default function Graficos() {
       <text
         x={x + width / 2}
         y={y - 8}
-        fill="#1f2937"
+        fill="#ffffff"
         textAnchor="middle"
         dominantBaseline="middle"
         fontSize="11"
@@ -272,7 +272,7 @@ export default function Graficos() {
       <text
         x={x + width / 2}
         y={y - 8}
-        fill="#1f2937"
+        fill="#ffffff"
         textAnchor="middle"
         dominantBaseline="middle"
         fontSize="11"
