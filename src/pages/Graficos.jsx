@@ -506,8 +506,8 @@ export default function Graficos() {
 
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
           <h3 className="text-white font-bold mb-6 text-center">R$/KM POR MOTORISTA</h3>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={driverCostArray} layout="vertical" margin={{ top: 10, right: 30, left: 30, bottom: 10 }}>
+          <ResponsiveContainer width="100%" height={500}>
+            <BarChart data={driverCostArray} layout="vertical" margin={{ top: 10, right: 30, left: 100, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis type="category" hide={true} />
