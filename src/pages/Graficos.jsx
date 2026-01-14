@@ -332,7 +332,7 @@ export default function Graficos() {
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={byUnitData} margin={{ top: 30, right: 30, left: 70, bottom: 200 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
-            <XAxis dataKey="name" angle={-90} textAnchor="end" height={200} stroke="#94a3b8" />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="liters" fill={YELLOW} name="Litros" radius={[4, 4, 0, 0]}>
