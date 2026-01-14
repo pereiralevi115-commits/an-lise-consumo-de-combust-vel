@@ -61,11 +61,12 @@ export default function Upload() {
     setResult(null);
 
     try {
-      // Call backend function with file directly
-      const response = await base44.functions.invoke('processExcel', {
-        fileContent: file,
-        fileName: file.name
-      });
+      // Create FormData
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // Call backend function with FormData
+      const response = await base44.functions.invoke('processExcel', formData);
 
       setResult({
         success: true,
