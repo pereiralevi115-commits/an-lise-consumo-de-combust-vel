@@ -344,9 +344,7 @@ export default function Graficos() {
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="kmPerLiter" position="top" content={<CustomLabel />} />
-            </Bar>
+            <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
