@@ -1,12 +1,12 @@
-import Graficos from './pages/Graficos';
 import Dados from './pages/Dados';
+import Graficos from './pages/Graficos';
 import Upload from './pages/Upload';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
-    "Graficos": Graficos,
     "Dados": Dados,
+    "Graficos": Graficos,
     "Upload": Upload,
 }
 

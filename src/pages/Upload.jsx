@@ -155,6 +155,14 @@ export default function Upload() {
           <p className="text-slate-300 text-sm">
             Clique no botão acima para processar e importar os dados do PDF MEDIAS2025.pdf
           </p>
+          {isProcessingPDF && (
+            <div className="mt-4 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
+              <p className="text-blue-300 text-sm flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Processando PDF... Isso pode levar alguns minutos. Aguarde.
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
