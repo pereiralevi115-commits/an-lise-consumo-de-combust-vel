@@ -9,8 +9,37 @@ import { useQueryClient } from '@tanstack/react-query';
 export default function Upload() {
   const [isUploading, setIsUploading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isProcessingPDF, setIsProcessingPDF] = useState(false);
   const [result, setResult] = useState(null);
   const queryClient = useQueryClient();
+
+  const handleProcessPDF = async () => {
+    setIsProcessingPDF(true);
+    setResult(null);
+    
+    try {
+      const response = await base44.functions.invoke('processPDF', {
+        fileUrl: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6966b9672e97c4d0d7e2664a/7399d1770_MEDIAS2025.pdf'
+      });
+
+      setResult({
+        success: true,
+        message: `${response.data.count} registros importados do PDF com sucesso!`,
+        count: response.data.count
+      });
+
+      // Refresh data
+      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+    } catch (error) {
+      console.error('Erro ao processar PDF:', error);
+      setResult({
+        success: false,
+        message: error.response?.data?.error || error.message || 'Erro ao processar PDF'
+      });
+    } finally {
+      setIsProcessingPDF(false);
+    }
+  };
 
   const handleDownloadTemplate = async () => {
     setIsDownloading(true);
@@ -94,6 +123,40 @@ export default function Upload() {
         <h1 className="text-3xl font-bold text-white mb-2">Upload de Dados</h1>
         <p className="text-slate-400">Carregue arquivos CSV com os dados de combustível</p>
       </div>
+
+      {/* Processar PDF Anexado */}
+      <Card className="bg-gradient-to-r from-orange-900/20 to-orange-800/20 border-orange-600">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <FileSpreadsheet className="w-5 h-5 text-orange-500" />
+              Processar PDF Anexado
+            </span>
+            <Button
+              onClick={handleProcessPDF}
+              disabled={isProcessingPDF}
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+            >
+              {isProcessingPDF ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Processando...
+                </>
+              ) : (
+                <>
+                  <UploadIcon className="w-4 h-4 mr-2" />
+                  Importar Dados do PDF
+                </>
+              )}
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-slate-300 text-sm">
+            Clique no botão acima para processar e importar os dados do PDF MEDIAS2025.pdf
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Download Template */}
       <Card className="bg-slate-800 border-slate-700">
