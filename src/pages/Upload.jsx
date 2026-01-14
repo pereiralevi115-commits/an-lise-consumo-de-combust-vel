@@ -13,13 +13,29 @@ export default function Upload() {
   const [result, setResult] = useState(null);
   const queryClient = useQueryClient();
 
-  const handleProcessPDF = async () => {
+  const handlePDFUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const fileName = file.name.toLowerCase();
+    if (!fileName.endsWith('.pdf')) {
+      setResult({
+        success: false,
+        message: 'Tipo de arquivo inválido. Use apenas arquivos PDF'
+      });
+      return;
+    }
+
     setIsProcessingPDF(true);
     setResult(null);
     
     try {
+      // Upload PDF
+      const uploadResult = await base44.integrations.Core.UploadFile({ file });
+      
+      // Process PDF
       const response = await base44.functions.invoke('processPDF', {
-        fileUrl: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6966b9672e97c4d0d7e2664a/7399d1770_MEDIAS2025.pdf'
+        fileUrl: uploadResult.file_url
       });
 
       setResult({
@@ -28,8 +44,8 @@ export default function Upload() {
         count: response.data.count
       });
 
-      // Refresh data
       queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+      event.target.value = '';
     } catch (error) {
       console.error('Erro ao processar PDF:', error);
       setResult({
@@ -124,45 +140,41 @@ export default function Upload() {
         <p className="text-slate-400">Carregue arquivos CSV com os dados de combustível</p>
       </div>
 
-      {/* Processar PDF Anexado */}
+      {/* Upload PDF */}
       <Card className="bg-gradient-to-r from-orange-900/20 to-orange-800/20 border-orange-600">
         <CardHeader>
-          <CardTitle className="text-white flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <FileSpreadsheet className="w-5 h-5 text-orange-500" />
-              Processar PDF Anexado
-            </span>
-            <Button
-              onClick={handleProcessPDF}
-              disabled={isProcessingPDF}
-              className="bg-orange-600 hover:bg-orange-700 text-white"
-            >
-              {isProcessingPDF ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Processando...
-                </>
-              ) : (
-                <>
-                  <UploadIcon className="w-4 h-4 mr-2" />
-                  Importar Dados do PDF
-                </>
-              )}
-            </Button>
+          <CardTitle className="text-white flex items-center gap-2">
+            <FileSpreadsheet className="w-5 h-5 text-orange-500" />
+            Importar PDF
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-slate-300 text-sm">
-            Clique no botão acima para processar e importar os dados do PDF MEDIAS2025.pdf
-          </p>
-          {isProcessingPDF && (
-            <div className="mt-4 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
-              <p className="text-blue-300 text-sm flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Processando PDF... Isso pode levar alguns minutos. Aguarde.
-              </p>
+          <label className="block">
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={handlePDFUpload}
+              disabled={isProcessingPDF}
+              className="hidden"
+            />
+            <div className="border-2 border-dashed border-orange-600 rounded-lg p-12 cursor-pointer hover:border-orange-500 hover:bg-orange-900/10 transition text-center">
+              {isProcessingPDF ? (
+                <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="w-12 h-12 text-orange-500 animate-spin" />
+                  <p className="text-white font-medium">Processando PDF...</p>
+                  <p className="text-slate-400 text-sm">Isso pode levar alguns minutos</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3">
+                  <UploadIcon className="w-12 h-12 text-orange-400" />
+                  <div>
+                    <p className="text-white font-medium mb-1">Clique para selecionar um PDF</p>
+                    <p className="text-slate-400 text-sm">Apenas arquivos PDF com dados de combustível</p>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </label>
         </CardContent>
       </Card>
 
