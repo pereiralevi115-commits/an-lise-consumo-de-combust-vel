@@ -8,6 +8,13 @@ import { TrendingUp, Fuel, DollarSign, Gauge } from 'lucide-react';
 
 export default function Graficos() {
   const [selectedUnit, setSelectedUnit] = useState('all');
+  const [filters, setFilters] = useState({
+    month: '',
+    equipment: '',
+    unit: '',
+    plate: '',
+    driver: ''
+  });
 
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['fuelRecords'],
@@ -17,11 +24,21 @@ export default function Graficos() {
   // Filter records
   const filteredRecords = records.filter(r => {
     if (selectedUnit !== 'all' && r.unit !== selectedUnit) return false;
+    if (filters.month && new Date(r.date).getMonth() !== parseInt(filters.month)) return false;
+    if (filters.equipment && r.vehicle_type !== filters.equipment) return false;
+    if (filters.unit && r.unit !== filters.unit) return false;
+    if (filters.plate && r.vehicle_plate !== filters.plate) return false;
+    if (filters.driver && r.driver !== filters.driver) return false;
     return true;
   });
 
-  // Get unique units
-  const units = [...new Set(records.map(r => r.unit))].filter(Boolean);
+  // Get unique units and other filters
+  const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
+  const months = [...new Set(records.map(r => r.date ? new Date(r.date).getMonth() : null))].filter(m => m !== null).sort();
+  const equipment = [...new Set(records.map(r => r.vehicle_type))].filter(Boolean).sort();
+  const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
+  const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort();
+  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
   // Calculate metrics
   const totalLiters = filteredRecords.reduce((sum, r) => sum + (r.liters || 0), 0);
@@ -77,20 +94,54 @@ export default function Graficos() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">Análise de Desempenho</h1>
-        
-        <div className="flex gap-3">
-          <Select value={selectedUnit} onValueChange={setSelectedUnit}>
-            <SelectTrigger className="w-48 bg-slate-800 text-white border-slate-700">
-              <SelectValue placeholder="Unidade" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas unidades</SelectItem>
-              {units.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
+      <h1 className="text-3xl font-bold text-white mb-6">Análise de Desempenho</h1>
+
+      {/* Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        <select 
+          value={filters.month} 
+          onChange={(e) => setFilters({...filters, month: e.target.value})}
+          className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+        >
+          <option value="">Todos meses</option>
+          {months.map(m => <option key={m} value={m}>{monthNames[m]}</option>)}
+        </select>
+
+        <select 
+          value={filters.equipment} 
+          onChange={(e) => setFilters({...filters, equipment: e.target.value})}
+          className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+        >
+          <option value="">Todos equipamentos</option>
+          {equipment.map(e => <option key={e} value={e}>{e}</option>)}
+        </select>
+
+        <select 
+          value={filters.unit} 
+          onChange={(e) => setFilters({...filters, unit: e.target.value})}
+          className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+        >
+          <option value="">Todas usinas</option>
+          {units.map(u => <option key={u} value={u}>{u}</option>)}
+        </select>
+
+        <select 
+          value={filters.plate} 
+          onChange={(e) => setFilters({...filters, plate: e.target.value})}
+          className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+        >
+          <option value="">Todas placas</option>
+          {plates.map(p => <option key={p} value={p}>{p}</option>)}
+        </select>
+
+        <select 
+          value={filters.driver} 
+          onChange={(e) => setFilters({...filters, driver: e.target.value})}
+          className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+        >
+          <option value="">Todos motoristas</option>
+          {drivers.map(d => <option key={d} value={d}>{d}</option>)}
+        </select>
       </div>
 
       {/* Metrics Cards */}
