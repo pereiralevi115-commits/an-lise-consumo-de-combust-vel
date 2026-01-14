@@ -302,6 +302,25 @@ export default function Graficos() {
     );
   };
 
+  const VehicleKmLiterLabel = (props) => {
+    const { x, y, width, height, value } = props;
+    if (!value) return null;
+
+    return (
+      <text
+        x={x + width + 8}
+        y={y + height / 2}
+        fill="#ffffff"
+        textAnchor="start"
+        dominantBaseline="middle"
+        fontSize="11"
+        fontWeight="600"
+      >
+        {typeof value === 'number' ? value.toFixed(2) : value} Km/Lt
+      </text>
+    );
+  };
+
   // By vehicle
   const byVehicleData = {};
   filtered.forEach(r => {
