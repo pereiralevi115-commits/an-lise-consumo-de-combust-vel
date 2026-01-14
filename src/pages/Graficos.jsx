@@ -330,9 +330,9 @@ export default function Graficos() {
       <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
         <h3 className="text-white font-bold mb-6 text-center">LITROS ABASTECIDOS - QUILOMETROS PERCORRIDOS - CUSTOS DOS ABASTECIMENTOS (USINAS)</h3>
         <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={byUnitData} margin={{ top: 30, right: 30, left: 70, bottom: 100 }}>
+          <BarChart data={byUnitData} margin={{ top: 30, right: 30, left: 70, bottom: 200 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
-            <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
+            <XAxis dataKey="name" angle={-90} textAnchor="end" height={200} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="liters" fill={YELLOW} name="Litros" radius={[4, 4, 0, 0]}>
