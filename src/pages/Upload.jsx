@@ -3,11 +3,14 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Upload as UploadIcon, FileSpreadsheet, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Upload as UploadIcon, FileSpreadsheet, CheckCircle2, AlertCircle, Loader2, FileText } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function Upload() {
   const [isProcessingPDF, setIsProcessingPDF] = useState(false);
+  const [isProcessingBatch, setIsProcessingBatch] = useState(false);
+  const [batchData, setBatchData] = useState('');
   const [result, setResult] = useState(null);
   const queryClient = useQueryClient();
 
@@ -52,6 +55,43 @@ export default function Upload() {
       });
     } finally {
       setIsProcessingPDF(false);
+    }
+  };
+
+  const handleBatchImport = async () => {
+    if (!batchData.trim()) {
+      setResult({
+        success: false,
+        message: 'Cole os dados do PDF no campo acima'
+      });
+      return;
+    }
+
+    setIsProcessingBatch(true);
+    setResult(null);
+
+    try {
+      const response = await base44.functions.invoke('importPDFBatch', {
+        textData: batchData,
+        pageInfo: 'Dados colados manualmente'
+      });
+
+      setResult({
+        success: true,
+        message: `${response.data.count} registros importados com sucesso!`,
+        count: response.data.count
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+      setBatchData('');
+    } catch (error) {
+      console.error('Erro ao importar lote:', error);
+      setResult({
+        success: false,
+        message: error.response?.data?.error || error.message || 'Erro ao processar dados'
+      });
+    } finally {
+      setIsProcessingBatch(false);
     }
   };
 
@@ -114,8 +154,54 @@ export default function Upload() {
               </div>
             </Alert>
           )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+          </CardContent>
+          </Card>
+
+          {/* Importar dados em texto (para PDFs grandes) */}
+          <Card className="bg-gradient-to-r from-blue-900/20 to-blue-800/20 border-blue-600">
+          <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <FileText className="w-5 h-5 text-blue-500" />
+            Importar Dados em Lote (PDFs Grandes)
+          </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+          <p className="text-slate-300 text-sm">
+            Para PDFs grandes, copie e cole os dados extraídos diretamente abaixo:
+          </p>
+
+          <Textarea
+            value={batchData}
+            onChange={(e) => setBatchData(e.target.value)}
+            placeholder="Cole aqui os dados do PDF (formato: DATA HORA PLACA TIPO USINA FRENTISTA MOTORISTA COMBUSTÍVEL LITROS KM VALOR M³)"
+            className="min-h-[300px] font-mono text-sm bg-slate-900/50 text-white border-blue-700"
+            disabled={isProcessingBatch}
+          />
+
+          <Button
+            onClick={handleBatchImport}
+            disabled={isProcessingBatch || !batchData.trim()}
+            className="w-full bg-blue-600 hover:bg-blue-700"
+          >
+            {isProcessingBatch ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Processando...
+              </>
+            ) : (
+              <>
+                <FileText className="w-4 h-4 mr-2" />
+                Importar Dados em Lote
+              </>
+            )}
+          </Button>
+
+          <div className="text-xs text-slate-400 bg-slate-900/30 p-3 rounded">
+            <strong>Dica:</strong> Abra o PDF, selecione e copie os dados da tabela, depois cole aqui. 
+            Cada linha deve conter: data, hora, placa, tipo, usina, frentista, motorista, combustível, litros, km, valor e m³.
+          </div>
+          </CardContent>
+          </Card>
+          </div>
+          );
+          }
