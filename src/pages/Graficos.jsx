@@ -500,7 +500,7 @@ export default function Graficos() {
       <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6">
         <h3 className="text-white font-bold mb-6 text-center">LITROS ABASTECIDOS - QUILOMETROS PERCORRIDOS - CUSTOS DOS ABASTECIMENTOS (MÊS)</h3>
         <ResponsiveContainer width="100%" height={420}>
-            <BarChart data={chartData} margin={{ top: 30, right: 30, left: 70, bottom: 20 }} style={{ margin: '0 -24px' }}>
+            <BarChart data={chartData} margin={{ top: 30, right: 30, left: 70, bottom: 20 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" stroke="#94a3b8" label={false} />
             <YAxis stroke="#94a3b8" hide={true} />
@@ -522,7 +522,7 @@ export default function Graficos() {
             <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6">
              <h3 className="text-white font-bold mb-6 text-center">LITROS ABASTECIDOS - QUILOMETROS PERCORRIDOS - CUSTOS DOS ABASTECIMENTOS (USINAS)</h3>
              <ResponsiveContainer width="100%" height={420}>
-             <BarChart data={byUnitData} margin={{ top: 30, right: 30, left: 30, bottom: 20 }} style={{ margin: '0 -24px' }}>
+             <BarChart data={byUnitData} margin={{ top: 30, right: 30, left: 30, bottom: 20 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" label={false} />
             <YAxis stroke="#94a3b8" label={false} hide={true} />
@@ -544,7 +544,7 @@ export default function Graficos() {
       <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6 mt-8">
         <h3 className="text-white font-bold mb-6 text-center">MÉDIAS POR TIPO DE EQUIPAMENTO (KM/LT)</h3>
         <ResponsiveContainer width="100%" height={420}>
-          <BarChart data={unitEquipmentArray} margin={{ top: 40, right: 30, left: 30, bottom: 100 }} style={{ margin: '0 -24px' }}>
+          <BarChart data={unitEquipmentArray} margin={{ top: 40, right: 30, left: 30, bottom: 100 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={200} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" hide={true} />
@@ -657,7 +657,7 @@ export default function Graficos() {
       <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6">
         <h3 className="text-white font-bold mb-6 text-center">PRODUÇÃO POR TIPO DE EQUIPAMENTO (M³)</h3>
         <ResponsiveContainer width="100%" height={420}>
-          <BarChart data={equipmentArray} margin={{ top: 30, right: 50, left: 70, bottom: 100 }} style={{ margin: '0 -24px' }}>
+          <BarChart data={equipmentArray} margin={{ top: 30, right: 50, left: 70, bottom: 100 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" hide={true} />
@@ -673,7 +673,7 @@ export default function Graficos() {
       <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6">
         <h3 className="text-white font-bold mb-6 text-center">MÉDIAS POR EQUIPAMENTO (LT/M³ - R$/M³)</h3>
         <ResponsiveContainer width="100%" height={420}>
-          <BarChart data={equipmentArray} margin={{ top: 30, right: 30, left: 70, bottom: 100 }} style={{ margin: '0 -24px' }}>
+          <BarChart data={equipmentArray} margin={{ top: 30, right: 30, left: 70, bottom: 100 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" hide={true} />
