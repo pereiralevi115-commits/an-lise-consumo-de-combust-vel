@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -38,11 +39,11 @@ export default function Dados() {
     return true;
   });
 
+  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
   if (isLoading) {
     return <div className="text-white text-center py-12">Carregando dados...</div>;
   }
-
-  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
   return (
     <div className="space-y-6">
@@ -51,60 +52,55 @@ export default function Dados() {
         
         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-          <Select value={filters.month} onValueChange={(value) => setFilters({...filters, month: value})}>
-            <SelectTrigger className="bg-slate-800 text-white border-slate-700">
-              <SelectValue placeholder="Mês" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={null}>Todos meses</SelectItem>
-              {months.map(m => <SelectItem key={m} value={m.toString()}>{monthNames[m]}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <select 
+            value={filters.month} 
+            onChange={(e) => setFilters({...filters, month: e.target.value})}
+            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+          >
+            <option value="">Todos meses</option>
+            {months.map(m => <option key={m} value={m}>{monthNames[m]}</option>)}
+          </select>
 
-          <Select value={filters.type} onValueChange={(value) => setFilters({...filters, type: value})}>
-            <SelectTrigger className="bg-slate-800 text-white border-slate-700">
-              <SelectValue placeholder="Tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={null}>Todos tipos</SelectItem>
-              {types.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <select 
+            value={filters.type} 
+            onChange={(e) => setFilters({...filters, type: e.target.value})}
+            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+          >
+            <option value="">Todos tipos</option>
+            {types.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
 
-          <Select value={filters.unit} onValueChange={(value) => setFilters({...filters, unit: value})}>
-            <SelectTrigger className="bg-slate-800 text-white border-slate-700">
-              <SelectValue placeholder="Usina" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={null}>Todas usinas</SelectItem>
-              {units.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <select 
+            value={filters.unit} 
+            onChange={(e) => setFilters({...filters, unit: e.target.value})}
+            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+          >
+            <option value="">Todas usinas</option>
+            {units.map(u => <option key={u} value={u}>{u}</option>)}
+          </select>
 
-          <Select value={filters.plate} onValueChange={(value) => setFilters({...filters, plate: value})}>
-            <SelectTrigger className="bg-slate-800 text-white border-slate-700">
-              <SelectValue placeholder="Placa" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={null}>Todas placas</SelectItem>
-              {plates.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <select 
+            value={filters.plate} 
+            onChange={(e) => setFilters({...filters, plate: e.target.value})}
+            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+          >
+            <option value="">Todas placas</option>
+            {plates.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
 
-          <Select value={filters.driver} onValueChange={(value) => setFilters({...filters, driver: value})}>
-            <SelectTrigger className="bg-slate-800 text-white border-slate-700">
-              <SelectValue placeholder="Motorista" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={null}>Todos motoristas</SelectItem>
-              {drivers.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-            </SelectContent>
-          </Select>
+          <select 
+            value={filters.driver} 
+            onChange={(e) => setFilters({...filters, driver: e.target.value})}
+            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+          >
+            <option value="">Todos motoristas</option>
+            {drivers.map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
         </div>
 
         <p className="text-slate-400">Total de {filtered.length} registros</p>
       </div>
-
+  
       {/* Table */}
       <Card className="bg-slate-800 border-slate-700">
         <CardContent className="p-0">
