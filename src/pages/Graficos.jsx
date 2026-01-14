@@ -86,6 +86,25 @@ export default function Graficos() {
       .reduce((sum, r) => sum + (r.cubic_meters || 0), 0)
   })).sort((a, b) => b.m3 - a.m3);
 
+  // Data by month for the combined chart
+  const monthlyData = {};
+  filteredRecords.forEach(r => {
+    const date = new Date(r.date);
+    const monthKey = date.getMonth();
+    const monthName = monthNames[monthKey];
+
+    if (!monthlyData[monthName]) {
+      monthlyData[monthName] = { name: monthName, liters: 0, km: 0, cost: 0 };
+    }
+    monthlyData[monthName].liters += r.liters || 0;
+    monthlyData[monthName].km += r.km_driven || 0;
+    monthlyData[monthName].cost += r.cost || 0;
+  });
+
+  const chartData = Object.values(monthlyData).sort((a, b) => 
+    monthNames.indexOf(a.name) - monthNames.indexOf(b.name)
+  );
+
   const COLORS = ['#f97316', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
 
   if (isLoading) {
@@ -199,7 +218,33 @@ export default function Graficos() {
         </Card>
       </div>
 
-
-    </div>
-  );
-}
+      {/* Charts */}
+      <div className="grid grid-cols-1 gap-6">
+        {/* Combined Monthly Chart */}
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white">Litros Abastecidos - Quilômetros Percorridos - Custos dos Abastecimentos (Mês)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={400}>
+              <ComposedChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
+                <XAxis dataKey="name" stroke="#94a3b8" />
+                <YAxis yAxisId="left" stroke="#94a3b8" label={{ value: 'Litros / Km', angle: -90, position: 'insideLeft' }} />
+                <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" label={{ value: 'Custo (R$)', angle: 90, position: 'insideRight' }} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1e293b', border: 'none' }}
+                  formatter={(value) => value.toLocaleString('pt-BR', {maximumFractionDigits: 2})}
+                />
+                <Legend />
+                <Bar yAxisId="left" dataKey="liters" fill="#fbbf24" name="Litros Abastecidos" />
+                <Bar yAxisId="left" dataKey="km" fill="#9ca3af" name="Quilômetros Percorridos" />
+                <Line yAxisId="right" type="monotone" dataKey="cost" stroke="#3b82f6" name="Custos (R$)" strokeWidth={3} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+      </div>
+      );
+      }
