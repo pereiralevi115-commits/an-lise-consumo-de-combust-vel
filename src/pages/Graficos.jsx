@@ -381,13 +381,15 @@ export default function Graficos() {
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis dataKey="placa" type="category" width={85} stroke="#94a3b8" />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+              <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]}>
+                <LabelList dataKey="placa" position="insideLeft" fill="white" fontSize={12} fontWeight="600" />
+              </Bar>
+              </BarChart>
+              </ResponsiveContainer>
+              </div>
 
-        <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
-          <h3 className="text-white font-bold mb-6 text-center">KM PERCORRIDO POR MOTORISTA</h3>
+              <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+              <h3 className="text-white font-bold mb-6 text-center">KM PERCORRIDO POR MOTORISTA</h3>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={driverKmArray} layout="vertical" margin={{ top: 10, right: 50, left: 150, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
