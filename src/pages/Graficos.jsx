@@ -605,7 +605,9 @@ export default function Graficos() {
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" hide={true} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="m3" fill={YELLOW} radius={[4, 4, 0, 0]} label={<InsideBarLabel />} />
+            <Bar dataKey="m3" fill={YELLOW} radius={[4, 4, 0, 0]}>
+              <LabelList dataKey="m3" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + ' M³' : value} fontSize={11} fill="#ffffff" fontWeight="600" />
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
