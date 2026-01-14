@@ -61,15 +61,9 @@ export default function Upload() {
     setResult(null);
 
     try {
-      // Read file as ArrayBuffer
-      const arrayBuffer = await file.arrayBuffer();
-      const base64 = btoa(
-        new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
-      );
-
-      // Call backend function
+      // Call backend function with file directly
       const response = await base44.functions.invoke('processExcel', {
-        fileContent: base64,
+        fileContent: file,
         fileName: file.name
       });
 
