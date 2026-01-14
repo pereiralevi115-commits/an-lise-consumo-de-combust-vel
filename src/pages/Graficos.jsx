@@ -166,14 +166,46 @@ export default function Graficos() {
     .sort((a, b) => a.kmPerLiter - b.kmPerLiter);
 
   const equipmentArray = Object.entries(byEquipmentData)
-    .map(([type, data]) => ({
-      name: type,
-      m3: data.m3,
-      litersPerM3: data.m3 > 0 ? (data.liters / data.m3).toFixed(2) : 0,
-      costPerM3: data.m3 > 0 ? (data.cost / data.m3).toFixed(2) : 0
-    }))
-    .filter(d => d.m3 > 0)
-    .sort((a, b) => b.m3 - a.m3);
+      .map(([type, data]) => ({
+        name: type,
+        m3: data.m3,
+        litersPerM3: data.m3 > 0 ? (data.liters / data.m3).toFixed(2) : 0,
+        costPerM3: data.m3 > 0 ? (data.cost / data.m3).toFixed(2) : 0
+      }))
+      .filter(d => d.m3 > 0)
+      .sort((a, b) => b.m3 - a.m3);
+
+  const CustomBarLabel = (props) => {
+    const { x, y, width, height, value } = props;
+    if (!value) return null;
+
+    return (
+      <g>
+        <text
+          x={x + width / 2}
+          y={y + height / 2 - 6}
+          fill="#1f2937"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize="11"
+          fontWeight="600"
+        >
+          {typeof value === 'number' ? value.toFixed(2) : value}
+        </text>
+        <text
+          x={x + width / 2}
+          y={y + height / 2 + 8}
+          fill="#1f2937"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize="9"
+          fontWeight="500"
+        >
+          Km/Lt
+        </text>
+      </g>
+    );
+  };
 
   // By vehicle
   const byVehicleData = {};
