@@ -4,9 +4,9 @@ import { useQuery } from '@tanstack/react-query';
 import { ComposedChart, Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
 import { parseISO } from 'date-fns';
 
-const YELLOW = '#F59E0B';
-const BLUE = '#3B82F6';
-const GREEN = '#10B981';
+const YELLOW = '#FCD34D';
+const BLUE = '#E5E7EB';
+const GRAY = '#9CA3AF';
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -304,71 +304,77 @@ export default function Graficos() {
         </div>
       </div>
 
-      {/* Chart 1: Monthly */}
+      {/* Chart 1: Monthly - Litros, Km, Custos */}
       <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+        <h3 className="text-white font-bold mb-6 text-center">LITROS ABASTECIDOS - QUILOMETROS PERCORRIDOS - CUSTOS DOS ABASTECIMENTOS (MÊS)</h3>
         <ResponsiveContainer width="100%" height={350}>
-          <ComposedChart data={chartData} margin={{ top: 30, right: 80, left: 70, bottom: 20 }}>
+          <BarChart data={chartData} margin={{ top: 30, right: 30, left: 70, bottom: 20 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" stroke="#94a3b8" />
-            <YAxis yAxisId="left" stroke="#94a3b8" />
-            <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" />
+            <YAxis stroke="#94a3b8" />
             <Tooltip content={<CustomTooltip />} />
-            <Legend wrapperStyle={{ paddingTop: '20px' }} />
-            <Bar yAxisId="left" dataKey="liters" fill={BLUE} name="Litros" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="liters" fill={YELLOW} name="Litros" radius={[4, 4, 0, 0]}>
               <LabelList dataKey="liters" position="top" content={<CustomLabel />} />
             </Bar>
-            <Bar yAxisId="left" dataKey="km" fill={GREEN} name="Km" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="km" fill={BLUE} name="Km" radius={[4, 4, 0, 0]}>
               <LabelList dataKey="km" position="top" content={<CustomLabel />} />
             </Bar>
-            <Bar yAxisId="right" dataKey="cost" fill={YELLOW} name="Custo (R$)" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="cost" fill={GRAY} name="Custo (R$)" radius={[4, 4, 0, 0]}>
               <LabelList dataKey="cost" position="top" content={<CustomLabel />} />
             </Bar>
-          </ComposedChart>
+          </BarChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Chart 2: By Unit */}
+      {/* Chart 2: By Unit - Litros, Km, Custos */}
       <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+        <h3 className="text-white font-bold mb-6 text-center">LITROS ABASTECIDOS - QUILOMETROS PERCORRIDOS - CUSTOS DOS ABASTECIMENTOS (USINAS)</h3>
         <ResponsiveContainer width="100%" height={400}>
-          <ComposedChart data={byUnitData} margin={{ top: 30, right: 80, left: 120, bottom: 100 }}>
+          <BarChart data={byUnitData} margin={{ top: 30, right: 30, left: 70, bottom: 100 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
-            <YAxis yAxisId="left" stroke="#94a3b8" />
-            <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" />
+            <YAxis stroke="#94a3b8" />
             <Tooltip content={<CustomTooltip />} />
-            <Legend wrapperStyle={{ paddingTop: '20px' }} />
-            <Bar yAxisId="left" dataKey="liters" fill={BLUE} name="Litros" radius={[4, 4, 0, 0]} />
-            <Bar yAxisId="left" dataKey="km" fill={GREEN} name="Km" radius={[4, 4, 0, 0]} />
-            <Bar yAxisId="right" dataKey="cost" fill={YELLOW} name="Custo (R$)" radius={[4, 4, 0, 0]} />
-          </ComposedChart>
+            <Bar dataKey="liters" fill={YELLOW} name="Litros" radius={[4, 4, 0, 0]}>
+              <LabelList dataKey="liters" position="top" content={<CustomLabel />} />
+            </Bar>
+            <Bar dataKey="km" fill={BLUE} name="Km" radius={[4, 4, 0, 0]}>
+              <LabelList dataKey="km" position="top" content={<CustomLabel />} />
+            </Bar>
+            <Bar dataKey="cost" fill={GRAY} name="Custo (R$)" radius={[4, 4, 0, 0]}>
+              <LabelList dataKey="cost" position="top" content={<CustomLabel />} />
+            </Bar>
+          </BarChart>
         </ResponsiveContainer>
       </div>
 
       {/* Chart 3: Km/L by Unit */}
       <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+        <h3 className="text-white font-bold mb-6 text-center">MÉDIAS POR USINA E TIPO DE EQUIPAMENTO (KM/LT)</h3>
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={byUnitData} margin={{ top: 30, right: 50, left: 70, bottom: 100 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="kmPerLiter" fill={BLUE} radius={[4, 4, 0, 0]}>
+            <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[4, 4, 0, 0]}>
               <LabelList dataKey="kmPerLiter" position="top" content={<CustomLabel />} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Charts 4 & 5: Two columns */}
+      {/* Charts 4 & 5: Km per Vehicle and Driver */}
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+          <h3 className="text-white font-bold mb-6 text-center">KM PERCORRIDO POR VEÍCULO</h3>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={vehicleKmArray} layout="vertical" margin={{ top: 10, right: 50, left: 90, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis dataKey="placa" type="category" width={85} stroke="#94a3b8" />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="km" fill={BLUE} radius={[0, 4, 4, 0]}>
+              <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]}>
                 <LabelList dataKey="km" position="right" content={<CustomLabel />} />
               </Bar>
             </BarChart>
@@ -376,13 +382,14 @@ export default function Graficos() {
         </div>
 
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+          <h3 className="text-white font-bold mb-6 text-center">KM PERCORRIDO POR MOTORISTA</h3>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={driverKmArray} layout="vertical" margin={{ top: 10, right: 50, left: 150, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis dataKey="driver" type="category" width={140} stroke="#94a3b8" />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="km" fill={BLUE} radius={[0, 4, 4, 0]}>
+              <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]}>
                 <LabelList dataKey="km" position="right" content={<CustomLabel />} />
               </Bar>
             </BarChart>
@@ -390,16 +397,17 @@ export default function Graficos() {
         </div>
       </div>
 
-      {/* Charts 6 & 7: Two columns */}
+      {/* Charts 6 & 7: Km/L per Vehicle and Driver */}
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+          <h3 className="text-white font-bold mb-6 text-center">KM/LITRO POR VEÍCULO</h3>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={vehicleKmLiterArray} layout="vertical" margin={{ top: 10, right: 50, left: 90, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis dataKey="placa" type="category" width={85} stroke="#94a3b8" />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="kmPerLiter" fill={BLUE} radius={[0, 4, 4, 0]}>
+              <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]}>
                 <LabelList dataKey="kmPerLiter" position="right" content={<CustomLabel />} />
               </Bar>
             </BarChart>
@@ -407,13 +415,14 @@ export default function Graficos() {
         </div>
 
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+          <h3 className="text-white font-bold mb-6 text-center">KM/LITRO POR MOTORISTA</h3>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={driverKmLiterArray} layout="vertical" margin={{ top: 10, right: 50, left: 150, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis dataKey="driver" type="category" width={140} stroke="#94a3b8" />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="kmPerLiter" fill={BLUE} radius={[0, 4, 4, 0]}>
+              <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]}>
                 <LabelList dataKey="kmPerLiter" position="right" content={<CustomLabel />} />
               </Bar>
             </BarChart>
@@ -421,9 +430,10 @@ export default function Graficos() {
         </div>
       </div>
 
-      {/* Charts 8 & 9: Two columns */}
+      {/* Charts 8 & 9: R$/Km per Vehicle and Driver */}
       <div className="grid grid-cols-2 gap-6">
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+          <h3 className="text-white font-bold mb-6 text-center">R$/KM POR VEÍCULO</h3>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={vehicleCostArray} layout="vertical" margin={{ top: 10, right: 50, left: 90, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
@@ -438,6 +448,7 @@ export default function Graficos() {
         </div>
 
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+          <h3 className="text-white font-bold mb-6 text-center">R$/KM POR MOTORISTA</h3>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={driverCostArray} layout="vertical" margin={{ top: 10, right: 50, left: 150, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
@@ -454,13 +465,14 @@ export default function Graficos() {
 
       {/* Chart 10: Production by Equipment */}
       <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+        <h3 className="text-white font-bold mb-6 text-center">PRODUÇÃO POR TIPO DE EQUIPAMENTO (M³)</h3>
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={equipmentArray} margin={{ top: 30, right: 50, left: 70, bottom: 100 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="m3" fill={GREEN} radius={[4, 4, 0, 0]}>
+            <Bar dataKey="m3" fill={YELLOW} radius={[4, 4, 0, 0]}>
               <LabelList dataKey="m3" position="top" content={<CustomLabel />} />
             </Bar>
           </BarChart>
@@ -469,21 +481,20 @@ export default function Graficos() {
 
       {/* Chart 11: Equipment Averages */}
       <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
+        <h3 className="text-white font-bold mb-6 text-center">MÉDIAS POR EQUIPAMENTO (LT/M³ - R$/M³)</h3>
         <ResponsiveContainer width="100%" height={350}>
-          <ComposedChart data={equipmentArray} margin={{ top: 30, right: 80, left: 70, bottom: 100 }}>
+          <BarChart data={equipmentArray} margin={{ top: 30, right: 30, left: 70, bottom: 100 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
-            <YAxis yAxisId="left" stroke="#94a3b8" />
-            <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" />
+            <YAxis stroke="#94a3b8" />
             <Tooltip content={<CustomTooltip />} />
-            <Legend wrapperStyle={{ paddingTop: '20px' }} />
-            <Bar yAxisId="left" dataKey="litersPerM3" fill={GREEN} name="LT/M³" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="litersPerM3" fill={YELLOW} name="LT/M³" radius={[4, 4, 0, 0]}>
               <LabelList dataKey="litersPerM3" position="top" content={<CustomLabel />} />
             </Bar>
-            <Bar yAxisId="right" dataKey="costPerM3" fill={YELLOW} name="R$/M³" radius={[4, 4, 0, 0]}>
+            <Bar dataKey="costPerM3" fill={GRAY} name="R$/M³" radius={[4, 4, 0, 0]}>
               <LabelList dataKey="costPerM3" position="top" content={<CustomLabel />} />
             </Bar>
-          </ComposedChart>
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </div>
