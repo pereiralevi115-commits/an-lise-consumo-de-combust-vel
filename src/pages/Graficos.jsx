@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
-import { ComposedChart, Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
-import { parseISO } from 'date-fns';
+      import { base44 } from '@/api/base44Client';
+      import { useQuery, useQueryClient } from '@tanstack/react-query';
+      import { ComposedChart, Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
+      import { parseISO } from 'date-fns';
+      import { RefreshCw } from 'lucide-react';
 
 const YELLOW = '#FCD34D';
 const BLUE = '#E5E7EB';
@@ -68,18 +69,23 @@ const CustomLabel = (props) => {
 };
 
 export default function Graficos() {
-  const [filters, setFilters] = useState({
-    month: '',
-    type: '',
-    unit: '',
-    plate: '',
-    driver: ''
-  });
+        const [filters, setFilters] = useState({
+          month: '',
+          type: '',
+          unit: '',
+          plate: '',
+          driver: ''
+        });
 
-  const { data: records = [], isLoading } = useQuery({
-    queryKey: ['fuelRecords'],
-    queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
-  });
+        const queryClient = useQueryClient();
+        const { data: records = [], isLoading } = useQuery({
+          queryKey: ['fuelRecords'],
+          queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
+        });
+
+        const handleRecalculate = () => {
+          queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+        };
 
   const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   
@@ -423,8 +429,18 @@ export default function Graficos() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-6">Gráficos de Combustível</h1>
-        
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-white">Gráficos de Combustível</h1>
+          <button
+            onClick={handleRecalculate}
+            disabled={isLoading}
+            className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Recalcular
+          </button>
+        </div>
+
         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
           <select 
