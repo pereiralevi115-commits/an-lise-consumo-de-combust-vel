@@ -424,12 +424,14 @@ export default function Graficos() {
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
           <h3 className="text-white font-bold mb-6 text-center">KM/LITRO POR MOTORISTA</h3>
           <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={driverKmLiterArray} layout="vertical" margin={{ top: 10, right: 50, left: 150, bottom: 10 }}>
+            <BarChart data={driverKmLiterArray} layout="vertical" margin={{ top: 10, right: 30, left: 30, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
               <XAxis type="number" stroke="#94a3b8" />
-              <YAxis dataKey="driver" type="category" width={140} stroke="#94a3b8" />
+              <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]} />
+              <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]}>
+                <LabelList dataKey="driver" position="insideLeft" fill="white" fontSize={12} fontWeight="600" />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
