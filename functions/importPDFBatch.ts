@@ -1,73 +1,5 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
-// Converte data serial do Excel para YYYY-MM-DD
-function excelSerialToDate(serial) {
-  const baseDate = new Date(1900, 0, 1);
-  const days = Math.floor(serial) - 2; // Excel tem bug: conta 1900 como ano bissexto
-  const date = new Date(baseDate.getTime() + days * 86400000);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-// Parseia uma linha do PDF
-function parseLine(line) {
-  const parts = line.trim().split(/\s+/);
-  if (parts.length < 12) return null;
-
-  const dateSerial = parseFloat(parts[0]);
-  if (isNaN(dateSerial) || dateSerial < 40000) return null;
-
-  const time = parts[1].includes(':') ? parts[1] : null;
-  const vehiclePlate = parts[2];
-  
-  // Encontrar índices dos campos fixos
-  let typeEndIdx = 3;
-  const possibleTypes = ['PÁ', 'CAMINHÃO', 'MUCK/PLATAFORMA', 'VEICULO', 'BOMBA', 'OUTROS', 'GERADOR', 'LIGATAN', 'MANUTEN'];
-  while (typeEndIdx < parts.length && !parts.slice(3, typeEndIdx + 1).join(' ').match(/CARREGADEIRA|BASCULANTE|BETONEIRA|APOIO|LANÇA|ESTACIONÁRIA|OUTROS/)) {
-    typeEndIdx++;
-  }
-  
-  const vehicleType = parts.slice(3, typeEndIdx + 1).join(' ');
-  
-  // Encontrar CONCRETAR
-  let concretarIdx = parts.findIndex((p, idx) => idx > typeEndIdx && p === 'CONCRETAR');
-  if (concretarIdx === -1) return null;
-  
-  const unit = parts.slice(typeEndIdx + 1, concretarIdx + 1).join(' ');
-  
-  // Depois de CONCRETAR, vem USINA, FRENTISTA, MOTORISTA até encontrar S10 ou S500
-  let fuelIdx = parts.findIndex((p, idx) => idx > concretarIdx && (p === 'S10' || p === 'S500'));
-  if (fuelIdx === -1) return null;
-  
-  const staffParts = parts.slice(concretarIdx + 1, fuelIdx);
-  const midPoint = Math.floor(staffParts.length / 2);
-  const attendant = staffParts.slice(0, midPoint).join(' ');
-  const driver = staffParts.slice(midPoint).join(' ');
-  
-  const fuelType = parts[fuelIdx];
-  const liters = parseFloat(parts[fuelIdx + 1]?.replace(',', '.')) || 0;
-  const kmDriven = parseFloat(parts[fuelIdx + 2]) || 0;
-  const cost = parseFloat(parts[fuelIdx + 3]?.replace(',', '.')) || 0;
-  const cubicMeters = parts[fuelIdx + 4] ? parseFloat(parts[fuelIdx + 4]) : null;
-
-  return {
-    date: excelSerialToDate(dateSerial),
-    time,
-    vehicle_plate: vehiclePlate,
-    vehicle_type: vehicleType,
-    unit,
-    attendant,
-    driver,
-    fuel_type: fuelType,
-    liters,
-    km_driven: kmDriven || null,
-    cost,
-    cubic_meters: cubicMeters
-  };
-}
-
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -78,29 +10,62 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { textData, pageInfo } = body;
+    const { textData } = body;
 
     if (!textData) {
       return Response.json({ error: 'Dados não fornecidos' }, { status: 400 });
     }
 
-    console.log(`Processando lote: ${pageInfo || 'sem info'}`);
+    console.log('Processando dados em lote via LLM');
 
-    // Parsear linhas
-    const lines = textData.split('\n').filter(l => l.trim());
-    const records = [];
-    
-    for (const line of lines) {
-      const record = parseLine(line);
-      if (record) {
-        records.push(record);
+    // Usar LLM para estruturar os dados
+    const llmResult = await base44.integrations.Core.InvokeLLM({
+      prompt: `Converta estes dados de abastecimento para JSON estruturado.
+
+Formato de entrada (cada linha):
+DATA(serial Excel) HORA PLACA TIPO USINA FRENTISTA MOTORISTA COMBUSTÍVEL LITROS KM_RODADO VALOR M³
+
+REGRAS:
+- DATA: converter serial Excel para YYYY-MM-DD (ex: 45992 = dias desde 1900-01-01, considerar bug do Excel -2 dias)
+- HORA: "HH:MM:SS" ou "HH:MM" (adicionar :00), se decimal tipo "0,75" usar null
+- KM_RODADO: manter valor literal (0 se for 0, null se vazio)
+- M³: null se vazio
+- LITROS e VALOR: converter vírgula para ponto decimal
+
+DADOS:
+${textData}`,
+      response_json_schema: {
+        type: "object",
+        properties: {
+          records: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                date: { type: "string" },
+                time: { type: ["string", "null"] },
+                vehicle_plate: { type: "string" },
+                vehicle_type: { type: "string" },
+                unit: { type: "string" },
+                attendant: { type: "string" },
+                driver: { type: "string" },
+                fuel_type: { type: "string" },
+                liters: { type: "number" },
+                km_driven: { type: ["number", "null"] },
+                cost: { type: "number" },
+                cubic_meters: { type: ["number", "null"] }
+              }
+            }
+          }
+        }
       }
-    }
+    });
 
-    console.log(`${records.length} registros parseados`);
+    const records = llmResult.records;
+    console.log(`${records.length} registros extraídos`);
 
     if (records.length === 0) {
-      return Response.json({ error: 'Nenhum registro válido encontrado' }, { status: 400 });
+      return Response.json({ error: 'Nenhum registro encontrado' }, { status: 400 });
     }
 
     // Inserir em lote
@@ -109,8 +74,7 @@ Deno.serve(async (req) => {
 
     return Response.json({ 
       success: true,
-      count: saved.length,
-      pageInfo
+      count: saved.length
     });
 
   } catch (error) {
