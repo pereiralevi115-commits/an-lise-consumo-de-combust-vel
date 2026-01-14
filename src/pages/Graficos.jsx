@@ -226,6 +226,25 @@ export default function Graficos() {
     );
   };
 
+  const InsideBarLabel = (props) => {
+    const { x, y, width, height, value } = props;
+    if (!value) return null;
+
+    return (
+      <text
+        x={x + width / 2}
+        y={y + height / 2}
+        fill="#1f2937"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fontSize="11"
+        fontWeight="600"
+      >
+        {typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) : value} M³
+      </text>
+    );
+  };
+
   // By vehicle
   const byVehicleData = {};
   filtered.forEach(r => {
@@ -548,9 +567,7 @@ export default function Graficos() {
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" hide={true} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="m3" fill={YELLOW} radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="m3" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) : value} fontSize={9} />
-            </Bar>
+            <Bar dataKey="m3" fill={YELLOW} radius={[4, 4, 0, 0]} label={<InsideBarLabel />} />
           </BarChart>
         </ResponsiveContainer>
       </div>
