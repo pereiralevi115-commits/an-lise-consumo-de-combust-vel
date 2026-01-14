@@ -20,29 +20,45 @@ Deno.serve(async (req) => {
 
     // Use LLM to extract data from PDF
     const extractionResult = await base44.integrations.Core.InvokeLLM({
-      prompt: `Extraia TODOS os dados da tabela deste PDF de abastecimento de combustível.
+      prompt: `Extraia ABSOLUTAMENTE TODOS os dados deste PDF de abastecimento de combustível, linha por linha, TODAS as páginas.
       
-      Retorne um array JSON com TODOS os registros encontrados no PDF, no seguinte formato:
+      O PDF contém uma tabela com dados de abastecimento. Extraia CADA LINHA da tabela completa.
       
-      Para cada linha da tabela, extraia:
-      - date: data no formato YYYY-MM-DD (converter o número serial do Excel para data)
-      - time: hora no formato HH:MM:SS
-      - vehicle_plate: placa do veículo
-      - vehicle_type: tipo do veículo
-      - unit: usina/localização
-      - attendant: nome do frentista
-      - driver: nome do motorista
-      - fuel_type: tipo de combustível (S10, S500, etc)
-      - liters: quantidade em litros (número decimal)
-      - km_driven: km rodados (número inteiro)
-      - cost: valor em reais (número decimal)
-      - cubic_meters: metros cúbicos M³ (número decimal ou null se vazio)
+      Colunas:
+      - DATA (número serial Excel, ex: 46010)
+      - HORA
+      - PLACA
+      - TIPO
+      - USINA
+      - FRENTISTA
+      - MOTORISTA
+      - COMBUSTIVEL
+      - LITROS
+      - RODADO (KM)
+      - VALOR (R$)
+      - M³
       
-      IMPORTANTE:
-      - O número na coluna DATA é um serial do Excel. Converta para data real (46010 = 10/01/2026, etc)
-      - Extraia TODOS os registros, não apenas uma amostra
-      - Mantenha os valores numéricos como números, não strings
-      - Se um campo estiver vazio, use null`,
+      Retorne todos os dados no formato:
+      {
+        "records": [
+          {
+            "date": "YYYY-MM-DD" (converter serial Excel para data: 46010=2026-01-10, 45992=2025-12-23, etc),
+            "time": "HH:MM:SS",
+            "vehicle_plate": "placa",
+            "vehicle_type": "tipo",
+            "unit": "usina",
+            "attendant": "frentista",
+            "driver": "motorista",
+            "fuel_type": "combustível",
+            "liters": número,
+            "km_driven": número ou null,
+            "cost": número,
+            "cubic_meters": número ou null
+          }
+        ]
+      }
+      
+      CRÍTICO: Não pule nenhuma linha. O PDF tem centenas de registros. Extraia TODOS.`,
       file_urls: [fileUrl],
       response_json_schema: {
         type: "object",
