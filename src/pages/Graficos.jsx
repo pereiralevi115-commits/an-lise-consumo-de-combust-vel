@@ -245,6 +245,44 @@ export default function Graficos() {
     );
   };
 
+  const LitersPerM3Label = (props) => {
+    const { x, y, width, height, value } = props;
+    if (!value) return null;
+
+    return (
+      <text
+        x={x + width / 2}
+        y={y - 8}
+        fill="#1f2937"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fontSize="11"
+        fontWeight="600"
+      >
+        {typeof value === 'number' ? value.toFixed(2) : value} Lt/M³
+      </text>
+    );
+  };
+
+  const CostPerM3Label = (props) => {
+    const { x, y, width, height, value } = props;
+    if (!value) return null;
+
+    return (
+      <text
+        x={x + width / 2}
+        y={y - 8}
+        fill="#1f2937"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fontSize="11"
+        fontWeight="600"
+      >
+        {typeof value === 'number' ? value.toFixed(2) : value} R$/M³
+      </text>
+    );
+  };
+
   // By vehicle
   const byVehicleData = {};
   filtered.forEach(r => {
@@ -581,12 +619,8 @@ export default function Graficos() {
             <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
             <YAxis stroke="#94a3b8" hide={true} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="litersPerM3" fill={YELLOW} name="LT/M³" radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="litersPerM3" position="top" formatter={(value) => typeof value === 'number' ? value.toFixed(2) : value} fontSize={9} />
-            </Bar>
-            <Bar dataKey="costPerM3" fill={GRAY} name="R$/M³" radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="costPerM3" position="top" formatter={(value) => typeof value === 'number' ? value.toFixed(2) : value} fontSize={9} />
-            </Bar>
+            <Bar dataKey="litersPerM3" fill={YELLOW} name="LT/M³" radius={[4, 4, 0, 0]} label={<LitersPerM3Label />} />
+            <Bar dataKey="costPerM3" fill={GRAY} name="R$/M³" radius={[4, 4, 0, 0]} label={<CostPerM3Label />} />
           </BarChart>
         </ResponsiveContainer>
       </div>
