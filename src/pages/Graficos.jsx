@@ -310,7 +310,7 @@ export default function Graficos() {
         <ResponsiveContainer width="100%" height={350}>
           <BarChart data={chartData} margin={{ top: 30, right: 30, left: 70, bottom: 20 }}>
             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
-            <XAxis dataKey="name" stroke="#94a3b8" />
+            <XAxis dataKey="name" stroke="#94a3b8" label={false} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="liters" fill={YELLOW} name="Litros" radius={[4, 4, 0, 0]} />
             <Bar dataKey="km" fill={BLUE} name="Km" radius={[4, 4, 0, 0]} />
