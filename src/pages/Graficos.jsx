@@ -125,7 +125,7 @@ export default function Graficos() {
     };
   })
     .filter(d => d.liters > 0 || d.km > 0 || d.cost > 0)
-    .sort((a, b) => b.cost - a.cost);
+    .sort((a, b) => a.cost - b.cost);
 
   // By equipment
   const byEquipmentData = {};
