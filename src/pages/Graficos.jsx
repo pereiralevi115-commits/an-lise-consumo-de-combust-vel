@@ -100,7 +100,9 @@ export default function Graficos() {
     monthlyData[monthName].km += r.km_driven || 0;
     monthlyData[monthName].cost += r.cost || 0;
   });
-  const chartData = Object.values(monthlyData).sort((a, b) => monthNames.indexOf(a.name) - monthNames.indexOf(b.name));
+  const chartData = Object.values(monthlyData)
+    .filter(d => d.liters > 0 || d.km > 0 || d.cost > 0)
+    .sort((a, b) => monthNames.indexOf(a.name) - monthNames.indexOf(b.name));
 
   // By unit
   const byUnitData = units.map(unit => {
@@ -112,7 +114,9 @@ export default function Graficos() {
       cost: unitRecords.reduce((sum, r) => sum + (r.cost || 0), 0),
       kmPerLiter: unitRecords.length > 0 ? (unitRecords.reduce((sum, r) => sum + (r.km_driven || 0), 0) / unitRecords.reduce((sum, r) => sum + (r.liters || 0), 0)) : 0
     };
-  }).sort((a, b) => b.cost - a.cost);
+  })
+    .filter(d => d.liters > 0 || d.km > 0 || d.cost > 0)
+    .sort((a, b) => b.cost - a.cost);
 
   // By equipment
   const byEquipmentData = {};
@@ -132,6 +136,7 @@ export default function Graficos() {
       litersPerM3: data.m3 > 0 ? (data.liters / data.m3).toFixed(2) : 0,
       costPerM3: data.m3 > 0 ? (data.cost / data.m3).toFixed(2) : 0
     }))
+    .filter(d => d.m3 > 0)
     .sort((a, b) => b.m3 - a.m3);
 
   // By vehicle
@@ -151,6 +156,7 @@ export default function Graficos() {
       kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
       costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0
     }))
+    .filter(d => d.km > 0)
     .sort((a, b) => b.km - a.km)
     .slice(0, 15);
 
@@ -159,6 +165,7 @@ export default function Graficos() {
       placa: plate,
       kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
     }))
+    .filter(d => d.kmPerLiter > 0)
     .sort((a, b) => b.kmPerLiter - a.kmPerLiter)
     .slice(0, 15);
 
@@ -167,6 +174,7 @@ export default function Graficos() {
       placa: plate,
       costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0,
     }))
+    .filter(d => d.costPerKm > 0)
     .sort((a, b) => b.costPerKm - a.costPerKm)
     .slice(0, 15);
 
@@ -187,6 +195,7 @@ export default function Graficos() {
       kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
       costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0
     }))
+    .filter(d => d.km > 0)
     .sort((a, b) => b.km - a.km)
     .slice(0, 15);
 
@@ -195,6 +204,7 @@ export default function Graficos() {
       driver,
       kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
     }))
+    .filter(d => d.kmPerLiter > 0)
     .sort((a, b) => b.kmPerLiter - a.kmPerLiter)
     .slice(0, 15);
 
@@ -203,6 +213,7 @@ export default function Graficos() {
       driver,
       costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0,
     }))
+    .filter(d => d.costPerKm > 0)
     .sort((a, b) => b.costPerKm - a.costPerKm)
     .slice(0, 15);
 
