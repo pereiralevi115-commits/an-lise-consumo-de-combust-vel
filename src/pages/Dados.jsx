@@ -2,30 +2,16 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search } from 'lucide-react';
+
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export default function Dados() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedUnit, setSelectedUnit] = useState('all');
-
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['fuelRecords'],
-    queryFn: () => base44.entities.FuelRecord.list('-date', 1000)
-  });
-
-  // Get unique units
-  const units = [...new Set(records.map(r => r.unit))].filter(Boolean);
-
-  // Filter records
-  const filteredRecords = records.filter(r => {
-    if (selectedUnit !== 'all' && r.unit !== selectedUnit) return false;
-    if (searchTerm && !JSON.stringify(r).toLowerCase().includes(searchTerm.toLowerCase())) return false;
-    return true;
+    queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
   });
 
   if (isLoading) {
@@ -36,40 +22,8 @@ export default function Dados() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-white mb-2">Dados de Combustível</h1>
-        <p className="text-slate-400">Total de {filteredRecords.length} registros</p>
+        <p className="text-slate-400">Total de {records.length} registros</p>
       </div>
-
-      {/* Filters */}
-      <Card className="bg-slate-800 border-slate-700">
-        <CardHeader>
-          <CardTitle className="text-white">Filtros</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-4">
-            <div className="flex-1 min-w-[200px]">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input
-                  placeholder="Buscar..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-900 text-white border-slate-700"
-                />
-              </div>
-            </div>
-
-            <Select value={selectedUnit} onValueChange={setSelectedUnit}>
-              <SelectTrigger className="w-48 bg-slate-900 text-white border-slate-700">
-                <SelectValue placeholder="Unidade" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas unidades</SelectItem>
-                {units.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Table */}
       <Card className="bg-slate-800 border-slate-700">
@@ -93,14 +47,14 @@ export default function Dados() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRecords.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={12} className="text-center text-slate-400 py-8">
-                      Nenhum registro encontrado
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredRecords.map((record) => (
+                {records.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={12} className="text-center text-slate-400 py-8">
+                        Nenhum registro encontrado
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    records.map((record) => (
                     <TableRow key={record.id} className="border-slate-700 hover:bg-slate-700/30">
                       <TableCell className="text-white">
                         {record.date ? format(new Date(record.date), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
