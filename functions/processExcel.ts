@@ -9,18 +9,18 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const body = await req.json();
-    const { fileContent, fileName } = body;
+    const formData = await req.formData();
+    const file = formData.get('file');
 
-    if (!fileContent || !fileName) {
+    if (!file) {
       return Response.json({ error: 'Arquivo não fornecido' }, { status: 400 });
     }
 
-    console.log(`Processando arquivo: ${fileName}`);
+    console.log(`Processando arquivo: ${file.name}`);
 
     // Upload file
     const uploadResult = await base44.integrations.Core.UploadFile({ 
-      file: fileContent 
+      file: file 
     });
 
     console.log(`Arquivo enviado: ${uploadResult.file_url}`);
