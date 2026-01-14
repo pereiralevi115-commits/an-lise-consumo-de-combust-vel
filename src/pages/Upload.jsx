@@ -3,13 +3,42 @@ import { base44 } from '@/api/base44Client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Upload as UploadIcon, FileSpreadsheet, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Upload as UploadIcon, FileSpreadsheet, CheckCircle2, AlertCircle, Loader2, Download } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 
 export default function Upload() {
   const [isUploading, setIsUploading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [result, setResult] = useState(null);
   const queryClient = useQueryClient();
+
+  const handleDownloadTemplate = async () => {
+    setIsDownloading(true);
+    try {
+      const response = await base44.functions.invoke('generateTemplate', {});
+      
+      const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'template_combustivel.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (error) {
+      console.error('Erro ao baixar template:', error);
+      setResult({
+        success: false,
+        message: 'Erro ao baixar template'
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   const handleFileUpload = async (event) => {
     const file = event.target.files?.[0];
@@ -72,6 +101,42 @@ export default function Upload() {
         <h1 className="text-3xl font-bold text-white mb-2">Upload de Dados</h1>
         <p className="text-slate-400">Carregue planilhas Excel ou CSV com os dados de combustível</p>
       </div>
+
+      {/* Download Template */}
+      <Card className="bg-slate-800 border-slate-700">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-blue-500" />
+              Template Excel
+            </span>
+            <Button
+              onClick={handleDownloadTemplate}
+              disabled={isDownloading}
+              variant="outline"
+              className="border-blue-600 text-blue-400 hover:bg-blue-600 hover:text-white"
+            >
+              {isDownloading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Baixando...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Baixar Template
+                </>
+              )}
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-slate-300 text-sm">
+            Baixe o template Excel com a estrutura correta e exemplos de dados. 
+            Preencha com seus dados e faça o upload abaixo.
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Upload Card */}
       <Card className="bg-slate-800 border-slate-700">
