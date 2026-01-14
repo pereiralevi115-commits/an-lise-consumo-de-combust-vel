@@ -207,6 +207,25 @@ export default function Graficos() {
     );
   };
 
+  const HorizontalBarLabel = (props) => {
+    const { x, y, width, height, value } = props;
+    if (!value) return null;
+
+    return (
+      <text
+        x={x + width + 8}
+        y={y + height / 2}
+        fill="#1f2937"
+        textAnchor="start"
+        dominantBaseline="middle"
+        fontSize="11"
+        fontWeight="600"
+      >
+        {typeof value === 'number' ? value.toFixed(2) : value}
+      </text>
+    );
+  };
+
   // By vehicle
   const byVehicleData = {};
   filtered.forEach(r => {
@@ -426,13 +445,12 @@ export default function Graficos() {
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
           <h3 className="text-white font-bold mb-6 text-center">KM PERCORRIDO POR VEÍCULO</h3>
           <ResponsiveContainer width="100%" height={500}>
-            <BarChart data={vehicleKmArray} layout="vertical" margin={{ top: 10, right: 30, left: 100, bottom: 10 }}>
+            <BarChart data={vehicleKmArray} layout="vertical" margin={{ top: 10, right: 100, left: 100, bottom: 10 }}>
              <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
              <XAxis type="number" stroke="#94a3b8" />
              <YAxis type="category" hide={true} />
              <Tooltip content={<CustomTooltip />} />
-             <Legend />
-              <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]} name="km">
+              <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]} label={<HorizontalBarLabel />}>
                 <LabelList dataKey="placa" position="insideLeft" fill="#1f2937" fontSize={10} fontWeight="600" />
               </Bar>
               </BarChart>
@@ -442,13 +460,12 @@ export default function Graficos() {
               <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
               <h3 className="text-white font-bold mb-6 text-center">KM PERCORRIDO POR MOTORISTA</h3>
               <ResponsiveContainer width="100%" height={500}>
-              <BarChart data={driverKmArray} layout="vertical" margin={{ top: 10, right: 30, left: 100, bottom: 10 }}>
+              <BarChart data={driverKmArray} layout="vertical" margin={{ top: 10, right: 100, left: 100, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]} name="km">
+              <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]} label={<HorizontalBarLabel />}>
                 <LabelList dataKey="driver" position="insideLeft" fill="#1f2937" fontSize={10} fontWeight="600" />
               </Bar>
             </BarChart>
@@ -461,13 +478,12 @@ export default function Graficos() {
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
           <h3 className="text-white font-bold mb-6 text-center">KM/LITRO POR VEÍCULO</h3>
           <ResponsiveContainer width="100%" height={500}>
-            <BarChart data={vehicleKmLiterArray} layout="vertical" margin={{ top: 10, right: 30, left: 100, bottom: 10 }}>
+            <BarChart data={vehicleKmLiterArray} layout="vertical" margin={{ top: 10, right: 100, left: 100, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]} name="Km/Lt">
+              <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]} label={<HorizontalBarLabel />}>
                 <LabelList dataKey="placa" position="insideLeft" fill="#1f2937" fontSize={10} fontWeight="600" />
               </Bar>
             </BarChart>
@@ -477,13 +493,12 @@ export default function Graficos() {
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
           <h3 className="text-white font-bold mb-6 text-center">KM/LITRO POR MOTORISTA</h3>
           <ResponsiveContainer width="100%" height={500}>
-            <BarChart data={driverKmLiterArray} layout="vertical" margin={{ top: 10, right: 30, left: 100, bottom: 10 }}>
+            <BarChart data={driverKmLiterArray} layout="vertical" margin={{ top: 10, right: 100, left: 100, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]} name="Km/Lt">
+              <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]} label={<HorizontalBarLabel />}>
                 <LabelList dataKey="driver" position="insideLeft" fill="#1f2937" fontSize={10} fontWeight="600" />
               </Bar>
             </BarChart>
@@ -496,13 +511,12 @@ export default function Graficos() {
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
           <h3 className="text-white font-bold mb-6 text-center">R$/KM POR VEÍCULO</h3>
           <ResponsiveContainer width="100%" height={500}>
-            <BarChart data={vehicleCostArray} layout="vertical" margin={{ top: 10, right: 30, left: 100, bottom: 10 }}>
+            <BarChart data={vehicleCostArray} layout="vertical" margin={{ top: 10, right: 100, left: 100, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]} name="R$/Km">
+              <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]} label={<HorizontalBarLabel />}>
                 <LabelList dataKey="placa" position="insideLeft" fill="#1f2937" fontSize={10} fontWeight="600" />
               </Bar>
             </BarChart>
@@ -512,13 +526,12 @@ export default function Graficos() {
         <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
           <h3 className="text-white font-bold mb-6 text-center">R$/KM POR MOTORISTA</h3>
           <ResponsiveContainer width="100%" height={500}>
-            <BarChart data={driverCostArray} layout="vertical" margin={{ top: 10, right: 30, left: 100, bottom: 10 }}>
+            <BarChart data={driverCostArray} layout="vertical" margin={{ top: 10, right: 100, left: 100, bottom: 10 }}>
               <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
               <XAxis type="number" stroke="#94a3b8" />
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
-              <Legend />
-              <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]} name="R$/Km">
+              <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]} label={<HorizontalBarLabel />}>
                 <LabelList dataKey="driver" position="insideLeft" fill="#1f2937" fontSize={10} fontWeight="600" />
               </Bar>
             </BarChart>
