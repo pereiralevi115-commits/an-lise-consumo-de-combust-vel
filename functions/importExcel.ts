@@ -33,9 +33,9 @@ Deno.serve(async (req) => {
     // Converter serial Excel para data
     const excelDateToJSDate = (serial) => {
       const date = new Date((serial - 25569) * 86400 * 1000);
-      const year = date.getUTCFullYear();
-      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-      const day = String(date.getUTCDate()).padStart(2, '0');
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     };
 
