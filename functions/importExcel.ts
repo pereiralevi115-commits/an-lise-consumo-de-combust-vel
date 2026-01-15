@@ -49,18 +49,18 @@ Deno.serve(async (req) => {
 
       try {
         const record = {
-          date: typeof cells[1] === 'number' ? excelDateToJSDate(cells[1]) : cells[1],
-          time: cells[2] ? String(cells[2]).substring(0, 8) : null,
-          vehicle_plate: cells[3] ? String(cells[3]) : null,
-          vehicle_type: cells[4] ? String(cells[4]) : null,
-          unit: cells[5] ? String(cells[5]) : null,
-          driver: cells[6] ? String(cells[6]) : null,
-          fuel_type: cells[7] ? String(cells[7]) : null,
-          liters: cells[8] ? parseFloat(cells[8]) : 0,
-          km_driven: cells[9] ? parseFloat(cells[9]) : null,
-          cost: cells[10] ? parseFloat(cells[10]) : 0,
-          cubic_meters: cells[11] ? parseFloat(cells[11]) : null
-        };
+           date: typeof cells[1] === 'number' ? excelDateToJSDate(cells[1]) : cells[1],
+           time: cells[2] ? String(cells[2]).substring(0, 8) : null,
+           vehicle_plate: cells[3] ? String(cells[3]) : null,
+           vehicle_type: cells[4] ? String(cells[4]) : null,
+           unit: cells[5] ? String(cells[5]) : null,
+           driver: cells[6] ? String(cells[6]) : null,
+           fuel_type: cells[7] ? String(cells[7]) : null,
+           liters: cells[8] ? parseFloat(cells[8]) : 0,
+           km_driven: cells[9] ? parseFloat(cells[9]) : 0,
+           cost: cells[10] ? parseFloat(cells[10]) : 0,
+           cubic_meters: cells[11] ? parseFloat(cells[11]) : null
+         };
 
         if (record.vehicle_plate && record.date) {
           records.push(record);
