@@ -40,20 +40,6 @@ export default function Dados() {
 
   const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
-  const queryClient = useQueryClient();
-
-  const handleDeleteAll = async () => {
-    if (!window.confirm(`Tem certeza? Serão excluídos ${filtered.length} registros.`)) return;
-    
-    try {
-      await base44.functions.invoke('resetFuelData');
-      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
-      alert('Todos os registros foram excluídos com sucesso!');
-    } catch (error) {
-      alert('Erro ao excluir registros: ' + error.message);
-    }
-  };
-
   if (isLoading) {
     return <div className="text-white text-center py-12">Carregando dados...</div>;
   }
