@@ -54,13 +54,12 @@ Deno.serve(async (req) => {
            vehicle_plate: cells[3] ? String(cells[3]) : null,
            vehicle_type: cells[4] ? String(cells[4]) : null,
            unit: cells[5] ? String(cells[5]) : null,
-           attendant: cells[6] ? String(cells[6]) : null,
-           driver: cells[7] ? String(cells[7]) : null,
-           fuel_type: cells[8] ? String(cells[8]) : null,
-           liters: cells[9] ? parseFloat(cells[9]) : 0,
-           km_driven: cells[10] ? parseFloat(cells[10]) : 0,
-           cost: cells[11] ? parseFloat(cells[11]) : 0,
-           cubic_meters: cells[12] ? parseFloat(cells[12]) : null
+           driver: cells[6] ? String(cells[6]) : null,
+           fuel_type: cells[7] ? String(cells[7]) : null,
+           liters: cells[8] ? parseFloat(cells[8]) : 0,
+           km_driven: cells[9] ? parseFloat(cells[9]) : 0,
+           cost: cells[10] ? parseFloat(cells[10]) : 0,
+           cubic_meters: cells[11] ? parseFloat(cells[11]) : null
          };
 
         if (record.vehicle_plate && record.date) {
