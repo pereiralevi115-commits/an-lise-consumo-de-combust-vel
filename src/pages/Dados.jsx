@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Trash2 } from 'lucide-react';
 
 export default function Dados() {
   const [filters, setFilters] = useState({
@@ -17,10 +17,25 @@ export default function Dados() {
     driver: ''
   });
 
+  const queryClient = useQueryClient();
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['fuelRecords'],
     queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
   });
+
+  const handleResetData = async () => {
+    if (!window.confirm('Tem certeza que deseja deletar TODOS os registros? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+
+    try {
+      await base44.functions.invoke('resetFuelData');
+      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+      alert('Todos os dados foram deletados com sucesso');
+    } catch (error) {
+      alert('Erro ao deletar dados: ' + error.message);
+    }
+  };
 
   // Get unique filter values
   const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b);
@@ -48,9 +63,19 @@ export default function Dados() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-6">Dados de Combustível</h1>
-        
-        {/* Filters */}
+         <div className="flex justify-between items-center mb-6">
+           <h1 className="text-3xl font-bold text-white">Dados de Combustível</h1>
+           <Button 
+             onClick={handleResetData} 
+             variant="destructive" 
+             className="gap-2"
+           >
+             <Trash2 className="w-4 h-4" />
+             Zerar Dados
+           </Button>
+         </div>
+
+         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
           <select 
             value={filters.month} 
