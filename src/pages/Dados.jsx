@@ -97,19 +97,7 @@ export default function Dados() {
           </select>
         </div>
 
-        <div className="flex justify-between items-center">
-          <p className="text-slate-400">Total de {filtered.length} registros</p>
-          {filtered.length > 0 && (
-            <Button 
-              onClick={handleDeleteAll}
-              variant="destructive"
-              className="gap-2"
-            >
-              <Trash2 className="w-4 h-4" />
-              Excluir Todos
-            </Button>
-          )}
-        </div>
+        <p className="text-slate-400">Total de {filtered.length} registros</p>
         </div>
   
       {/* Table */}
