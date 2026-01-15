@@ -32,10 +32,11 @@ Deno.serve(async (req) => {
 
     // Converter serial Excel para data
     const excelDateToJSDate = (serial) => {
-      const utc_days = Math.floor(serial - 25569);
-      const utc_value = utc_days * 86400;
-      const date_info = new Date(utc_value * 1000);
-      return date_info.toISOString().split('T')[0];
+      const date = new Date((serial - 25569) * 86400 * 1000);
+      const year = date.getUTCFullYear();
+      const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+      const day = String(date.getUTCDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     };
 
     // Processar linhas (pular cabeçalho)
