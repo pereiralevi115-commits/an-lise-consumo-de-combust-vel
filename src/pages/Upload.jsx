@@ -99,8 +99,17 @@ export default function Upload() {
               )}
             </div>
           </label>
-          </CardContent>
-          </Card>
-          </div>
-          );
-          }
+
+          {result && (
+            <Alert className={result.success ? 'bg-green-900/20 border-green-600 text-green-100' : 'bg-red-900/20 border-red-600 text-red-100'}>
+              <AlertDescription className="flex items-center gap-2">
+                {result.success ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                {result.message}
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
