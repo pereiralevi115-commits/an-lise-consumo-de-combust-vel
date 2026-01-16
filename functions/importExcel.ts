@@ -30,9 +30,24 @@ Deno.serve(async (req) => {
     const worksheet = workbook.worksheets[0];
     const records = [];
 
-    // Converter serial Excel para data (usar UTC para evitar problema de timezone)
-    const excelDateToJSDate = (serial) => {
-      const date = new Date((serial - 25569) * 86400 * 1000);
+    // Converter data Excel para formato YYYY-MM-DD
+    const excelDateToJSDate = (value) => {
+      let date;
+      
+      // Se for número serial do Excel
+      if (typeof value === 'number') {
+        date = new Date((value - 25569) * 86400 * 1000);
+      } 
+      // Se o ExcelJS já retornou um objeto Date
+      else if (value instanceof Date) {
+        date = value;
+      }
+      // Se for string, tentar parsear
+      else if (typeof value === 'string') {
+        date = new Date(value);
+      }
+      
+      // Extrair data usando UTC para evitar problemas de timezone
       const year = date.getUTCFullYear();
       const month = String(date.getUTCMonth() + 1).padStart(2, '0');
       const day = String(date.getUTCDate()).padStart(2, '0');
@@ -50,7 +65,7 @@ Deno.serve(async (req) => {
 
       try {
         const record = {
-           date: typeof cells[1] === 'number' ? excelDateToJSDate(cells[1]) : cells[1],
+           date: excelDateToJSDate(cells[1]),
            time: cells[2] ? String(cells[2]).substring(0, 8) : null,
            vehicle_plate: cells[3] ? String(cells[3]) : null,
            vehicle_type: cells[4] ? String(cells[4]) : null,
