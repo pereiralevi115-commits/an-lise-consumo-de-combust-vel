@@ -20,11 +20,22 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Deletar todos os registros
+    // Deletar em lotes de 50 com pausa de 1 segundo entre lotes
     let deletedCount = 0;
-    for (const record of records) {
-      await base44.asServiceRole.entities.FuelRecord.delete(record.id);
-      deletedCount++;
+    const batchSize = 50;
+    
+    for (let i = 0; i < records.length; i += batchSize) {
+      const batch = records.slice(i, i + batchSize);
+      
+      for (const record of batch) {
+        await base44.asServiceRole.entities.FuelRecord.delete(record.id);
+        deletedCount++;
+      }
+      
+      // Pausa de 1 segundo entre lotes
+      if (i + batchSize < records.length) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
     }
 
     return Response.json({
