@@ -37,6 +37,7 @@ async function buscarAbastecimentos(token, dataIni, dataFim) {
   const response = await fetch(url, {
     method: 'GET',
     headers: {
+      'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Bearer ${token}`
     }
