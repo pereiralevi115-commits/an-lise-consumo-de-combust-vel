@@ -20,6 +20,14 @@ export default function Dados() {
     queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
   });
 
+  const { data: frentistas = [] } = useQuery({ queryKey: ['Frentista'], queryFn: () => base44.entities.Frentista.list() });
+  const { data: motoristas = [] } = useQuery({ queryKey: ['Motorista'], queryFn: () => base44.entities.Motorista.list() });
+  const { data: pontos = [] } = useQuery({ queryKey: ['Ponto'], queryFn: () => base44.entities.Ponto.list() });
+
+  const frentistasMap = Object.fromEntries(frentistas.map(f => [f.codigo, f.nome]));
+  const motoristasMap = Object.fromEntries(motoristas.map(m => [m.codigo, m.nome]));
+  const pontosMap = Object.fromEntries(pontos.map(p => [p.codigo, p.nome]));
+
   // Get unique filter values
   const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b);
   const types = [...new Set(records.map(r => r.vehicle_type))].filter(Boolean).sort();
