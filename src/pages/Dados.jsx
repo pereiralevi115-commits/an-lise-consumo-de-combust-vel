@@ -24,9 +24,9 @@ export default function Dados() {
   const { data: motoristas = [] } = useQuery({ queryKey: ['Motorista'], queryFn: () => base44.entities.Motorista.list() });
   const { data: pontos = [] } = useQuery({ queryKey: ['Ponto'], queryFn: () => base44.entities.Ponto.list() });
 
-  const frentistasMap = Object.fromEntries(frentistas.map(f => [f.codigo, f.nome]));
-  const motoristasMap = Object.fromEntries(motoristas.map(m => [m.codigo, m.nome]));
-  const pontosMap = Object.fromEntries(pontos.map(p => [p.codigo, p.nome]));
+  const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
+  const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
+  const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
 
   // Get unique filter values
   const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b);
