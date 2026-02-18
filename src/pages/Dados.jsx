@@ -144,7 +144,7 @@ export default function Dados() {
                       <TableCell className="text-white">{record.time}</TableCell>
                       <TableCell className="text-white font-mono">{record.vehicle_plate}</TableCell>
                       <TableCell className="text-slate-300">{record.vehicle_type || '-'}</TableCell>
-                      <TableCell className="text-slate-300 text-xs">{pontosMap[record.unit] || record.unit || '-'}</TableCell>
+                      <TableCell className="text-slate-300 text-xs">{pontosMap[String(record.unit)] || record.unit || '-'}</TableCell>
                       <TableCell className="text-slate-300">{frentistasMap[record.attendant] || record.attendant || '-'}</TableCell>
                       <TableCell className="text-slate-300">{motoristasMap[record.driver] || record.driver || '-'}</TableCell>
                       <TableCell className="text-slate-300">{record.fuel_type || '-'}</TableCell>
