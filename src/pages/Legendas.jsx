@@ -6,87 +6,117 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, Plus, Users, Fuel, MapPin } from 'lucide-react';
 
-function LegendaSection({ title, icon: Icon, entityName, labelCodigo, labelNome, color }) {
+function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, color }) {
   const queryClient = useQueryClient();
-  const [novo, setNovo] = useState({ codigo: '', nome: '' });
+  const [novo, setNovo] = useState({ codigo: '', nome: '', entity: entities[0].name });
 
-  const { data: items = [] } = useQuery({
-    queryKey: [entityName],
-    queryFn: () => base44.entities[entityName].list('codigo')
-  });
+  // Fetch all entities in this section
+  const queries = entities.map(e => useQuery({
+    queryKey: [e.name],
+    queryFn: () => base44.entities[e.name].list('codigo')
+  }));
+
+  const allItems = entities.map((e, i) => ({
+    entity: e,
+    items: queries[i].data || []
+  }));
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities[entityName].create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [entityName] });
-      setNovo({ codigo: '', nome: '' });
+    mutationFn: ({ entityName, data }) => base44.entities[entityName].create(data),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: [vars.entityName] });
+      setNovo({ ...novo, codigo: '', nome: '' });
     }
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities[entityName].delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [entityName] })
+    mutationFn: ({ entityName, id }) => base44.entities[entityName].delete(id),
+    onSuccess: (_, vars) => queryClient.invalidateQueries({ queryKey: [vars.entityName] })
   });
 
   const handleAdd = () => {
     if (!novo.codigo.trim() || !novo.nome.trim()) return;
-    createMutation.mutate({ codigo: novo.codigo.trim(), nome: novo.nome.trim() });
+    createMutation.mutate({ entityName: novo.entity, data: { codigo: novo.codigo.trim(), nome: novo.nome.trim() } });
   };
 
+  const totalItems = allItems.reduce((acc, e) => acc + e.items.length, 0);
+
+  const borderColors = { yellow: 'border-yellow-700', blue: 'border-blue-700', green: 'border-green-700' };
+  const iconColors = { yellow: 'text-yellow-400', blue: 'text-blue-400', green: 'text-green-400' };
+  const btnColors = { yellow: 'bg-yellow-600 hover:bg-yellow-700', blue: 'bg-blue-600 hover:bg-blue-700', green: 'bg-green-600 hover:bg-green-700' };
+
   return (
-    <Card className={`bg-slate-800 border-${color}-700 border`}>
+    <Card className={`bg-slate-800 border ${borderColors[color]}`}>
       <CardHeader className="pb-3">
         <CardTitle className="text-white flex items-center gap-2">
-          <Icon className={`w-5 h-5 text-${color}-400`} />
+          <Icon className={`w-5 h-5 ${iconColors[color]}`} />
           {title}
-          <span className="ml-auto text-sm font-normal text-slate-400">{items.length} cadastrados</span>
+          <span className="ml-auto text-sm font-normal text-slate-400">{totalItems} cadastrados</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Formulário de adição */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          {entities.length > 1 && (
+            <select
+              value={novo.entity}
+              onChange={(e) => setNovo({ ...novo, entity: e.target.value })}
+              className="bg-slate-700 border border-slate-600 text-white rounded px-2 py-2 text-sm"
+            >
+              {entities.map(e => (
+                <option key={e.name} value={e.name}>{e.label}</option>
+              ))}
+            </select>
+          )}
           <Input
             placeholder={labelCodigo}
             value={novo.codigo}
             onChange={(e) => setNovo({ ...novo, codigo: e.target.value })}
-            className="bg-slate-700 border-slate-600 text-white w-32"
+            className="bg-slate-700 border-slate-600 text-white w-28"
           />
           <Input
             placeholder={labelNome}
             value={novo.nome}
             onChange={(e) => setNovo({ ...novo, nome: e.target.value })}
-            className="bg-slate-700 border-slate-600 text-white flex-1"
+            className="bg-slate-700 border-slate-600 text-white flex-1 min-w-[120px]"
           />
           <Button
             onClick={handleAdd}
             disabled={createMutation.isPending || !novo.codigo || !novo.nome}
-            className={`bg-${color}-600 hover:bg-${color}-700 text-white`}
+            className={`${btnColors[color]} text-white`}
           >
             <Plus className="w-4 h-4" />
           </Button>
         </div>
 
-        {/* Lista */}
-        <div className="space-y-1 max-h-64 overflow-y-auto">
-          {items.length === 0 ? (
-            <p className="text-slate-500 text-sm text-center py-4">Nenhum cadastro ainda</p>
-          ) : (
-            items.map((item) => (
-              <div key={item.id} className="flex items-center justify-between bg-slate-700/50 rounded px-3 py-2">
-                <span className="text-slate-400 font-mono text-sm w-20">{item.codigo}</span>
-                <span className="text-white flex-1">{item.nome}</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => deleteMutation.mutate(item.id)}
-                  className="h-7 w-7 text-slate-500 hover:text-red-400"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            ))
-          )}
-        </div>
+        {/* Listas agrupadas por entidade */}
+        {allItems.map(({ entity, items }) => (
+          <div key={entity.name}>
+            {entities.length > 1 && (
+              <p className="text-slate-500 text-xs uppercase tracking-wide mb-1">{entity.label} ({items.length})</p>
+            )}
+            <div className="space-y-1 max-h-56 overflow-y-auto">
+              {items.length === 0 ? (
+                <p className="text-slate-500 text-sm text-center py-2">Nenhum cadastro ainda</p>
+              ) : (
+                items.map((item) => (
+                  <div key={item.id} className="flex items-center justify-between bg-slate-700/50 rounded px-3 py-1.5">
+                    <span className="text-slate-400 font-mono text-sm w-20">{item.codigo}</span>
+                    <span className="text-white flex-1 text-sm">{item.nome}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteMutation.mutate({ entityName: entity.name, id: item.id })}
+                      className="h-7 w-7 text-slate-500 hover:text-red-400"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        ))}
       </CardContent>
     </Card>
   );
@@ -102,25 +132,28 @@ export default function Legendas() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <LegendaSection
-          title="Frentistas"
+          title="Combustível"
           icon={Fuel}
-          entityName="Frentista"
+          entities={[{ name: 'Combustivel', label: 'Combustível' }]}
           labelCodigo="Código"
-          labelNome="Nome do frentista"
+          labelNome="Nome do combustível"
           color="yellow"
         />
         <LegendaSection
-          title="Motoristas"
+          title="Motoristas / Frentistas"
           icon={Users}
-          entityName="Motorista"
+          entities={[
+            { name: 'Motorista', label: 'Motoristas' },
+            { name: 'Frentista', label: 'Frentistas' }
+          ]}
           labelCodigo="Código"
-          labelNome="Nome do motorista"
+          labelNome="Nome"
           color="blue"
         />
         <LegendaSection
           title="Pontos / Usinas"
           icon={MapPin}
-          entityName="Ponto"
+          entities={[{ name: 'Ponto', label: 'Pontos/Usinas' }]}
           labelCodigo="Código"
           labelNome="Nome da usina"
           color="green"
