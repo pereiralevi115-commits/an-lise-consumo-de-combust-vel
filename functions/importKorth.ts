@@ -1,6 +1,6 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
-const KORTH_API_URL = 'https://www.guardianweb.com.br/webservicev1gw';
+const KORTH_API_URL = 'https://www.guardianweb.online/webservicev1gw';
 
 async function autenticar() {
   const response = await fetch(`${KORTH_API_URL}/v1/autenticar`, {
