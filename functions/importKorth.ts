@@ -20,21 +20,23 @@ async function autenticar() {
   }
 
   const data = await response.json();
-  // O token pode estar em diferentes campos dependendo da resposta
-  const token = data?.dados?.token || data.token || data.access_token;
+  console.log('Resposta autenticação:', JSON.stringify(data).substring(0, 200));
+
+  // Token está em data.dados.token
+  const token = (data.dados && data.dados.token) ? data.dados.token : (data.token || data.access_token);
   if (!token) {
-    throw new Error('Token não encontrado na resposta: ' + JSON.stringify(data));
+    throw new Error('Token não encontrado. Resposta: ' + JSON.stringify(data).substring(0, 300));
   }
   return token;
 }
 
 async function buscarAbastecimentos(token, dataIni, dataFim) {
   const url = `${KORTH_API_URL}/v2/listar/abastecimentos?dataIni=${dataIni}&dataFim=${dataFim}&referencia=data_abast`;
-  
+  console.log('Buscando URL:', url);
+
   const response = await fetch(url, {
     method: 'GET',
     headers: {
-      'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Bearer ${token}`
     }
@@ -45,11 +47,18 @@ async function buscarAbastecimentos(token, dataIni, dataFim) {
   }
 
   if (!response.ok) {
-    throw new Error(`Falha ao buscar abastecimentos: ${response.status}`);
+    const body = await response.text();
+    throw new Error(`Falha ao buscar abastecimentos: ${response.status} - ${body.substring(0, 200)}`);
   }
 
   const data = await response.json();
-  return data.dados || data.abastecimentos || data || [];
+  console.log('Campos resposta:', Object.keys(data));
+
+  // A lista pode estar em data.dados (array) ou diretamente
+  if (Array.isArray(data.dados)) return data.dados;
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data.abastecimentos)) return data.abastecimentos;
+  return [];
 }
 
 function mapearRegistro(item) {
@@ -64,7 +73,7 @@ function mapearRegistro(item) {
     fuel_type: item.combustivel || null,
     liters: item.litragem ? parseFloat(item.litragem) : 0,
     km_driven: item.medidor_unidade === 'km' ? parseFloat(item.medidor || 0) : 0,
-    cost: 0, // API não retorna custo diretamente
+    cost: 0,
     cubic_meters: null
   };
 }
@@ -79,37 +88,31 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json().catch(() => ({}));
-    
-    // Se não informar datas, busca o dia anterior
+
     let { dataIni, dataFim } = body;
     if (!dataIni || !dataFim) {
-      const hoje = new Date();
-      const ontem = new Date(hoje);
+      const ontem = new Date();
       ontem.setDate(ontem.getDate() - 1);
       const fmt = (d) => d.toISOString().split('T')[0];
       dataIni = fmt(ontem);
       dataFim = fmt(ontem);
     }
 
-    console.log(`Buscando abastecimentos de ${dataIni} até ${dataFim}`);
+    console.log(`Período: ${dataIni} até ${dataFim}`);
 
-    // 1. Autenticar
     const token = await autenticar();
-    console.log('Autenticação realizada com sucesso');
+    console.log('Token obtido com sucesso');
 
-    // 2. Buscar abastecimentos
     const abastecimentos = await buscarAbastecimentos(token, dataIni, dataFim);
-    console.log(`${abastecimentos.length} registros encontrados na API`);
+    console.log(`${abastecimentos.length} registros encontrados`);
 
     if (abastecimentos.length === 0) {
-      return Response.json({ success: true, count: 0, message: 'Nenhum abastecimento encontrado no período' });
+      return Response.json({ success: true, count: 0, periodo: `${dataIni} a ${dataFim}`, message: 'Nenhum abastecimento encontrado no período' });
     }
 
-    // 3. Mapear para o formato FuelRecord
     const records = abastecimentos.map(mapearRegistro).filter(r => r.date && r.vehicle_plate);
-    console.log(`${records.length} registros válidos para importar`);
+    console.log(`${records.length} registros válidos`);
 
-    // 4. Salvar no banco
     const saved = await base44.asServiceRole.entities.FuelRecord.bulkCreate(records);
     console.log(`${saved.length} registros salvos`);
 
