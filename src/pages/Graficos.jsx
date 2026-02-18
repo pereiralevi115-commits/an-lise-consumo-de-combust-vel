@@ -153,7 +153,7 @@ export default function Graficos() {
   // By unit and equipment type
   const byUnitAndEquipmentData = {};
   filtered.forEach(r => {
-    const key = `${r.unit.replace('CONCRETAR ', '')} - ${r.vehicle_type}`;
+    const key = `${(r.unit || '').replace('CONCRETAR ', '')} - ${r.vehicle_type}`;
     if (!byUnitAndEquipmentData[key]) {
       byUnitAndEquipmentData[key] = { name: key, liters: 0, km: 0, cost: 0 };
     }
