@@ -106,6 +106,9 @@ Deno.serve(async (req) => {
 
     const abastecimentos = await buscarAbastecimentos(token, dataIni, dataFim);
     console.log(`${abastecimentos.length} registros encontrados`);
+  if (abastecimentos.length > 0) {
+    console.log('Primeiro registro (campos brutos):', JSON.stringify(abastecimentos[0], null, 2));
+  }
 
     if (abastecimentos.length === 0) {
       return Response.json({ success: true, count: 0, periodo: `${dataIni} a ${dataFim}`, message: 'Nenhum abastecimento encontrado no período' });
