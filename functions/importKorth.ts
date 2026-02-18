@@ -123,7 +123,8 @@ Deno.serve(async (req) => {
     return Response.json({
       success: true,
       count: saved.length,
-      periodo: `${dataIni} a ${dataFim}`
+      periodo: `${dataIni} a ${dataFim}`,
+      sample: abastecimentos[0] || null
     });
 
   } catch (error) {
