@@ -136,15 +136,15 @@ export default function Dados() {
                       </TableCell>
                       <TableCell className="text-white">{record.time}</TableCell>
                       <TableCell className="text-white font-mono">{record.vehicle_plate}</TableCell>
-                      <TableCell className="text-slate-300">{record.vehicle_type}</TableCell>
-                      <TableCell className="text-slate-300">{record.unit}</TableCell>
-                      <TableCell className="text-slate-300">{record.attendant}</TableCell>
-                      <TableCell className="text-slate-300">{record.driver}</TableCell>
-                      <TableCell className="text-slate-300">{record.fuel_type}</TableCell>
-                      <TableCell className="text-white text-right">{record.liters?.toFixed(1)}</TableCell>
-                      <TableCell className="text-white text-right">{record.km_driven?.toFixed(0)}</TableCell>
-                      <TableCell className="text-white text-right">R$ {record.cost?.toFixed(2)}</TableCell>
-                      <TableCell className="text-white text-right">{record.cubic_meters?.toFixed(2)}</TableCell>
+                      <TableCell className="text-slate-300">{record.vehicle_type || '-'}</TableCell>
+                      <TableCell className="text-slate-300 font-mono text-xs">{record.unit || '-'}</TableCell>
+                      <TableCell className="text-slate-300">{record.attendant || '-'}</TableCell>
+                      <TableCell className="text-slate-300">{record.driver || '-'}</TableCell>
+                      <TableCell className="text-slate-300">{record.fuel_type || '-'}</TableCell>
+                      <TableCell className="text-white text-right">{record.liters != null ? record.liters.toFixed(3) : '-'}</TableCell>
+                      <TableCell className="text-white text-right">{record.km_driven != null && record.km_driven > 0 ? record.km_driven.toFixed(0) : '-'}</TableCell>
+                      <TableCell className="text-white text-right">{record.cost != null && record.cost > 0 ? `R$ ${record.cost.toFixed(2)}` : '-'}</TableCell>
+                      <TableCell className="text-white text-right">{record.cubic_meters != null ? record.cubic_meters.toFixed(2) : '-'}</TableCell>
                     </TableRow>
                   ))
                 )}
