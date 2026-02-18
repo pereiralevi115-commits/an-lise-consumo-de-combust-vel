@@ -31,12 +31,13 @@ async function autenticar() {
 }
 
 async function buscarAbastecimentos(token, dataIni, dataFim) {
-  const url = `${KORTH_API_URL}/v2/listar/abastecimentos?dataIni=${dataIni}&dataFim=${dataFim}&referencia=data_abast`;
+  const url = `${KORTH_API_URL}/v2/listar/abastecimentos?dataIni=${dataIni}&dataFim=${dataFim}&referencia=data_integ&allData=true`;
   console.log('Buscando URL:', url);
 
   const response = await fetch(url, {
     method: 'GET',
     headers: {
+      'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Authorization': `Bearer ${token}`
     }
