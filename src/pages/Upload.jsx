@@ -63,6 +63,30 @@ export default function Upload() {
 
 
 
+  const handleKorthImport = async () => {
+    setIsImportingKorth(true);
+    setKorthResult(null);
+    try {
+      const payload = {};
+      if (dataIni) payload.dataIni = dataIni;
+      if (dataFim) payload.dataFim = dataFim;
+
+      const response = await base44.functions.invoke('importKorth', payload);
+      setKorthResult({
+        success: true,
+        message: `${response.data.count} registros importados do Korth Guardian (${response.data.periodo})!`
+      });
+      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+    } catch (error) {
+      setKorthResult({
+        success: false,
+        message: error.response?.data?.error || error.message || 'Erro ao importar do Korth Guardian'
+      });
+    } finally {
+      setIsImportingKorth(false);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       <div>
