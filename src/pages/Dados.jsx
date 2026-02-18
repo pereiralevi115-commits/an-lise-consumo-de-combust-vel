@@ -133,7 +133,7 @@ export default function Dados() {
               <TableBody>
                 {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={12} className="text-center text-slate-400 py-8">
+                      <TableCell colSpan={11} className="text-center text-slate-400 py-8">
                         Nenhum registro encontrado
                       </TableCell>
                     </TableRow>
