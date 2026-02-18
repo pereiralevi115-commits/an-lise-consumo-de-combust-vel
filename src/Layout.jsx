@@ -7,7 +7,8 @@ export default function Layout({ children, currentPageName }) {
   const navItems = [
     { name: 'Gráficos', page: 'Graficos', icon: BarChart3 },
     { name: 'Dados', page: 'Dados', icon: Table2 },
-    { name: 'Upload', page: 'Upload', icon: Upload }
+    { name: 'Upload', page: 'Upload', icon: Upload },
+    { name: 'Legendas', page: 'Legendas', icon: Upload }
   ];
 
   return (
