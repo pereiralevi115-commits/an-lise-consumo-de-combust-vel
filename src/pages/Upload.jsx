@@ -94,6 +94,60 @@ export default function Upload() {
         <p className="text-slate-400">Importe arquivos PDF com os dados de combustível</p>
       </div>
 
+      {/* Korth Guardian Integration */}
+      <Card className="bg-gradient-to-r from-blue-900/20 to-blue-800/20 border-blue-600">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <RefreshCw className="w-5 h-5 text-blue-400" />
+            Importar do Korth Guardian
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-slate-400 text-sm">
+            Busca os abastecimentos diretamente da API do Korth Guardian. Se não informar datas, importa o dia anterior automaticamente.
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label className="text-slate-300 text-sm">Data Início</Label>
+              <Input
+                type="date"
+                value={dataIni}
+                onChange={(e) => setDataIni(e.target.value)}
+                className="bg-slate-800 border-slate-600 text-white"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-slate-300 text-sm">Data Fim</Label>
+              <Input
+                type="date"
+                value={dataFim}
+                onChange={(e) => setDataFim(e.target.value)}
+                className="bg-slate-800 border-slate-600 text-white"
+              />
+            </div>
+          </div>
+          <Button
+            onClick={handleKorthImport}
+            disabled={isImportingKorth}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            {isImportingKorth ? (
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Importando...</>
+            ) : (
+              <><RefreshCw className="w-4 h-4 mr-2" /> Importar Agora</>
+            )}
+          </Button>
+          {korthResult && (
+            <Alert className={korthResult.success ? 'bg-blue-900/20 border-blue-600 text-blue-100' : 'bg-red-900/20 border-red-600 text-red-100'}>
+              <AlertDescription className="flex items-center gap-2">
+                {korthResult.success ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                {korthResult.message}
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Upload Excel */}
           <Card className="bg-gradient-to-r from-green-900/20 to-green-800/20 border-green-600">
         <CardHeader>
