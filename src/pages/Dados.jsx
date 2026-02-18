@@ -119,7 +119,7 @@ export default function Dados() {
                   <TableHead className="text-slate-300">Data</TableHead>
                   <TableHead className="text-slate-300">Hora</TableHead>
                   <TableHead className="text-slate-300">Placa</TableHead>
-                  <TableHead className="text-slate-300">Medidor</TableHead>
+
                   <TableHead className="text-slate-300">Ponto (Usina)</TableHead>
                   <TableHead className="text-slate-300">Cód. Frentista</TableHead>
                   <TableHead className="text-slate-300">Cód. Motorista</TableHead>
