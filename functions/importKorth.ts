@@ -21,7 +21,7 @@ async function autenticar() {
 
   const data = await response.json();
   // O token pode estar em diferentes campos dependendo da resposta
-  const token = data.token || data.access_token || data.jwt || data.bearer;
+  const token = data?.dados?.token || data.token || data.access_token;
   if (!token) {
     throw new Error('Token não encontrado na resposta: ' + JSON.stringify(data));
   }
