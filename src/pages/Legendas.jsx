@@ -10,15 +10,13 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
   const queryClient = useQueryClient();
   const [novo, setNovo] = useState({ codigo: '', nome: '', entity: entities[0].name });
 
-  // Fetch all entities in this section
-  const queries = entities.map(e => useQuery({
-    queryKey: [e.name],
-    queryFn: () => base44.entities[e.name].list('codigo')
-  }));
+  // Fetch entities individually (hooks cannot be called in loops)
+  const query0 = useQuery({ queryKey: [entities[0]?.name], queryFn: () => base44.entities[entities[0].name].list('codigo'), enabled: !!entities[0] });
+  const query1 = useQuery({ queryKey: [entities[1]?.name], queryFn: () => base44.entities[entities[1]?.name]?.list('codigo'), enabled: !!entities[1] });
 
   const allItems = entities.map((e, i) => ({
     entity: e,
-    items: queries[i].data || []
+    items: (i === 0 ? query0.data : query1.data) || []
   }));
 
   const createMutation = useMutation({
