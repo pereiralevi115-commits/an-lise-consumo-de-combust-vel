@@ -155,7 +155,7 @@ export default function MetrosCubicos() {
                     <TableCell colSpan={5} className="text-center text-slate-400 py-8">Nenhum registro encontrado</TableCell>
                   </TableRow>
                 ) : (
-                  records.map((r) => (
+                  sortedRecords.map((r) => (
                     <TableRow key={r.id} className="border-slate-700 hover:bg-slate-700/30">
                       <TableCell className="text-white">{formatMes(r.mes)}</TableCell>
                       <TableCell className="text-white font-mono">{r.placa}</TableCell>
