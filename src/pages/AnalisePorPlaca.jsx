@@ -120,7 +120,7 @@ export default function AnalisePorPlaca() {
       month: item.month,
       plate: item.plate,
       unit: pontosMap[String(item.unit)] || item.unit || '-',
-      equipment: item.equipment || '-',
+      equipment: '-',
       vehicle_type: item.vehicle_type || '-',
       driver: motoristasMap[String(item.driver)] || item.driver || '-',
       fuelType: combustiveisMap[String(item.fuelType)] || item.fuelType || '-',
