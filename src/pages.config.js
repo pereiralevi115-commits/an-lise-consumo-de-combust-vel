@@ -52,6 +52,7 @@ import Graficos from './pages/Graficos';
 import Legendas from './pages/Legendas';
 import MetrosCubicos from './pages/MetrosCubicos';
 import Upload from './pages/Upload';
+import AnalisePorPlaca from './pages/AnalisePorPlaca';
 import __Layout from './Layout.jsx';
 
 
@@ -61,6 +62,7 @@ export const PAGES = {
     "Legendas": Legendas,
     "MetrosCubicos": MetrosCubicos,
     "Upload": Upload,
+    "AnalisePorPlaca": AnalisePorPlaca,
 }
 
 export const pagesConfig = {
