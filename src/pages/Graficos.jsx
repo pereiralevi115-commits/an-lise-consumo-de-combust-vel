@@ -75,8 +75,7 @@ export default function Graficos() {
           type: '',
           unit: '',
           plate: '',
-          driver: '',
-          equipment: ''
+          driver: ''
         });
 
         const { data: records = [], isLoading } = useQuery({
@@ -182,7 +181,6 @@ export default function Graficos() {
   const units = [...new Set(analysisData.map(d => d.unit))].filter(Boolean).sort();
   const plates = [...new Set(analysisData.map(d => d.plate))].filter(Boolean).sort();
   const drivers = [...new Set(analysisData.map(d => d.driver))].filter(Boolean).sort();
-  const equipments = [...new Set(analysisData.map(d => d.equipment))].filter(Boolean).sort();
 
   // Apply filters to analysisData
   const filtered = analysisData.filter(d => {
@@ -192,7 +190,6 @@ export default function Graficos() {
     if (filters.unit && d.unit !== filters.unit) return false;
     if (filters.plate && d.plate !== filters.plate) return false;
     if (filters.driver && d.driver !== filters.driver) return false;
-    if (filters.equipment && d.equipment !== filters.equipment) return false;
     return true;
   });
 
@@ -565,22 +562,13 @@ export default function Graficos() {
           </select>
 
           <select 
-            value={filters.driver} 
-            onChange={(e) => setFilters({...filters, driver: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
-          >
-            <option value="">Todos motoristas</option>
-            {drivers.map(d => <option key={d} value={d}>{d}</option>)}
-          </select>
-
-          <select 
-            value={filters.equipment} 
-            onChange={(e) => setFilters({...filters, equipment: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
-          >
-            <option value="">Todos equipamentos</option>
-            {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
-          </select>
+             value={filters.driver} 
+             onChange={(e) => setFilters({...filters, driver: e.target.value})}
+             className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+           >
+             <option value="">Todos motoristas</option>
+             {drivers.map(d => <option key={d} value={d}>{d}</option>)}
+           </select>
         </div>
 
         <p className="text-slate-400 mb-6">Total de {filtered.length} registros</p>
