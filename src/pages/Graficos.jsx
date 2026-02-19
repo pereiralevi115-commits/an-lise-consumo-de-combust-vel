@@ -131,16 +131,31 @@ export default function Graficos() {
 
   const totalKm = calcKmByPlate(filtered);
 
-  // Monthly data
+  // Monthly data - KM calculado por placa (último - primeiro) por mês
   const monthlyData = {};
   filtered.forEach(r => {
     const monthName = monthNames[parseISO(r.date).getMonth()];
     if (!monthlyData[monthName]) {
-      monthlyData[monthName] = { name: monthName, liters: 0, km: 0, cost: 0 };
+      monthlyData[monthName] = { name: monthName, liters: 0, km: 0, cost: 0, _plateGroups: {} };
     }
     monthlyData[monthName].liters += r.liters || 0;
-    monthlyData[monthName].km += r.km_driven || 0;
     monthlyData[monthName].cost += r.cost || 0;
+    if (r.vehicle_plate && Number(r.km_driven) > 0) {
+      if (!monthlyData[monthName]._plateGroups[r.vehicle_plate]) monthlyData[monthName]._plateGroups[r.vehicle_plate] = [];
+      monthlyData[monthName]._plateGroups[r.vehicle_plate].push(r);
+    }
+  });
+  Object.values(monthlyData).forEach(m => {
+    let kmTotal = 0;
+    Object.values(m._plateGroups).forEach(group => {
+      const sorted = group.sort((a, b) => ((a.date || '') + (a.time || '')) < ((b.date || '') + (b.time || '')) ? -1 : 1);
+      if (sorted.length >= 2) {
+        const diff = Number(sorted[sorted.length - 1].km_driven) - Number(sorted[0].km_driven);
+        if (diff > 0) kmTotal += diff;
+      }
+    });
+    m.km = kmTotal;
+    delete m._plateGroups;
   });
   const chartData = Object.values(monthlyData)
     .filter(d => d.liters > 0 || d.km > 0 || d.cost > 0)
