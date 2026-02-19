@@ -106,8 +106,30 @@ export default function Graficos() {
 
   const totalLiters = filtered.reduce((sum, r) => sum + (r.liters || 0), 0);
   const totalCost = filtered.reduce((sum, r) => sum + (r.cost || 0), 0);
-  const totalKm = filtered.reduce((sum, r) => sum + (r.km_driven || 0), 0);
   const totalM3 = filtered.filter(r => r.vehicle_type === 'CAMINHÃO BETONEIRA').reduce((sum, r) => sum + (r.cubic_meters || 0), 0);
+
+  // Calcula KM percorrido por placa: último KM - primeiro KM (ordenado por data+hora)
+  const calcKmByPlate = (recs) => {
+    const groups = {};
+    recs.forEach(r => {
+      if (!r.vehicle_plate || !Number(r.km_driven) > 0) return;
+      if (!groups[r.vehicle_plate]) groups[r.vehicle_plate] = [];
+      groups[r.vehicle_plate].push(r);
+    });
+    let total = 0;
+    Object.values(groups).forEach(group => {
+      const sorted = group
+        .filter(r => Number(r.km_driven) > 0)
+        .sort((a, b) => ((a.date || '') + (a.time || '')) < ((b.date || '') + (b.time || '')) ? -1 : 1);
+      if (sorted.length >= 2) {
+        const diff = Number(sorted[sorted.length - 1].km_driven) - Number(sorted[0].km_driven);
+        if (diff > 0) total += diff;
+      }
+    });
+    return total;
+  };
+
+  const totalKm = calcKmByPlate(filtered);
 
   // Monthly data
   const monthlyData = {};
