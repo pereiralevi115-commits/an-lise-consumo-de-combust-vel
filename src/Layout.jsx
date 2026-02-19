@@ -6,11 +6,11 @@ import { BarChart3, Table2, Upload, BookOpen, Box } from 'lucide-react';
 export default function Layout({ children, currentPageName }) {
   const navItems = [
     { name: 'Gráficos', page: 'Graficos', icon: BarChart3 },
-    { name: 'Dados', page: 'Dados', icon: Table2 },
     { name: 'Análise', page: 'AnalisePorPlaca', icon: Box },
+    { name: 'Dados', page: 'Dados', icon: Table2 },
+    { name: 'M³', page: 'MetrosCubicos', icon: Box },
     { name: 'Upload', page: 'Upload', icon: Upload },
-    { name: 'Legendas', page: 'Legendas', icon: BookOpen },
-    { name: 'M³', page: 'MetrosCubicos', icon: Box }
+    { name: 'Legendas', page: 'Legendas', icon: BookOpen }
   ];
 
   return (
