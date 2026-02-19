@@ -235,6 +235,7 @@ export default function AnalisePorPlaca() {
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
                   <TableHead className="text-slate-300">Tipo</TableHead>
+                  <TableHead className="text-slate-300">Equipamentos</TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('fuelType')}>Combustível<SortIcon field="fuelType" /></TableHead>
                   <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('totalLiters')}>Litros<SortIcon field="totalLiters" /></TableHead>
@@ -257,6 +258,7 @@ export default function AnalisePorPlaca() {
                       <TableCell className="text-white font-mono font-bold">{item.plate}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{item.unit}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{item.vehicle_type}</TableCell>
+                      <TableCell className="text-slate-300 text-sm">{item.equipment}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{item.driver}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{item.fuelType}</TableCell>
                       <TableCell className="text-white text-right">{item.totalLiters.toFixed(2)} L</TableCell>
