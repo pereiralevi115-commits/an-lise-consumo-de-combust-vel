@@ -129,6 +129,10 @@ export default function Legendas() {
         <p className="text-slate-400">Cadastre os códigos e nomes para exibição na tela de Dados</p>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <ValorCalculado />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <LegendaSection
           title="Combustível"
