@@ -143,7 +143,7 @@ export default function Dados() {
                   <TableHead className="text-slate-300">Hora</TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
-                  <TableHead className="text-slate-300">Equipamento</TableHead>
+                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('equipamento')}>Equipamento<SortIcon field="equipamento" /></TableHead>
                   <TableHead className="text-slate-300">Frentista</TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
                   <TableHead className="text-slate-300">Combustível</TableHead>
