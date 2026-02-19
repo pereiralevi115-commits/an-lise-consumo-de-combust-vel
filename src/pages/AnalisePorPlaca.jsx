@@ -131,7 +131,7 @@ export default function AnalisePorPlaca() {
       m3: m3,
       cost: item.cost,
       efficiency: item.totalLiters > 0 ? (kmDelta / item.totalLiters).toFixed(2) : 0,
-      efficiencyCost: item.cost > 0 ? (kmDelta / item.cost).toFixed(2) : 0
+      efficiencyCost: item.cost > 0 ? (item.cost / kmDelta).toFixed(2) : 0
     };
   });
 
