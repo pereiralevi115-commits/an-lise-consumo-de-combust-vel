@@ -30,6 +30,7 @@ export default function Dados() {
   const { data: motoristas = [] } = useQuery({ queryKey: ['Motorista'], queryFn: () => base44.entities.Motorista.list() });
   const { data: pontos = [] } = useQuery({ queryKey: ['Ponto'], queryFn: () => base44.entities.Ponto.list() });
   const { data: combustiveis = [] } = useQuery({ queryKey: ['Combustivel'], queryFn: () => base44.entities.Combustivel.list() });
+  const { data: placaEquipamentos = [] } = useQuery({ queryKey: ['PlacaEquipamento'], queryFn: () => base44.entities.PlacaEquipamento.list('placa', 10000) });
   const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
   const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
   const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
