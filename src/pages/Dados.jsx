@@ -249,37 +249,21 @@ export default function Dados() {
                       <TableCell className="text-slate-300">{combustiveisMap[String(record.fuel_type)] || record.fuel_type || '-'}</TableCell>
                        <TableCell className="text-white text-right">{record.liters != null ? record.liters.toFixed(3) : '-'}</TableCell>
                        <TableCell className="text-slate-300">{placaEquipamentosMap[String(record.vehicle_plate).toUpperCase()] || record.vehicle_type || '-'}</TableCell>
-                       <TableCell className="text-slate-300 text-sm"><div className="space-y-1"><div><span className="font-semibold">Hora:</span> {record.time || '-'}</div><div><span className="font-semibold">KM:</span> 
-                        {kmInconsistencyIds.has(record.id) ? (
-                          editingKm?.id === record.id ? (
-                            <div className="flex items-center gap-1 justify-end">
-                              <input
-                                type="number"
-                                className="w-24 bg-slate-700 text-white border border-yellow-400 rounded px-2 py-0.5 text-right text-sm"
-                                value={editingKm.value}
-                                onChange={e => setEditingKm({ id: record.id, value: e.target.value })}
-                                onKeyDown={e => {
-                                  if (e.key === 'Enter') saveKm(record.id, editingKm.value);
-                                  if (e.key === 'Escape') setEditingKm(null);
-                                }}
-                                autoFocus
-                              />
-                              <button onClick={() => saveKm(record.id, editingKm.value)} className="text-green-400 hover:text-green-300"><Check className="w-4 h-4" /></button>
-                              <button onClick={() => setEditingKm(null)} className="text-red-400 hover:text-red-300"><X className="w-4 h-4" /></button>
-                            </div>
-                          ) : (
-                            <span
-                              className="cursor-pointer underline decoration-dotted text-red-300 hover:text-yellow-300"
-                              title="Clique para editar"
-                              onClick={() => setEditingKm({ id: record.id, value: record.km_driven || '' })}
-                            >
-                              {record.km_driven != null && record.km_driven > 0 ? record.km_driven.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '-'}
-                            </span>
-                          )
-                        ) : (
-                          record.km_driven != null && record.km_driven > 0 ? record.km_driven.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '-'
-                        )}
-                      </TableCell>
+                       <TableCell className="text-slate-300 text-sm">
+                         <div className="space-y-1">
+                           <div><span className="font-semibold">Hora:</span> {record.time || '-'}</div>
+                           <div><span className="font-semibold">KM:</span> {kmInconsistencyIds.has(record.id) ? (
+                             editingKm?.id === record.id ? (
+                               <input type="number" className="w-20 bg-slate-700 text-white border border-yellow-400 rounded px-2 py-0.5 text-right text-sm" value={editingKm.value} onChange={e => setEditingKm({ id: record.id, value: e.target.value })} onKeyDown={e => { if (e.key === 'Enter') saveKm(record.id, editingKm.value); if (e.key === 'Escape') setEditingKm(null); }} autoFocus />
+                             ) : (
+                               <span className="cursor-pointer underline decoration-dotted text-red-300 hover:text-yellow-300" title="Clique para editar" onClick={() => setEditingKm({ id: record.id, value: record.km_driven || '' })}>{record.km_driven != null && record.km_driven > 0 ? record.km_driven.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '-'}</span>
+                             )
+                           ) : (
+                             record.km_driven != null && record.km_driven > 0 ? record.km_driven.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '-'
+                           )}</div>
+                           <div><span className="font-semibold">Motorista:</span> {motoristasMap[String(record.driver)] || record.driver || '-'}</div>
+                         </div>
+                       </TableCell>
                       <TableCell className="text-white text-right">{record.cost != null && record.cost > 0 ? `R$ ${record.cost.toFixed(2)}` : '-'}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{record.created_date ? format(parseISO(record.created_date), 'dd/MM/yyyy HH:mm', { locale: ptBR }) : '-'}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{record.created_by || '-'}</TableCell>
