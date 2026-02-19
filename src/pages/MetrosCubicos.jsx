@@ -9,6 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 export default function MetrosCubicos() {
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState(null); // { type: 'success'|'error', message: string }
+  const [sortBy, setSortBy] = useState('mes');
+  const [sortDir, setSortDir] = useState('asc');
   const queryClient = useQueryClient();
 
   const { data: records = [], isLoading } = useQuery({
@@ -22,6 +24,27 @@ export default function MetrosCubicos() {
   });
 
   const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
+
+  const toggleSort = (field) => {
+    if (sortBy === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortBy(field); setSortDir('asc'); }
+  };
+
+  const SortIcon = ({ field }) => {
+    if (sortBy !== field) return <span className="text-slate-600 ml-1">↕</span>;
+    return <span className="text-yellow-400 ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>;
+  };
+
+  const sortedRecords = [...records].sort((a, b) => {
+    let valA, valB;
+    if (sortBy === 'mes') { valA = a.mes; valB = b.mes; }
+    else if (sortBy === 'placa') { valA = a.placa; valB = b.placa; }
+    else if (sortBy === 'equipamento') { valA = placaEquipamentosMap[String(a.placa).toUpperCase()] || a.equipamento; valB = placaEquipamentosMap[String(b.placa).toUpperCase()] || b.equipamento; }
+    else if (sortBy === 'm3') { valA = a.metros_cubicos; valB = b.metros_cubicos; }
+    
+    const cmp = typeof valA === 'string' ? valA.localeCompare(valB) : (valA < valB ? -1 : valA > valB ? 1 : 0);
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
@@ -117,10 +140,10 @@ export default function MetrosCubicos() {
             <Table>
               <TableHeader>
                 <TableRow className="border-slate-700 hover:bg-slate-700/50">
-                  <TableHead className="text-slate-300">Mês</TableHead>
-                  <TableHead className="text-slate-300">Placa</TableHead>
-                  <TableHead className="text-slate-300">Equipamento</TableHead>
-                  <TableHead className="text-slate-300 text-right">M³</TableHead>
+                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('mes')}>Mês<SortIcon field="mes" /></TableHead>
+                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('placa')}>Placa<SortIcon field="placa" /></TableHead>
+                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('equipamento')}>Equipamento<SortIcon field="equipamento" /></TableHead>
+                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('m3')}>M³<SortIcon field="m3" /></TableHead>
                   <TableHead className="text-slate-300 text-right w-16"></TableHead>
                 </TableRow>
               </TableHeader>
