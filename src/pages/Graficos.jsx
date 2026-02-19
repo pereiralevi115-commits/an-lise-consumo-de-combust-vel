@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
       import { base44 } from '@/api/base44Client';
       import { useQuery, useQueryClient } from '@tanstack/react-query';
       import { ComposedChart, Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
@@ -83,99 +83,143 @@ export default function Graficos() {
           queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
         });
 
+        const { data: cubicMetros = [] } = useQuery({
+          queryKey: ['cubicMetros'],
+          queryFn: () => base44.entities.CubicMetros.list()
+        });
+
+        const { data: motoristas = [] } = useQuery({
+          queryKey: ['Motorista'],
+          queryFn: () => base44.entities.Motorista.list()
+        });
+
         const { data: pontos = [] } = useQuery({
           queryKey: ['Ponto'],
           queryFn: () => base44.entities.Ponto.list()
         });
+
+        const { data: placaEquipamentos = [] } = useQuery({
+          queryKey: ['PlacaEquipamento'],
+          queryFn: () => base44.entities.PlacaEquipamento.list('placa', 10000)
+        });
+
         const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
+        const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
+        const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
 
   const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+  // Compute analysisData like AnalisePorPlaca does
+  const analysisData = useMemo(() => {
+    const groupedData = {};
+    
+    records.forEach(r => {
+      if (!r.date || !r.vehicle_plate) return;
+      
+      const month = parseISO(r.date).getMonth();
+      const year = parseISO(r.date).getFullYear();
+      const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+      const plateKey = r.vehicle_plate.toUpperCase();
+      const groupKey = `${monthKey}-${plateKey}`;
+
+      if (!groupedData[groupKey]) {
+        groupedData[groupKey] = {
+          month: monthNames[month],
+          year: year,
+          monthKey: monthKey,
+          plate: r.vehicle_plate,
+          unit: r.unit,
+          equipment: placaEquipamentosMap[plateKey] || r.vehicle_type || '',
+          vehicle_type: r.vehicle_type,
+          driver: r.driver,
+          totalLiters: 0,
+          kmRecords: [],
+          cost: 0
+        };
+      }
+
+      groupedData[groupKey].totalLiters += r.liters || 0;
+      groupedData[groupKey].cost += r.cost || 0;
+      if (Number(r.km_driven) > 0) {
+        groupedData[groupKey].kmRecords.push(Number(r.km_driven));
+      }
+    });
+
+    return Object.values(groupedData).map(item => {
+      const kmDelta = item.kmRecords.length > 0 
+        ? Math.max(...item.kmRecords) - Math.min(...item.kmRecords)
+        : 0;
+
+      const m3Data = cubicMetros.find(cm => 
+        String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() && 
+        cm.mes === item.monthKey
+      );
+      const m3 = m3Data ? Number(m3Data.metros_cubicos) : 0;
+
+      return {
+        month: item.month,
+        monthKey: item.monthKey,
+        year: item.year,
+        plate: item.plate,
+        unit: pontosMap[String(item.unit)] || item.unit || '-',
+        equipment: item.equipment || '-',
+        vehicle_type: item.vehicle_type,
+        driver: motoristasMap[String(item.driver)] || item.driver || '-',
+        totalLiters: item.totalLiters,
+        kmDelta: kmDelta,
+        m3: m3,
+        cost: item.cost,
+        efficiency: item.totalLiters > 0 ? (kmDelta / item.totalLiters).toFixed(2) : 0
+      };
+    });
+  }, [records, cubicMetros, placaEquipamentosMap, motoristasMap, pontosMap, monthNames]);
   
   // Get unique filter values
-  const years = [...new Set(records.map(r => r.date ? parseISO(r.date).getFullYear() : null))].filter(y => y !== null).sort((a, b) => b - a);
+  const years = [...new Set(analysisData.map(d => d.year))].sort((a, b) => b - a);
   const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b);
-  const types = [...new Set(records.map(r => r.vehicle_type))].filter(Boolean).sort();
-  const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
-  const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
-  const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort();
+  const types = [...new Set(analysisData.map(d => d.vehicle_type))].filter(Boolean).sort();
+  const units = [...new Set(analysisData.map(d => d.unit))].filter(Boolean).sort();
+  const plates = [...new Set(analysisData.map(d => d.plate))].filter(Boolean).sort();
+  const drivers = [...new Set(analysisData.map(d => d.driver))].filter(Boolean).sort();
 
-  // Apply filters
-  const filtered = records.filter(r => {
-    if (filters.year && parseISO(r.date).getFullYear() !== parseInt(filters.year)) return false;
-    if (filters.month && parseISO(r.date).getMonth() !== parseInt(filters.month)) return false;
-    if (filters.type && r.vehicle_type !== filters.type) return false;
-    if (filters.unit && r.unit !== filters.unit) return false;
-    if (filters.plate && r.vehicle_plate !== filters.plate) return false;
-    if (filters.driver && r.driver !== filters.driver) return false;
+  // Apply filters to analysisData
+  const filtered = analysisData.filter(d => {
+    if (filters.year && d.year !== parseInt(filters.year)) return false;
+    if (filters.month && monthNames[parseInt(filters.month)] !== d.month) return false;
+    if (filters.type && d.vehicle_type !== filters.type) return false;
+    if (filters.unit && d.unit !== filters.unit) return false;
+    if (filters.plate && d.plate !== filters.plate) return false;
+    if (filters.driver && d.driver !== filters.driver) return false;
     return true;
   });
 
-  const totalLiters = filtered.reduce((sum, r) => sum + (r.liters || 0), 0);
-  const totalCost = filtered.reduce((sum, r) => sum + (r.cost || 0), 0);
-  const totalM3 = filtered.filter(r => r.vehicle_type === 'CAMINHÃO BETONEIRA').reduce((sum, r) => sum + (r.cubic_meters || 0), 0);
+  const totalLiters = filtered.reduce((sum, d) => sum + (d.totalLiters || 0), 0);
+  const totalCost = filtered.reduce((sum, d) => sum + (d.cost || 0), 0);
+  const totalM3 = filtered.filter(d => d.vehicle_type === 'CAMINHÃO BETONEIRA').reduce((sum, d) => sum + (d.m3 || 0), 0);
+  const totalKm = filtered.reduce((sum, d) => sum + (d.kmDelta || 0), 0);
 
-  // Calcula KM percorrido por placa: último KM - primeiro KM (ordenado por data+hora)
-  const calcKmByPlate = (recs) => {
-    const groups = {};
-    recs.forEach(r => {
-      if (!r.vehicle_plate || !(Number(r.km_driven) > 0)) return;
-      if (!groups[r.vehicle_plate]) groups[r.vehicle_plate] = [];
-      groups[r.vehicle_plate].push(r);
-    });
-    let total = 0;
-    Object.values(groups).forEach(group => {
-      const sorted = group
-        .filter(r => Number(r.km_driven) > 0)
-        .sort((a, b) => ((a.date || '') + (a.time || '')) < ((b.date || '') + (b.time || '')) ? -1 : 1);
-      if (sorted.length >= 2) {
-        const diff = Number(sorted[sorted.length - 1].km_driven) - Number(sorted[0].km_driven);
-        if (diff > 0) total += diff;
-      }
-    });
-    return total;
-  };
-
-  const totalKm = calcKmByPlate(filtered);
-
-  // Monthly data - KM calculado por placa (último - primeiro) por mês
+  // Monthly data - agregado de analysisData
   const monthlyData = {};
-  filtered.forEach(r => {
-    const monthName = monthNames[parseISO(r.date).getMonth()];
-    if (!monthlyData[monthName]) {
-      monthlyData[monthName] = { name: monthName, liters: 0, km: 0, cost: 0, _plateGroups: {} };
+  filtered.forEach(d => {
+    if (!monthlyData[d.month]) {
+      monthlyData[d.month] = { name: d.month, liters: 0, km: 0, cost: 0 };
     }
-    monthlyData[monthName].liters += r.liters || 0;
-    monthlyData[monthName].cost += r.cost || 0;
-    if (r.vehicle_plate && Number(r.km_driven) > 0) {
-      if (!monthlyData[monthName]._plateGroups[r.vehicle_plate]) monthlyData[monthName]._plateGroups[r.vehicle_plate] = [];
-      monthlyData[monthName]._plateGroups[r.vehicle_plate].push(r);
-    }
-  });
-  Object.values(monthlyData).forEach(m => {
-    let kmTotal = 0;
-    Object.values(m._plateGroups).forEach(group => {
-      const sorted = group.sort((a, b) => ((a.date || '') + (a.time || '')) < ((b.date || '') + (b.time || '')) ? -1 : 1);
-      if (sorted.length >= 2) {
-        const diff = Number(sorted[sorted.length - 1].km_driven) - Number(sorted[0].km_driven);
-        if (diff > 0) kmTotal += diff;
-      }
-    });
-    m.km = kmTotal;
-    delete m._plateGroups;
+    monthlyData[d.month].liters += d.totalLiters || 0;
+    monthlyData[d.month].km += d.kmDelta || 0;
+    monthlyData[d.month].cost += d.cost || 0;
   });
   const chartData = Object.values(monthlyData)
     .filter(d => d.liters > 0 || d.km > 0 || d.cost > 0)
     .sort((a, b) => monthNames.indexOf(a.name) - monthNames.indexOf(b.name));
 
-  // By unit - KM calculado por placa (último - primeiro) por usina
+  // By unit - agregado de analysisData
   const byUnitData = units.map(unit => {
-    const unitRecords = filtered.filter(r => r.unit === unit);
-    const liters = unitRecords.reduce((sum, r) => sum + (r.liters || 0), 0);
-    const cost = unitRecords.reduce((sum, r) => sum + (r.cost || 0), 0);
-    const km = calcKmByPlate(unitRecords);
-    const nomeUsina = pontosMap[String(unit)] || unit;
+    const unitData = filtered.filter(d => d.unit === unit);
+    const liters = unitData.reduce((sum, d) => sum + (d.totalLiters || 0), 0);
+    const km = unitData.reduce((sum, d) => sum + (d.kmDelta || 0), 0);
+    const cost = unitData.reduce((sum, d) => sum + (d.cost || 0), 0);
     return {
-      name: nomeUsina.replace('CONCRETAR ', ''),
+      name: unit.replace('CONCRETAR ', ''),
       liters,
       km,
       cost,
@@ -185,49 +229,19 @@ export default function Graficos() {
     .filter(d => d.liters > 0 || d.km > 0 || d.cost > 0)
     .sort((a, b) => a.cost - b.cost);
 
-  // By equipment - with correct KM calculation per plate
+  // By equipment - agregado de analysisData
   const byEquipmentData = {};
-  filtered.forEach(r => {
-    if (!byEquipmentData[r.vehicle_type]) {
-      byEquipmentData[r.vehicle_type] = { liters: 0, cost: 0, m3: 0, plateGroups: {} };
+  filtered.forEach(d => {
+    const eqType = d.vehicle_type;
+    if (!byEquipmentData[eqType]) {
+      byEquipmentData[eqType] = { liters: 0, cost: 0, m3: 0, km: 0 };
     }
-    byEquipmentData[r.vehicle_type].liters += r.liters || 0;
-    byEquipmentData[r.vehicle_type].cost += r.cost || 0;
-    byEquipmentData[r.vehicle_type].m3 += r.cubic_meters || 0;
-    
-    if (r.vehicle_plate && Number(r.km_driven) > 0) {
-      if (!byEquipmentData[r.vehicle_type].plateGroups[r.vehicle_plate]) {
-        byEquipmentData[r.vehicle_type].plateGroups[r.vehicle_plate] = [];
-      }
-      byEquipmentData[r.vehicle_type].plateGroups[r.vehicle_plate].push(r);
-    }
+    byEquipmentData[eqType].liters += d.totalLiters || 0;
+    byEquipmentData[eqType].cost += d.cost || 0;
+    byEquipmentData[eqType].m3 += d.m3 || 0;
+    byEquipmentData[eqType].km += d.kmDelta || 0;
   });
 
-  // Calculate KM per equipment (sum of plate deltas)
-  Object.entries(byEquipmentData).forEach(([type, data]) => {
-    let kmTotal = 0;
-    Object.values(data.plateGroups).forEach(group => {
-      const sorted = group.sort((a, b) => ((a.date || '') + (a.time || '')) < ((b.date || '') + (b.time || '')) ? -1 : 1);
-      if (sorted.length >= 2) {
-        const diff = Number(sorted[sorted.length - 1].km_driven) - Number(sorted[0].km_driven);
-        if (diff > 0) kmTotal += diff;
-      }
-    });
-    byEquipmentData[type].km = kmTotal;
-    delete byEquipmentData[type].plateGroups;
-  });
-
-  // By unit and equipment type
-  const byUnitAndEquipmentData = {};
-  filtered.forEach(r => {
-    const key = `${(r.unit || '').replace('CONCRETAR ', '')} - ${r.vehicle_type}`;
-    if (!byUnitAndEquipmentData[key]) {
-      byUnitAndEquipmentData[key] = { name: key, liters: 0, km: 0, cost: 0 };
-    }
-    byUnitAndEquipmentData[key].liters += r.liters || 0;
-    byUnitAndEquipmentData[key].km += r.km_driven || 0;
-    byUnitAndEquipmentData[key].cost += r.cost || 0;
-  });
   const equipmentTypes = ['BOMBA ESTACIONÁRIA', 'BOMBA LANÇA', 'CAMINHÃO BASCULANTE', 'CAMINHÃO BETONEIRA'];
   const unitEquipmentArray = equipmentTypes
     .map(type => {
@@ -414,15 +428,15 @@ export default function Graficos() {
     );
   };
 
-  // By vehicle
+  // By vehicle - agregado de analysisData
   const byVehicleData = {};
-  filtered.forEach(r => {
-    if (!byVehicleData[r.vehicle_plate]) {
-      byVehicleData[r.vehicle_plate] = { liters: 0, km: 0, cost: 0 };
+  filtered.forEach(d => {
+    if (!byVehicleData[d.plate]) {
+      byVehicleData[d.plate] = { liters: 0, km: 0, cost: 0 };
     }
-    byVehicleData[r.vehicle_plate].liters += r.liters || 0;
-    byVehicleData[r.vehicle_plate].km += r.km_driven || 0;
-    byVehicleData[r.vehicle_plate].cost += r.cost || 0;
+    byVehicleData[d.plate].liters += d.totalLiters || 0;
+    byVehicleData[d.plate].km += d.kmDelta || 0;
+    byVehicleData[d.plate].cost += d.cost || 0;
   });
   const vehicleKmArray = Object.entries(byVehicleData)
     .map(([plate, data]) => ({
@@ -453,15 +467,15 @@ export default function Graficos() {
     .sort((a, b) => b.costPerKm - a.costPerKm)
     .slice(0, 15);
 
-  // By driver
+  // By driver - agregado de analysisData
   const byDriverData = {};
-  filtered.forEach(r => {
-    if (!byDriverData[r.driver]) {
-      byDriverData[r.driver] = { liters: 0, km: 0, cost: 0 };
+  filtered.forEach(d => {
+    if (!byDriverData[d.driver]) {
+      byDriverData[d.driver] = { liters: 0, km: 0, cost: 0 };
     }
-    byDriverData[r.driver].liters += r.liters || 0;
-    byDriverData[r.driver].km += r.km_driven || 0;
-    byDriverData[r.driver].cost += r.cost || 0;
+    byDriverData[d.driver].liters += d.totalLiters || 0;
+    byDriverData[d.driver].km += d.kmDelta || 0;
+    byDriverData[d.driver].cost += d.cost || 0;
   });
   const driverKmArray = Object.entries(byDriverData)
     .map(([driver, data]) => ({
