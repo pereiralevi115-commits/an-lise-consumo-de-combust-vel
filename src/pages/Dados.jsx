@@ -223,6 +223,7 @@ export default function Dados() {
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
                   <TableHead className="text-slate-300">Tipo</TableHead>
+                  <TableHead className="text-slate-300">Equipamentos</TableHead>
                   <TableHead className="text-slate-300">Frentista</TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
                   <TableHead className="text-slate-300">Combustível</TableHead>
@@ -237,7 +238,7 @@ export default function Dados() {
               <TableBody>
                 {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={14} className="text-center text-slate-400 py-8">
+                      <TableCell colSpan={15} className="text-center text-slate-400 py-8">
                         Nenhum registro encontrado
                       </TableCell>
                     </TableRow>
@@ -251,6 +252,7 @@ export default function Dados() {
                       <TableCell className="text-white font-mono">{record.vehicle_plate}</TableCell>
 
                       <TableCell className="text-slate-300 text-xs">{pontosMap[String(record.unit)] || record.unit || '-'}</TableCell>
+                      <TableCell className="text-slate-300">{record.vehicle_type || '-'}</TableCell>
                       <TableCell className="text-slate-300">{record.vehicle_type || '-'}</TableCell>
                       <TableCell className="text-slate-300">{frentistasMap[String(record.attendant)] || motoristasMap[String(record.attendant)] || record.attendant || '-'}</TableCell>
                       <TableCell className="text-slate-300">{motoristasMap[String(record.driver)] || frentistasMap[String(record.driver)] || record.driver || '-'}</TableCell>
