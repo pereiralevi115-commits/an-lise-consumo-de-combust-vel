@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Plus, Users, Fuel, MapPin, Truck, Upload } from 'lucide-react';
+import { Trash2, Plus, Users, Fuel, MapPin, Truck, Upload, Edit2, Check, X } from 'lucide-react';
 import ValorCalculado from '@/components/ValorCalculado';
 
 function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, color }) {
