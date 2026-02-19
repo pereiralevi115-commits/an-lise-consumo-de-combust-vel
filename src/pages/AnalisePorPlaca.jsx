@@ -12,7 +12,6 @@ export default function AnalisePorPlaca() {
     year: '',
     plate: '',
     unit: '',
-    equipment: '',
     driver: ''
   });
   const [sortBy, setSortBy] = useState('month');
@@ -138,7 +137,6 @@ export default function AnalisePorPlaca() {
     if (filters.year && !item.month.includes(filters.year)) return false;
     if (filters.plate && !item.plate.toUpperCase().includes(filters.plate.toUpperCase())) return false;
     if (filters.unit && !item.unit.includes(filters.unit)) return false;
-    if (filters.equipment && !item.equipment.includes(filters.equipment)) return false;
     if (filters.driver && !item.driver.toLowerCase().includes(filters.driver.toLowerCase())) return false;
     return true;
   }).sort((a, b) => {
