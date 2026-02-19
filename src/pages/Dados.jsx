@@ -17,6 +17,8 @@ export default function Dados() {
   });
   const [sortBy, setSortBy] = useState('date');
   const [sortDir, setSortDir] = useState('desc');
+  const [editingKm, setEditingKm] = useState(null); // { id, value }
+  const queryClient = useQueryClient();
 
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['fuelRecords'],
