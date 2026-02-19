@@ -216,7 +216,7 @@ export default function AnalisePorPlaca() {
             onChange={(e) => setFilters({...filters, equipment: e.target.value})}
             className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2 text-sm"
           >
-            <option value="">Equipamento</option>
+            <option value="">Todos equipamentos</option>
             {equipments.map(e => <option key={e} value={e}>{e}</option>)}
           </select>
 
