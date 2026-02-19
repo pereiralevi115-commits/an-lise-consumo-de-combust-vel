@@ -71,13 +71,13 @@ export default function AnalisePorPlaca() {
 
   // Agrupar por mês e placa
   const groupedData = {};
-  
+
   records.forEach(r => {
     if (!r.date || !r.vehicle_plate) return;
-    
+
     const month = parseISO(r.date).getMonth();
     const year = parseISO(r.date).getFullYear();
-    const monthKey = `${year}-${month}`;
+    const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
     const plateKey = r.vehicle_plate.toUpperCase();
     const groupKey = `${monthKey}-${plateKey}`;
 
@@ -112,7 +112,7 @@ export default function AnalisePorPlaca() {
 
     const m3Data = cubicMetros.find(cm => 
       String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() && 
-      (cm.mes === item.monthKey || cm.mes === `${item.year}-${String(parseISO(`2000-${parseISO(`2000-01-${monthNames.indexOf(item.month) + 1}`).getMonth() + 1}`).getMonth() + 1).padStart(2, '0')}`)
+      cm.mes === item.monthKey
     );
     const m3 = m3Data ? Number(m3Data.metros_cubicos) : 0;
 
