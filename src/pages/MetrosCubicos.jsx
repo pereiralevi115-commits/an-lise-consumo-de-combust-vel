@@ -120,11 +120,9 @@ export default function MetrosCubicos() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-slate-400 py-8">Carregando...</TableCell>
-                  </TableRow>
-                ) : records.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center text-slate-400 py-8">Nenhum registro encontrado</TableCell>
+                    <TableCell colSpan={5} className="text-center text-slate-400 py-8">Carregando...</TableCell>
+...
+                    <TableCell colSpan={5} className="text-center text-slate-400 py-8">Nenhum registro encontrado</TableCell>
                   </TableRow>
                 ) : (
                   records.map((r) => (
