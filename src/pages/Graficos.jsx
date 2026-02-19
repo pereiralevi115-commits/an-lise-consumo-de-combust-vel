@@ -189,32 +189,40 @@ export default function Graficos() {
   const byEquipmentData = {};
   filtered.forEach(r => {
     if (!byEquipmentData[r.vehicle_type]) {
-      byEquipmentData[r.vehicle_type] = { liters: 0, cost: 0, m3: 0, plateGroups: {} };
+      byEquipmentData[r.vehicle_type] = { liters: 0, cost: 0, m3: 0, allRecords: {} };
     }
     byEquipmentData[r.vehicle_type].liters += r.liters || 0;
     byEquipmentData[r.vehicle_type].cost += r.cost || 0;
     byEquipmentData[r.vehicle_type].m3 += r.cubic_meters || 0;
     
-    if (r.vehicle_plate && Number(r.km_driven) > 0) {
-      if (!byEquipmentData[r.vehicle_type].plateGroups[r.vehicle_plate]) {
-        byEquipmentData[r.vehicle_type].plateGroups[r.vehicle_plate] = [];
+    if (r.vehicle_plate) {
+      if (!byEquipmentData[r.vehicle_type].allRecords[r.vehicle_plate]) {
+        byEquipmentData[r.vehicle_type].allRecords[r.vehicle_plate] = [];
       }
-      byEquipmentData[r.vehicle_type].plateGroups[r.vehicle_plate].push(r);
+      byEquipmentData[r.vehicle_type].allRecords[r.vehicle_plate].push(r);
     }
   });
 
-  // Calculate KM per equipment (sum of plate deltas)
+  // Calculate KM per equipment (sum of plate deltas: last KM - first KM per plate)
   Object.entries(byEquipmentData).forEach(([type, data]) => {
     let kmTotal = 0;
-    Object.values(data.plateGroups).forEach(group => {
-      const sorted = group.sort((a, b) => ((a.date || '') + (a.time || '')) < ((b.date || '') + (b.time || '')) ? -1 : 1);
-      if (sorted.length >= 2) {
-        const diff = Number(sorted[sorted.length - 1].km_driven) - Number(sorted[0].km_driven);
+    Object.values(data.allRecords).forEach(group => {
+      const sorted = group.sort((a, b) => {
+        const dateA = (a.date || '') + (a.time || '');
+        const dateB = (b.date || '') + (b.time || '');
+        return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
+      });
+      
+      const kmsWithValue = sorted.filter(r => Number(r.km_driven) > 0);
+      if (kmsWithValue.length >= 1) {
+        const firstKm = Number(kmsWithValue[0].km_driven);
+        const lastKm = Number(kmsWithValue[kmsWithValue.length - 1].km_driven);
+        const diff = lastKm - firstKm;
         if (diff > 0) kmTotal += diff;
       }
     });
     byEquipmentData[type].km = kmTotal;
-    delete byEquipmentData[type].plateGroups;
+    delete byEquipmentData[type].allRecords;
   });
 
   // By unit and equipment type
