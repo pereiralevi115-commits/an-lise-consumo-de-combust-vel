@@ -112,9 +112,9 @@ export default function AnalisePorPlaca() {
 
     const m3Data = cubicMetros.find(cm => 
       String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() && 
-      cm.mes === item.monthKey
+      (cm.mes === item.monthKey || cm.mes === `${item.year}-${String(parseISO(`2000-${parseISO(`2000-01-${monthNames.indexOf(item.month) + 1}`).getMonth() + 1}`).getMonth() + 1).padStart(2, '0')}`)
     );
-    const m3 = m3Data ? m3Data.metros_cubicos : 0;
+    const m3 = m3Data ? Number(m3Data.metros_cubicos) : 0;
 
     return {
       month: item.month,
