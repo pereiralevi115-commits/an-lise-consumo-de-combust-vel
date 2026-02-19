@@ -227,7 +227,6 @@ export default function Dados() {
                   <TableHead className="text-slate-300 text-right">Litros</TableHead>
                    <TableHead className="text-slate-300 text-right">KM</TableHead>
                    <TableHead className="text-slate-300 text-right">Valor (R$)</TableHead>
-                   <TableHead className="text-slate-300 text-right">M³</TableHead>
                    <TableHead className="text-slate-300">Data Criação</TableHead>
                    <TableHead className="text-slate-300">Criado por</TableHead>
                   </TableRow>
@@ -235,7 +234,7 @@ export default function Dados() {
               <TableBody>
                 {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={14} className="text-center text-slate-400 py-8">
+                      <TableCell colSpan={13} className="text-center text-slate-400 py-8">
                         Nenhum registro encontrado
                       </TableCell>
                     </TableRow>
@@ -286,7 +285,6 @@ export default function Dados() {
                         )}
                       </TableCell>
                       <TableCell className="text-white text-right">{record.cost != null && record.cost > 0 ? `R$ ${record.cost.toFixed(2)}` : '-'}</TableCell>
-                      <TableCell className="text-white text-right">{record.cubic_meters != null && record.cubic_meters > 0 ? record.cubic_meters.toFixed(2) : '-'}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{record.created_date ? format(parseISO(record.created_date), 'dd/MM/yyyy HH:mm', { locale: ptBR }) : '-'}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{record.created_by || '-'}</TableCell>
                       </TableRow>
