@@ -14,6 +14,8 @@ export default function Dados() {
     plate: '',
     driver: ''
   });
+  const [sortBy, setSortBy] = useState('date');
+  const [sortDir, setSortDir] = useState('desc');
 
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['fuelRecords'],
