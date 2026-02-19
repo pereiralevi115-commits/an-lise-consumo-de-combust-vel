@@ -10,6 +10,7 @@ import ValorCalculado from '@/components/ValorCalculado';
 function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, color }) {
   const queryClient = useQueryClient();
   const [novo, setNovo] = useState({ codigo: '', nome: '', entity: entities[0].name });
+  const [editing, setEditing] = useState(null); // { entityName, id, codigo, nome }
 
   // Fetch entities individually (hooks cannot be called in loops)
   const query0 = useQuery({ queryKey: [entities[0]?.name], queryFn: () => base44.entities[entities[0].name].list('codigo'), enabled: !!entities[0] });
