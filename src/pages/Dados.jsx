@@ -55,6 +55,7 @@ export default function Dados() {
     else if (sortBy === 'plate') { valA = a.vehicle_plate || ''; valB = b.vehicle_plate || ''; }
     else if (sortBy === 'unit') { valA = pontosMap[String(a.unit)] || a.unit || ''; valB = pontosMap[String(b.unit)] || b.unit || ''; }
     else if (sortBy === 'driver') { valA = motoristasMap[String(a.driver)] || a.driver || ''; valB = motoristasMap[String(b.driver)] || b.driver || ''; }
+    else if (sortBy === 'equipamento') { valA = placaEquipamentosMap[String(a.vehicle_plate).toUpperCase()] || a.vehicle_type || ''; valB = placaEquipamentosMap[String(b.vehicle_plate).toUpperCase()] || b.vehicle_type || ''; }
     const cmp = valA < valB ? -1 : valA > valB ? 1 : 0;
     return sortDir === 'asc' ? cmp : -cmp;
   });
