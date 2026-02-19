@@ -230,7 +230,6 @@ export default function AnalisePorPlaca() {
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('month')}>Mês<SortIcon field="month" /></TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
-                  <TableHead className="text-slate-300">Tipo</TableHead>
                   <TableHead className="text-slate-300">Equipamentos</TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('fuelType')}>Combustível<SortIcon field="fuelType" /></TableHead>
@@ -243,7 +242,7 @@ export default function AnalisePorPlaca() {
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={11} className="text-center text-slate-400 py-8">
+                    <TableCell colSpan={10} className="text-center text-slate-400 py-8">
                       Nenhum registro encontrado
                     </TableCell>
                   </TableRow>
@@ -253,7 +252,6 @@ export default function AnalisePorPlaca() {
                       <TableCell className="text-white">{item.month}</TableCell>
                       <TableCell className="text-white font-mono font-bold">{item.plate}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{item.unit}</TableCell>
-                      <TableCell className="text-slate-300 text-sm">{item.vehicle_type}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{item.equipment}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{item.driver}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{item.fuelType}</TableCell>
