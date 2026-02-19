@@ -242,10 +242,9 @@ export default function AnalisePorPlaca() {
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('equipment')}>Equipamento<SortIcon field="equipment" /></TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('fuelType')}>Combustível<SortIcon field="fuelType" /></TableHead>
                   <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('totalLiters')}>Litros<SortIcon field="totalLiters" /></TableHead>
-                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('kmDelta')}>KM (Máx - Mín)<SortIcon field="kmDelta" /></TableHead>
+                  <TableHead className="text-slate-300">Detalhes (Motorista/KM)</TableHead>
+                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('equipment')}>Equipamento<SortIcon field="equipment" /></TableHead>
                   <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('m3')}>M³<SortIcon field="m3" /></TableHead>
                   <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('efficiency')}>Eficiência (KM/L)<SortIcon field="efficiency" /></TableHead>
                 </TableRow>
@@ -253,7 +252,7 @@ export default function AnalisePorPlaca() {
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center text-slate-400 py-8">
+                    <TableCell colSpan={9} className="text-center text-slate-400 py-8">
                       Nenhum registro encontrado
                     </TableCell>
                   </TableRow>
@@ -263,11 +262,14 @@ export default function AnalisePorPlaca() {
                       <TableCell className="text-white">{item.month}</TableCell>
                       <TableCell className="text-white font-mono font-bold">{item.plate}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{item.unit}</TableCell>
-                      <TableCell className="text-slate-300 text-sm">{item.equipment}</TableCell>
-                      <TableCell className="text-slate-300 text-sm">{item.driver}</TableCell>
-                      <TableCell className="text-slate-300 text-sm">{item.fuelType}</TableCell>
                       <TableCell className="text-white text-right">{item.totalLiters.toFixed(2)} L</TableCell>
-                      <TableCell className="text-white text-right">{item.kmDelta.toLocaleString('pt-BR', {maximumFractionDigits: 0})} km</TableCell>
+                      <TableCell className="text-slate-300 text-sm">
+                        <div className="space-y-1">
+                          <div><span className="font-semibold">Motorista:</span> {item.driver}</div>
+                          <div><span className="font-semibold">KM:</span> {item.kmDelta.toLocaleString('pt-BR', {maximumFractionDigits: 0})} km</div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-slate-300 text-sm">{item.equipment}</TableCell>
                       <TableCell className="text-white text-right">{item.m3.toFixed(2)} m³</TableCell>
                       <TableCell className="text-yellow-400 text-right font-bold">{item.efficiency} km/L</TableCell>
                     </TableRow>
