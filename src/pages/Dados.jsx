@@ -30,13 +30,10 @@ export default function Dados() {
   const { data: motoristas = [] } = useQuery({ queryKey: ['Motorista'], queryFn: () => base44.entities.Motorista.list() });
   const { data: pontos = [] } = useQuery({ queryKey: ['Ponto'], queryFn: () => base44.entities.Ponto.list() });
   const { data: combustiveis = [] } = useQuery({ queryKey: ['Combustivel'], queryFn: () => base44.entities.Combustivel.list() });
-  const { data: placaEquipamentos = [] } = useQuery({ queryKey: ['PlacaEquipamento'], queryFn: () => base44.entities.PlacaEquipamento.list('placa', 10000) });
-
   const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
   const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
   const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
   const combustiveisMap = Object.fromEntries(combustiveis.map(c => [String(c.codigo), c.nome]));
-  const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
 
   // Get unique filter values
   const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b);
@@ -44,7 +41,7 @@ export default function Dados() {
   const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
   const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
   const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort();
-  const equipments = [...new Set(records.map(r => placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()]))].filter(Boolean).sort();
+
 
   // Apply filters
   const filtered = records.filter(r => {
@@ -53,7 +50,7 @@ export default function Dados() {
     if (filters.unit && r.unit !== filters.unit) return false;
     if (filters.plate && r.vehicle_plate !== filters.plate) return false;
     if (filters.driver && r.driver !== filters.driver) return false;
-    if (filters.equipment && placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()] !== filters.equipment) return false;
+
     return true;
   }).sort((a, b) => {
     let valA, valB;
@@ -61,7 +58,7 @@ export default function Dados() {
     else if (sortBy === 'plate') { valA = a.vehicle_plate || ''; valB = b.vehicle_plate || ''; }
     else if (sortBy === 'unit') { valA = pontosMap[String(a.unit)] || a.unit || ''; valB = pontosMap[String(b.unit)] || b.unit || ''; }
     else if (sortBy === 'driver') { valA = motoristasMap[String(a.driver)] || a.driver || ''; valB = motoristasMap[String(b.driver)] || b.driver || ''; }
-    else if (sortBy === 'equipamento') { valA = placaEquipamentosMap[String(a.vehicle_plate).toUpperCase()] || a.vehicle_type || ''; valB = placaEquipamentosMap[String(b.vehicle_plate).toUpperCase()] || b.vehicle_type || ''; }
+
     const cmp = valA < valB ? -1 : valA > valB ? 1 : 0;
     const primarySort = sortDir === 'asc' ? cmp : -cmp;
     if (primarySort !== 0) return primarySort;
@@ -200,14 +197,7 @@ export default function Dados() {
             {drivers.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
 
-          <select 
-            value={filters.equipment} 
-            onChange={(e) => setFilters({...filters, equipment: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
-          >
-            <option value="">Todos equipamentos</option>
-            {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
-          </select>
+
         </div>
 
         <div className="flex items-center gap-4">
@@ -233,7 +223,6 @@ export default function Dados() {
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
                   <TableHead className="text-slate-300">Tipo</TableHead>
-                  <TableHead className="text-slate-300">Equipamentos</TableHead>
                   <TableHead className="text-slate-300">Frentista</TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
                   <TableHead className="text-slate-300">Combustível</TableHead>
@@ -248,7 +237,7 @@ export default function Dados() {
               <TableBody>
                 {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={15} className="text-center text-slate-400 py-8">
+                      <TableCell colSpan={14} className="text-center text-slate-400 py-8">
                         Nenhum registro encontrado
                       </TableCell>
                     </TableRow>
@@ -263,7 +252,6 @@ export default function Dados() {
 
                       <TableCell className="text-slate-300 text-xs">{pontosMap[String(record.unit)] || record.unit || '-'}</TableCell>
                       <TableCell className="text-slate-300">{record.vehicle_type || '-'}</TableCell>
-                      <TableCell className="text-slate-300">{placaEquipamentosMap[String(record.vehicle_plate).toUpperCase()] || '-'}</TableCell>
                       <TableCell className="text-slate-300">{frentistasMap[String(record.attendant)] || motoristasMap[String(record.attendant)] || record.attendant || '-'}</TableCell>
                       <TableCell className="text-slate-300">{motoristasMap[String(record.driver)] || frentistasMap[String(record.driver)] || record.driver || '-'}</TableCell>
                       <TableCell className="text-slate-300">{combustiveisMap[String(record.fuel_type)] || record.fuel_type || '-'}</TableCell>
