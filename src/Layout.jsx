@@ -9,7 +9,7 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Dados', page: 'Dados', icon: Table2 },
     { name: 'Upload', page: 'Upload', icon: Upload },
     { name: 'Legendas', page: 'Legendas', icon: BookOpen },
-    { name: 'M³', page: 'MetrosCubicos', icon: Cylinder }
+    { name: 'M³', page: 'MetrosCubicos', icon: Box }
   ];
 
   return (
