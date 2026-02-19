@@ -146,7 +146,7 @@ export default function Dados() {
                   <TableHead className="text-slate-300 text-right">Litros</TableHead>
                   <TableHead className="text-slate-300 text-right">KM</TableHead>
                   <TableHead className="text-slate-300 text-right">Valor (R$)</TableHead>
-                  <TableHead className="text-slate-300 text-right">M³</TableHead>
+
                 </TableRow>
               </TableHeader>
               <TableBody>
