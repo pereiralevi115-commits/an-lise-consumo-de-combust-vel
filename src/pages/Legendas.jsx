@@ -34,6 +34,14 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
     onSuccess: (_, vars) => queryClient.invalidateQueries({ queryKey: [vars.entityName] })
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ entityName, id, data }) => base44.entities[entityName].update(id, data),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: [vars.entityName] });
+      setEditing(null);
+    }
+  });
+
   const handleAdd = () => {
     if (!novo.codigo.trim() || !novo.nome.trim()) return;
     createMutation.mutate({ entityName: novo.entity, data: { codigo: novo.codigo.trim(), nome: novo.nome.trim() } });
