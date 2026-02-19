@@ -47,7 +47,7 @@ export default function Layout({ children, currentPageName }) {
       </header>
 
       {/* Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-[1600px] mx-auto px-6 py-8">
         {children}
       </main>
 
