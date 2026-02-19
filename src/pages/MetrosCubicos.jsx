@@ -41,10 +41,20 @@ export default function MetrosCubicos() {
 
   const formatMes = (mes) => {
     if (!mes) return '-';
-    const [year, month] = mes.split('-');
     const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
       'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-    return `${monthNames[parseInt(month) - 1]} / ${year}`;
+    // Formato YYYY-MM
+    if (/^\d{4}-\d{2}$/.test(mes)) {
+      const [year, month] = mes.split('-');
+      return `${monthNames[parseInt(month) - 1]} / ${year}`;
+    }
+    // Formato MM/YYYY
+    if (/^\d{2}\/\d{4}$/.test(mes)) {
+      const [month, year] = mes.split('/');
+      return `${monthNames[parseInt(month) - 1]} / ${year}`;
+    }
+    // Qualquer outro formato, exibe como está
+    return mes;
   };
 
   return (
