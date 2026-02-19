@@ -108,19 +108,62 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
                 <p className="text-slate-500 text-sm text-center py-2">Nenhum cadastro ainda</p>
               ) : (
                 items.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between bg-slate-700/50 rounded px-3 py-1.5">
-                    <span className="text-slate-400 font-mono text-sm w-20">{item.codigo}</span>
-                    <span className="text-white flex-1 text-sm">{item.nome}</span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteMutation.mutate({ entityName: entity.name, id: item.id })}
-                      className="h-7 w-7 text-slate-500 hover:text-red-400"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                ))
+                   <div key={item.id}>
+                     {editing?.id === item.id && editing?.entityName === entity.name ? (
+                       <div className="flex items-center gap-1 bg-slate-700 rounded px-2 py-1.5">
+                         <input
+                           type="text"
+                           value={editing.codigo}
+                           onChange={(e) => setEditing({ ...editing, codigo: e.target.value })}
+                           className="bg-slate-600 text-white rounded px-2 py-1 text-sm w-20 font-mono"
+                         />
+                         <input
+                           type="text"
+                           value={editing.nome}
+                           onChange={(e) => setEditing({ ...editing, nome: e.target.value })}
+                           className="bg-slate-600 text-white rounded px-2 py-1 text-sm flex-1"
+                         />
+                         <Button
+                           variant="ghost"
+                           size="icon"
+                           onClick={() => updateMutation.mutate({ entityName: entity.name, id: item.id, data: { codigo: editing.codigo, nome: editing.nome } })}
+                           className="h-6 w-6 text-green-400 hover:text-green-300"
+                         >
+                           <Check className="w-4 h-4" />
+                         </Button>
+                         <Button
+                           variant="ghost"
+                           size="icon"
+                           onClick={() => setEditing(null)}
+                           className="h-6 w-6 text-slate-500 hover:text-red-400"
+                         >
+                           <X className="w-4 h-4" />
+                         </Button>
+                       </div>
+                     ) : (
+                       <div className="flex items-center justify-between bg-slate-700/50 rounded px-3 py-1.5">
+                         <span className="text-slate-400 font-mono text-sm w-20">{item.codigo}</span>
+                         <span className="text-white flex-1 text-sm">{item.nome}</span>
+                         <Button
+                           variant="ghost"
+                           size="icon"
+                           onClick={() => setEditing({ entityName: entity.name, id: item.id, codigo: item.codigo, nome: item.nome })}
+                           className="h-7 w-7 text-slate-500 hover:text-yellow-400"
+                         >
+                           <Edit2 className="w-4 h-4" />
+                         </Button>
+                         <Button
+                           variant="ghost"
+                           size="icon"
+                           onClick={() => deleteMutation.mutate({ entityName: entity.name, id: item.id })}
+                           className="h-7 w-7 text-slate-500 hover:text-red-400"
+                         >
+                           <Trash2 className="w-4 h-4" />
+                         </Button>
+                       </div>
+                     )}
+                   </div>
+                 ))
               )}
             </div>
           </div>
