@@ -152,7 +152,7 @@ export default function Dados() {
               <TableBody>
                 {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={11} className="text-center text-slate-400 py-8">
+                      <TableCell colSpan={10} className="text-center text-slate-400 py-8">
                         Nenhum registro encontrado
                       </TableCell>
                     </TableRow>
@@ -172,7 +172,6 @@ export default function Dados() {
                       <TableCell className="text-white text-right">{record.liters != null ? record.liters.toFixed(3) : '-'}</TableCell>
                       <TableCell className="text-white text-right">{record.km_driven != null && record.km_driven > 0 ? record.km_driven.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '-'}</TableCell>
                       <TableCell className="text-white text-right">{record.cost != null && record.cost > 0 ? `R$ ${record.cost.toFixed(2)}` : '-'}</TableCell>
-                      <TableCell className="text-white text-right">{record.cubic_meters != null ? record.cubic_meters.toFixed(2) : '-'}</TableCell>
                     </TableRow>
                   ))
                 )}
