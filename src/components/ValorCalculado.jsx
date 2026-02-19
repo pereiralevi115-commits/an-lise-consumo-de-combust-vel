@@ -1,18 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { parseISO } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Calculator } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Calculator, Save, CheckCircle } from 'lucide-react';
 
 const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
 export default function ValorCalculado() {
   const [mesFilter, setMesFilter] = useState('');
+  const [anoFilter, setAnoFilter] = useState('');
   const [unitFilter, setUnitFilter] = useState('');
   const [precoLitro, setPrecoLitro] = useState('');
+  const [saved, setSaved] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const { data: records = [] } = useQuery({
     queryKey: ['fuelRecords'],
@@ -26,13 +31,19 @@ export default function ValorCalculado() {
 
   const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
 
+  const anos = [...new Set(records.map(r => r.date ? parseISO(r.date).getFullYear() : null))]
+    .filter(Boolean).sort((a, b) => b - a);
+
   const meses = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))]
     .filter(m => m !== null).sort((a, b) => a - b);
 
   const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
 
   const filtered = records.filter(r => {
-    if (mesFilter !== '' && parseISO(r.date).getMonth() !== parseInt(mesFilter)) return false;
+    if (!r.date) return false;
+    const d = parseISO(r.date);
+    if (anoFilter && d.getFullYear() !== parseInt(anoFilter)) return false;
+    if (mesFilter !== '' && d.getMonth() !== parseInt(mesFilter)) return false;
     if (unitFilter && r.unit !== unitFilter) return false;
     return true;
   });
@@ -40,6 +51,24 @@ export default function ValorCalculado() {
   const totalLitros = filtered.reduce((sum, r) => sum + (r.liters || 0), 0);
   const preco = parseFloat(precoLitro.replace(',', '.')) || 0;
   const valorTotal = totalLitros * preco;
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      // Atualiza o campo cost de cada registro filtrado
+      await Promise.all(
+        filtered.map(r =>
+          base44.entities.FuelRecord.update(r.id, { cost: (r.liters || 0) * preco })
+        )
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    }
+  });
+
+  const canSave = preco > 0 && filtered.length > 0;
 
   return (
     <Card className="bg-slate-800 border-orange-700">
@@ -51,6 +80,15 @@ export default function ValorCalculado() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 gap-3">
+          <select
+            value={anoFilter}
+            onChange={e => setAnoFilter(e.target.value)}
+            className="bg-slate-700 border border-slate-600 text-white rounded px-3 py-2 text-sm"
+          >
+            <option value="">Todos os anos</option>
+            {anos.map(a => <option key={a} value={a}>{a}</option>)}
+          </select>
+
           <select
             value={mesFilter}
             onChange={e => setMesFilter(e.target.value)}
@@ -80,6 +118,10 @@ export default function ValorCalculado() {
 
         <div className="border-t border-slate-600 pt-3 space-y-2">
           <div className="flex justify-between text-sm">
+            <span className="text-slate-400">Registros encontrados:</span>
+            <span className="text-white font-mono">{filtered.length}</span>
+          </div>
+          <div className="flex justify-between text-sm">
             <span className="text-slate-400">Total de Litros:</span>
             <span className="text-white font-mono">{totalLitros.toLocaleString('pt-BR', { maximumFractionDigits: 3 })} L</span>
           </div>
@@ -92,6 +134,25 @@ export default function ValorCalculado() {
             <span className="text-orange-300">R$ {valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </div>
         </div>
+
+        <Button
+          onClick={() => saveMutation.mutate()}
+          disabled={!canSave || saveMutation.isPending}
+          className={`w-full ${saved ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-600 hover:bg-orange-700'} text-white`}
+        >
+          {saved ? (
+            <><CheckCircle className="w-4 h-4 mr-2" /> Salvo com sucesso!</>
+          ) : saveMutation.isPending ? (
+            'Salvando...'
+          ) : (
+            <><Save className="w-4 h-4 mr-2" /> Salvar Valores (R$)</>
+          )}
+        </Button>
+        {canSave && !saved && (
+          <p className="text-slate-400 text-xs text-center">
+            Irá atualizar o campo Valor (R$) de {filtered.length} registros
+          </p>
+        )}
       </CardContent>
     </Card>
   );
