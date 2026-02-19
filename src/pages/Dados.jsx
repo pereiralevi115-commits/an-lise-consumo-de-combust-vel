@@ -10,11 +10,9 @@ import { Check, X } from 'lucide-react';
 export default function Dados() {
   const [filters, setFilters] = useState({
     month: '',
-    type: '',
     unit: '',
     plate: '',
-    driver: '',
-    equipment: ''
+    driver: ''
   });
   const [sortBy, setSortBy] = useState('date');
   const [sortDir, setSortDir] = useState('desc');
@@ -39,7 +37,6 @@ export default function Dados() {
 
   // Get unique filter values
   const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b);
-  const types = [...new Set(records.map(r => r.vehicle_type))].filter(Boolean).sort();
   const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
   const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
   const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort();
@@ -48,7 +45,6 @@ export default function Dados() {
   // Apply filters
   const filtered = records.filter(r => {
     if (filters.month && parseISO(r.date).getMonth() !== parseInt(filters.month)) return false;
-    if (filters.type && r.vehicle_type !== filters.type) return false;
     if (filters.unit && r.unit !== filters.unit) return false;
     if (filters.plate && r.vehicle_plate !== filters.plate) return false;
     if (filters.driver && r.driver !== filters.driver) return false;
@@ -161,15 +157,6 @@ export default function Dados() {
           >
             <option value="">Todos meses</option>
             {months.map(m => <option key={m} value={m}>{monthNames[m]}</option>)}
-          </select>
-
-          <select 
-            value={filters.type} 
-            onChange={(e) => setFilters({...filters, type: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
-          >
-            <option value="">Equipamentos</option>
-            {types.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
 
           <select 
