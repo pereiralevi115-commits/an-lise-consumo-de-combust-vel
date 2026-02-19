@@ -161,15 +161,18 @@ export default function Graficos() {
     .filter(d => d.liters > 0 || d.km > 0 || d.cost > 0)
     .sort((a, b) => monthNames.indexOf(a.name) - monthNames.indexOf(b.name));
 
-  // By unit
+  // By unit - KM calculado por placa (último - primeiro) por usina
   const byUnitData = units.map(unit => {
     const unitRecords = filtered.filter(r => r.unit === unit);
+    const liters = unitRecords.reduce((sum, r) => sum + (r.liters || 0), 0);
+    const cost = unitRecords.reduce((sum, r) => sum + (r.cost || 0), 0);
+    const km = calcKmByPlate(unitRecords);
     return {
       name: unit.replace('CONCRETAR ', ''),
-      liters: unitRecords.reduce((sum, r) => sum + (r.liters || 0), 0),
-      km: unitRecords.reduce((sum, r) => sum + (r.km_driven || 0), 0),
-      cost: unitRecords.reduce((sum, r) => sum + (r.cost || 0), 0),
-      kmPerLiter: unitRecords.length > 0 ? (unitRecords.reduce((sum, r) => sum + (r.km_driven || 0), 0) / unitRecords.reduce((sum, r) => sum + (r.liters || 0), 0)) : 0
+      liters,
+      km,
+      cost,
+      kmPerLiter: liters > 0 ? (km / liters) : 0
     };
   })
     .filter(d => d.liters > 0 || d.km > 0 || d.cost > 0)
