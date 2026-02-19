@@ -11,6 +11,7 @@ export default function Dados() {
   const [filters, setFilters] = useState({
     month: '',
     unit: '',
+    equipment: '',
     plate: '',
     driver: ''
   });
@@ -38,6 +39,7 @@ export default function Dados() {
   // Get unique filter values
   const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b);
   const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
+  const equipments = [...new Set(records.map(r => placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()]))].filter(Boolean).sort();
   const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
   const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort();
 
@@ -46,6 +48,7 @@ export default function Dados() {
   const filtered = records.filter(r => {
     if (filters.month && parseISO(r.date).getMonth() !== parseInt(filters.month)) return false;
     if (filters.unit && r.unit !== filters.unit) return false;
+    if (filters.equipment && placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()] !== filters.equipment) return false;
     if (filters.plate && r.vehicle_plate !== filters.plate) return false;
     if (filters.driver && r.driver !== filters.driver) return false;
 
@@ -150,7 +153,7 @@ export default function Dados() {
          <h1 className="text-3xl font-bold text-white mb-6">Dados de Combustível</h1>
 
          {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
           <select 
             value={filters.month} 
             onChange={(e) => setFilters({...filters, month: e.target.value})}
@@ -167,6 +170,15 @@ export default function Dados() {
           >
             <option value="">Todas usinas</option>
             {units.map(u => <option key={u} value={u}>{pontosMap[String(u)] || u}</option>)}
+          </select>
+
+          <select 
+            value={filters.equipment} 
+            onChange={(e) => setFilters({...filters, equipment: e.target.value})}
+            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+          >
+            <option value="">Todos equipamentos</option>
+            {equipments.map(e => <option key={e} value={e}>{e}</option>)}
           </select>
 
           <select 

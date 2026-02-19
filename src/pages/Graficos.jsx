@@ -73,6 +73,7 @@ export default function Graficos() {
           year: '',
           month: '',
           unit: '',
+          equipment: '',
           plate: '',
           driver: ''
         });
@@ -177,6 +178,7 @@ export default function Graficos() {
   const years = [...new Set(analysisData.map(d => d.year))].sort((a, b) => b - a);
   const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b);
   const units = [...new Set(analysisData.map(d => d.unit))].filter(Boolean).sort();
+  const equipments = [...new Set(analysisData.map(d => d.equipment))].filter(Boolean).sort();
   const plates = [...new Set(analysisData.map(d => d.plate))].filter(Boolean).sort();
   const drivers = [...new Set(analysisData.map(d => d.driver))].filter(Boolean).sort();
 
@@ -185,6 +187,7 @@ export default function Graficos() {
     if (filters.year && d.year !== parseInt(filters.year)) return false;
     if (filters.month && monthNames[parseInt(filters.month)] !== d.month) return false;
     if (filters.unit && d.unit !== filters.unit) return false;
+    if (filters.equipment && d.equipment !== filters.equipment) return false;
     if (filters.plate && d.plate !== filters.plate) return false;
     if (filters.driver && d.driver !== filters.driver) return false;
     return true;
@@ -521,7 +524,7 @@ export default function Graficos() {
         </div>
 
         {/* Filters */}
-         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+         <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
           <select 
             value={filters.month} 
             onChange={(e) => setFilters({...filters, month: e.target.value})}
@@ -531,8 +534,6 @@ export default function Graficos() {
             {months.map(m => <option key={m} value={m}>{monthNames[m]}</option>)}
           </select>
 
-
-
           <select 
             value={filters.unit} 
             onChange={(e) => setFilters({...filters, unit: e.target.value})}
@@ -540,6 +541,15 @@ export default function Graficos() {
           >
             <option value="">Todas usinas</option>
             {units.map(u => <option key={u} value={u}>{u}</option>)}
+          </select>
+
+          <select 
+            value={filters.equipment} 
+            onChange={(e) => setFilters({...filters, equipment: e.target.value})}
+            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+          >
+            <option value="">Todos equipamentos</option>
+            {equipments.map(e => <option key={e} value={e}>{e}</option>)}
           </select>
 
           <select 

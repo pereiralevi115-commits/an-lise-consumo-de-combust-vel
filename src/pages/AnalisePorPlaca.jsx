@@ -12,6 +12,7 @@ export default function AnalisePorPlaca() {
     year: '',
     plate: '',
     unit: '',
+    equipment: '',
     driver: ''
   });
   const [sortBy, setSortBy] = useState('month');
@@ -64,6 +65,7 @@ export default function AnalisePorPlaca() {
   const years = [...new Set(records.map(r => r.date ? parseISO(r.date).getFullYear() : null))].filter(y => y !== null).sort((a, b) => b - a);
   const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
   const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
+  const equipments = [...new Set(placaEquipamentos.map(p => p.tipo))].filter(Boolean).sort();
   const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort();
 
   // Agrupar por mês e placa
@@ -135,6 +137,7 @@ export default function AnalisePorPlaca() {
     if (filters.year && !item.month.includes(filters.year)) return false;
     if (filters.plate && !item.plate.toUpperCase().includes(filters.plate.toUpperCase())) return false;
     if (filters.unit && !item.unit.includes(filters.unit)) return false;
+    if (filters.equipment && item.equipment !== filters.equipment) return false;
     if (filters.driver && !item.driver.toLowerCase().includes(filters.driver.toLowerCase())) return false;
     return true;
   }).sort((a, b) => {
@@ -170,7 +173,7 @@ export default function AnalisePorPlaca() {
         <h1 className="text-3xl font-bold text-white mb-6">Análise por Placa</h1>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-3 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-7 gap-3 mb-6">
           <select 
             value={filters.month} 
             onChange={(e) => setFilters({...filters, month: e.target.value})}
@@ -205,6 +208,15 @@ export default function AnalisePorPlaca() {
           >
             <option value="">Usina</option>
             {units.map(u => <option key={u} value={u}>{pontosMap[String(u)] || u}</option>)}
+          </select>
+
+          <select 
+            value={filters.equipment} 
+            onChange={(e) => setFilters({...filters, equipment: e.target.value})}
+            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2 text-sm"
+          >
+            <option value="">Equipamento</option>
+            {equipments.map(e => <option key={e} value={e}>{e}</option>)}
           </select>
 
           <select 
