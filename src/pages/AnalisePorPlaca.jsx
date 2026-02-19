@@ -93,11 +93,13 @@ export default function AnalisePorPlaca() {
         fuelType: r.fuel_type,
         totalLiters: 0,
         kmRecords: [],
+        cost: 0,
         recordCount: 0
       };
     }
 
     groupedData[groupKey].totalLiters += r.liters || 0;
+    groupedData[groupKey].cost += r.cost || 0;
     if (Number(r.km_driven) > 0) {
       groupedData[groupKey].kmRecords.push(Number(r.km_driven));
     }
@@ -127,7 +129,9 @@ export default function AnalisePorPlaca() {
       totalLiters: item.totalLiters,
       kmDelta: kmDelta,
       m3: m3,
-      efficiency: item.totalLiters > 0 ? (kmDelta / item.totalLiters).toFixed(2) : 0
+      cost: item.cost,
+      efficiency: item.totalLiters > 0 ? (kmDelta / item.totalLiters).toFixed(2) : 0,
+      efficiencyCost: item.cost > 0 ? (kmDelta / item.cost).toFixed(2) : 0
     };
   });
 
@@ -151,7 +155,9 @@ export default function AnalisePorPlaca() {
     else if (sortBy === 'totalLiters') { valA = a.totalLiters; valB = b.totalLiters; }
     else if (sortBy === 'kmDelta') { valA = a.kmDelta; valB = b.kmDelta; }
     else if (sortBy === 'm3') { valA = a.m3; valB = b.m3; }
+    else if (sortBy === 'cost') { valA = a.cost; valB = b.cost; }
     else if (sortBy === 'efficiency') { valA = parseFloat(a.efficiency); valB = parseFloat(b.efficiency); }
+    else if (sortBy === 'efficiencyCost') { valA = parseFloat(a.efficiencyCost); valB = parseFloat(b.efficiencyCost); }
     
     const cmp = typeof valA === 'string' ? valA.localeCompare(valB) : (valA < valB ? -1 : valA > valB ? 1 : 0);
     return sortDir === 'asc' ? cmp : -cmp;
@@ -248,13 +254,15 @@ export default function AnalisePorPlaca() {
                   <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('totalLiters')}>Litros<SortIcon field="totalLiters" /></TableHead>
                   <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('kmDelta')}>KM (Máx - Mín)<SortIcon field="kmDelta" /></TableHead>
                   <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('m3')}>M³<SortIcon field="m3" /></TableHead>
+                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('cost')}>Valor (R$)<SortIcon field="cost" /></TableHead>
                   <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('efficiency')}>Eficiência (KM/L)<SortIcon field="efficiency" /></TableHead>
+                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('efficiencyCost')}>Eficiência (KM/R$)<SortIcon field="efficiencyCost" /></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center text-slate-400 py-8">
+                    <TableCell colSpan={12} className="text-center text-slate-400 py-8">
                       Nenhum registro encontrado
                     </TableCell>
                   </TableRow>
@@ -270,7 +278,9 @@ export default function AnalisePorPlaca() {
                       <TableCell className="text-white text-right">{item.totalLiters.toFixed(2)} L</TableCell>
                       <TableCell className="text-white text-right">{item.kmDelta.toLocaleString('pt-BR', {maximumFractionDigits: 0})} km</TableCell>
                       <TableCell className="text-white text-right">{item.m3.toFixed(2)} m³</TableCell>
+                      <TableCell className="text-white text-right">R$ {item.cost.toFixed(2)}</TableCell>
                       <TableCell className="text-yellow-400 text-right font-bold">{item.efficiency} km/L</TableCell>
+                      <TableCell className="text-yellow-400 text-right font-bold">{item.efficiencyCost} km/R$</TableCell>
                     </TableRow>
                   ))
                 )}
