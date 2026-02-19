@@ -63,6 +63,61 @@ export default function Dados() {
     return (b.date || '') < (a.date || '') ? -1 : (b.date || '') > (a.date || '') ? 1 : 0;
   });
 
+  // Detectar inconsistências de KM por placa
+  // Para cada registro, verificar anomalias comparando com outros registros da mesma placa ordenados por data
+  const kmInconsistencyIds = new Set();
+  const KM_MAX_DIFF = 2000; // diferença máxima razoável entre abastecimentos da mesma placa
+
+  const plateGroups = {};
+  records.forEach(r => {
+    const plate = r.vehicle_plate;
+    if (!plate) return;
+    if (!plateGroups[plate]) plateGroups[plate] = [];
+    plateGroups[plate].push(r);
+  });
+
+  Object.values(plateGroups).forEach(group => {
+    // Ordenar por data+hora crescente
+    const sorted = [...group].sort((a, b) => {
+      const da = (a.date || '') + ' ' + (a.time || '');
+      const db = (b.date || '') + ' ' + (b.time || '');
+      return da < db ? -1 : da > db ? 1 : 0;
+    });
+
+    // Calcular média de KM para definir limiar de diferença grande
+    const kmsWithValue = sorted.filter(r => r.km_driven > 0).map(r => r.km_driven);
+    const avgKm = kmsWithValue.length > 0 ? kmsWithValue.reduce((s, v) => s + v, 0) / kmsWithValue.length : 0;
+    const threshold = Math.max(KM_MAX_DIFF, avgKm * 3);
+
+    for (let i = 0; i < sorted.length; i++) {
+      const r = sorted[i];
+      // Regra 2: KM zerado ou vazio quando outros registros da placa têm KM
+      if ((r.km_driven == null || r.km_driven === 0) && kmsWithValue.length > 0) {
+        kmInconsistencyIds.add(r.id);
+        continue;
+      }
+      if (r.km_driven > 0 && i > 0) {
+        // Pegar o anterior com KM válido
+        let prev = null;
+        for (let j = i - 1; j >= 0; j--) {
+          if (sorted[j].km_driven > 0) { prev = sorted[j]; break; }
+        }
+        if (prev) {
+          const diff = r.km_driven - prev.km_driven;
+          // Regra 1: hodômetro voltou
+          if (diff < 0) {
+            kmInconsistencyIds.add(r.id);
+            kmInconsistencyIds.add(prev.id);
+          }
+          // Regra 3: diferença muito grande
+          if (diff > threshold) {
+            kmInconsistencyIds.add(r.id);
+          }
+        }
+      }
+    }
+  });
+
   const toggleSort = (field) => {
     if (sortBy === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setSortBy(field); setSortDir('asc'); }
