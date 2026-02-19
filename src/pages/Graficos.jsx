@@ -72,7 +72,6 @@ export default function Graficos() {
         const [filters, setFilters] = useState({
           year: '',
           month: '',
-          type: '',
           unit: '',
           plate: '',
           driver: ''
@@ -177,7 +176,6 @@ export default function Graficos() {
   // Get unique filter values
   const years = [...new Set(analysisData.map(d => d.year))].sort((a, b) => b - a);
   const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b);
-  const types = [...new Set(analysisData.map(d => d.vehicle_type))].filter(Boolean).sort();
   const units = [...new Set(analysisData.map(d => d.unit))].filter(Boolean).sort();
   const plates = [...new Set(analysisData.map(d => d.plate))].filter(Boolean).sort();
   const drivers = [...new Set(analysisData.map(d => d.driver))].filter(Boolean).sort();
@@ -186,7 +184,6 @@ export default function Graficos() {
   const filtered = analysisData.filter(d => {
     if (filters.year && d.year !== parseInt(filters.year)) return false;
     if (filters.month && monthNames[parseInt(filters.month)] !== d.month) return false;
-    if (filters.type && d.vehicle_type !== filters.type) return false;
     if (filters.unit && d.unit !== filters.unit) return false;
     if (filters.plate && d.plate !== filters.plate) return false;
     if (filters.driver && d.driver !== filters.driver) return false;
