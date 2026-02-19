@@ -24,7 +24,8 @@ Deno.serve(async (req) => {
 
       const mesRaw = row.getCell(1).value;
       const placa = row.getCell(2).value;
-      const m3 = row.getCell(3).value;
+      const equipamento = row.getCell(3).value;
+      const m3 = row.getCell(4).value;
 
       if (!mesRaw || !placa || m3 == null) return;
 
@@ -41,6 +42,7 @@ Deno.serve(async (req) => {
       records.push({
         mes: mesStr,
         placa: String(placa).trim().toUpperCase(),
+        equipamento: equipamento ? String(equipamento).trim() : '',
         metros_cubicos: parseFloat(String(m3).replace(',', '.'))
       });
     });
