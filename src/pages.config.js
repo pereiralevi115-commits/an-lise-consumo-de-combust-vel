@@ -51,6 +51,7 @@ import Dados from './pages/Dados';
 import Graficos from './pages/Graficos';
 import Legendas from './pages/Legendas';
 import Upload from './pages/Upload';
+import MetrosCubicos from './pages/MetrosCubicos';
 import __Layout from './Layout.jsx';
 
 
@@ -59,6 +60,7 @@ export const PAGES = {
     "Graficos": Graficos,
     "Legendas": Legendas,
     "Upload": Upload,
+    "MetrosCubicos": MetrosCubicos,
 }
 
 export const pagesConfig = {
