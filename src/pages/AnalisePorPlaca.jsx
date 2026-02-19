@@ -280,7 +280,7 @@ export default function AnalisePorPlaca() {
                       <TableCell className="text-white text-right">{item.m3.toFixed(2)} m³</TableCell>
                       <TableCell className="text-white text-right">R$ {item.cost.toFixed(2)}</TableCell>
                       <TableCell className="text-yellow-400 text-right font-bold">{item.efficiency} km/L</TableCell>
-                      <TableCell className="text-yellow-400 text-right font-bold">{item.efficiencyCost} km/R$</TableCell>
+                      <TableCell className="text-yellow-400 text-right font-bold">R$ {item.efficiencyCost}/km</TableCell>
                     </TableRow>
                   ))
                 )}
