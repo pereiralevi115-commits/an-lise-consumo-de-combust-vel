@@ -539,7 +539,7 @@ export default function Graficos() {
             onChange={(e) => setFilters({...filters, type: e.target.value})}
             className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
           >
-            <option value="">Todos tipos</option>
+            <option value="">Equipamentos</option>
             {types.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
 
