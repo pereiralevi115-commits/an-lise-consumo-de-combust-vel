@@ -132,7 +132,7 @@ export default function Dados() {
       {/* Table */}
       <Card className="bg-slate-800 border-slate-700">
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto w-full">
             <Table>
               <TableHeader>
                 <TableRow className="border-slate-700 hover:bg-slate-700/50">
