@@ -112,7 +112,7 @@ export default function Graficos() {
   const calcKmByPlate = (recs) => {
     const groups = {};
     recs.forEach(r => {
-      if (!r.vehicle_plate || !Number(r.km_driven) > 0) return;
+      if (!r.vehicle_plate || !(Number(r.km_driven) > 0)) return;
       if (!groups[r.vehicle_plate]) groups[r.vehicle_plate] = [];
       groups[r.vehicle_plate].push(r);
     });
