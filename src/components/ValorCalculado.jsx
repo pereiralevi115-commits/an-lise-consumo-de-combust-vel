@@ -54,18 +54,13 @@ export default function ValorCalculado() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const batchSize = 10;
-      for (let i = 0; i < filtered.length; i += batchSize) {
-        const batch = filtered.slice(i, i + batchSize);
-        await Promise.all(
-          batch.map(r =>
-            base44.entities.FuelRecord.update(r.id, { cost: (r.liters || 0) * preco })
-          )
-        );
-        if (i + batchSize < filtered.length) {
-          await new Promise(res => setTimeout(res, 500));
-        }
-      }
+      const response = await base44.functions.invoke('salvarValoresCombustivel', {
+        preco,
+        anoFilter: anoFilter || null,
+        mesFilter: mesFilter !== '' ? mesFilter : null,
+        unitFilter: unitFilter || null,
+      });
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
