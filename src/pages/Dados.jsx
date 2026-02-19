@@ -13,7 +13,8 @@ export default function Dados() {
     type: '',
     unit: '',
     plate: '',
-    driver: ''
+    driver: '',
+    equipment: ''
   });
   const [sortBy, setSortBy] = useState('date');
   const [sortDir, setSortDir] = useState('desc');
@@ -43,6 +44,7 @@ export default function Dados() {
   const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
   const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
   const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort();
+  const equipments = [...new Set(records.map(r => placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()]))].filter(Boolean).sort();
 
   // Apply filters
   const filtered = records.filter(r => {
@@ -51,6 +53,7 @@ export default function Dados() {
     if (filters.unit && r.unit !== filters.unit) return false;
     if (filters.plate && r.vehicle_plate !== filters.plate) return false;
     if (filters.driver && r.driver !== filters.driver) return false;
+    if (filters.equipment && placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()] !== filters.equipment) return false;
     return true;
   }).sort((a, b) => {
     let valA, valB;
@@ -195,6 +198,15 @@ export default function Dados() {
           >
             <option value="">Todos motoristas</option>
             {drivers.map(d => <option key={d} value={d}>{d}</option>)}
+          </select>
+
+          <select 
+            value={filters.equipment} 
+            onChange={(e) => setFilters({...filters, equipment: e.target.value})}
+            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+          >
+            <option value="">Todos equipamentos</option>
+            {equipments.map(eq => <option key={eq} value={eq}>{eq}</option>)}
           </select>
         </div>
 
