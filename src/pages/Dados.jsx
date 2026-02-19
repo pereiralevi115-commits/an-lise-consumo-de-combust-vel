@@ -64,9 +64,8 @@ export default function Dados() {
   });
 
   // Detectar inconsistências de KM por placa
-  // Para cada registro, verificar anomalias comparando com outros registros da mesma placa ordenados por data
   const kmInconsistencyIds = new Set();
-  const KM_MAX_DIFF = 2000; // diferença máxima razoável entre abastecimentos da mesma placa
+  const KM_MAX_DIFF = 2000;
 
   const plateGroups = {};
   records.forEach(r => {
@@ -77,33 +76,33 @@ export default function Dados() {
   });
 
   Object.values(plateGroups).forEach(group => {
-    // Ordenar por data+hora crescente
     const sorted = [...group].sort((a, b) => {
       const da = (a.date || '') + ' ' + (a.time || '');
       const db = (b.date || '') + ' ' + (b.time || '');
       return da < db ? -1 : da > db ? 1 : 0;
     });
 
-    // Calcular média de KM para definir limiar de diferença grande
-    const kmsWithValue = sorted.filter(r => r.km_driven > 0).map(r => r.km_driven);
+    const kmsWithValue = sorted.filter(r => Number(r.km_driven) > 0).map(r => Number(r.km_driven));
     const avgKm = kmsWithValue.length > 0 ? kmsWithValue.reduce((s, v) => s + v, 0) / kmsWithValue.length : 0;
     const threshold = Math.max(KM_MAX_DIFF, avgKm * 3);
 
     for (let i = 0; i < sorted.length; i++) {
       const r = sorted[i];
+      const km = Number(r.km_driven);
+
       // Regra 2: KM zerado ou vazio quando outros registros da placa têm KM
-      if ((r.km_driven == null || r.km_driven === 0) && kmsWithValue.length > 0) {
+      if ((km == null || km === 0 || isNaN(km)) && kmsWithValue.length > 0) {
         kmInconsistencyIds.add(r.id);
         continue;
       }
-      if (r.km_driven > 0 && i > 0) {
-        // Pegar o anterior com KM válido
+
+      if (km > 0 && i > 0) {
         let prev = null;
         for (let j = i - 1; j >= 0; j--) {
-          if (sorted[j].km_driven > 0) { prev = sorted[j]; break; }
+          if (Number(sorted[j].km_driven) > 0) { prev = sorted[j]; break; }
         }
         if (prev) {
-          const diff = r.km_driven - prev.km_driven;
+          const diff = km - Number(prev.km_driven);
           // Regra 1: hodômetro voltou
           if (diff < 0) {
             kmInconsistencyIds.add(r.id);
