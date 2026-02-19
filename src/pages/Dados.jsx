@@ -255,7 +255,7 @@ export default function Dados() {
 
                       <TableCell className="text-slate-300 text-xs">{pontosMap[String(record.unit)] || record.unit || '-'}</TableCell>
                       <TableCell className="text-slate-300">{record.vehicle_type || '-'}</TableCell>
-                      <TableCell className="text-slate-300">-</TableCell>
+                      <TableCell className="text-slate-300">{placaEquipamentosMap[String(record.vehicle_plate).toUpperCase()] || '-'}</TableCell>
                       <TableCell className="text-slate-300">{frentistasMap[String(record.attendant)] || record.attendant || '-'}</TableCell>
                       <TableCell className="text-slate-300">{motoristasMap[String(record.driver)] || frentistasMap[String(record.driver)] || record.driver || '-'}</TableCell>
                       <TableCell className="text-slate-300">{combustiveisMap[String(record.fuel_type)] || record.fuel_type || '-'}</TableCell>
