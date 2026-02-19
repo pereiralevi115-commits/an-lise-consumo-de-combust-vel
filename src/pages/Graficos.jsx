@@ -173,8 +173,9 @@ export default function Graficos() {
     const liters = unitRecords.reduce((sum, r) => sum + (r.liters || 0), 0);
     const cost = unitRecords.reduce((sum, r) => sum + (r.cost || 0), 0);
     const km = calcKmByPlate(unitRecords);
+    const nomeUsina = pontosMap[String(unit)] || unit;
     return {
-      name: unit.replace('CONCRETAR ', ''),
+      name: nomeUsina.replace('CONCRETAR ', ''),
       liters,
       km,
       cost,
