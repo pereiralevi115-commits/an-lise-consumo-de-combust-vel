@@ -15,6 +15,8 @@ export default function AnalisePorPlaca() {
     equipment: '',
     driver: ''
   });
+  const [sortBy, setSortBy] = useState('month');
+  const [sortDir, setSortDir] = useState('asc');
 
   const { data: records = [] } = useQuery({
     queryKey: ['fuelRecords'],
@@ -138,10 +140,31 @@ export default function AnalisePorPlaca() {
     if (filters.driver && !item.driver.toLowerCase().includes(filters.driver.toLowerCase())) return false;
     return true;
   }).sort((a, b) => {
-    const monthOrder = monthNames.indexOf(a.month) - monthNames.indexOf(b.month);
-    if (monthOrder !== 0) return monthOrder;
-    return a.plate.localeCompare(b.plate);
+    let valA, valB;
+    if (sortBy === 'month') { valA = monthNames.indexOf(a.month); valB = monthNames.indexOf(b.month); }
+    else if (sortBy === 'plate') { valA = a.plate; valB = b.plate; }
+    else if (sortBy === 'unit') { valA = a.unit; valB = b.unit; }
+    else if (sortBy === 'equipment') { valA = a.equipment; valB = b.equipment; }
+    else if (sortBy === 'driver') { valA = a.driver; valB = b.driver; }
+    else if (sortBy === 'fuelType') { valA = a.fuelType; valB = b.fuelType; }
+    else if (sortBy === 'totalLiters') { valA = a.totalLiters; valB = b.totalLiters; }
+    else if (sortBy === 'kmDelta') { valA = a.kmDelta; valB = b.kmDelta; }
+    else if (sortBy === 'm3') { valA = a.m3; valB = b.m3; }
+    else if (sortBy === 'efficiency') { valA = parseFloat(a.efficiency); valB = parseFloat(b.efficiency); }
+    
+    const cmp = typeof valA === 'string' ? valA.localeCompare(valB) : (valA < valB ? -1 : valA > valB ? 1 : 0);
+    return sortDir === 'asc' ? cmp : -cmp;
   });
+
+  const toggleSort = (field) => {
+    if (sortBy === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortBy(field); setSortDir('asc'); }
+  };
+
+  const SortIcon = ({ field }) => {
+    if (sortBy !== field) return <span className="text-slate-600 ml-1">↕</span>;
+    return <span className="text-yellow-400 ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>;
+  };
 
   return (
     <div className="space-y-6">
@@ -215,16 +238,16 @@ export default function AnalisePorPlaca() {
             <Table className="min-w-[1400px]">
               <TableHeader>
                 <TableRow className="border-slate-700 hover:bg-slate-700/50">
-                  <TableHead className="text-slate-300">Mês</TableHead>
-                  <TableHead className="text-slate-300">Placa</TableHead>
-                  <TableHead className="text-slate-300">Usina</TableHead>
-                  <TableHead className="text-slate-300">Equipamento</TableHead>
-                  <TableHead className="text-slate-300">Motorista</TableHead>
-                  <TableHead className="text-slate-300">Combustível</TableHead>
-                  <TableHead className="text-slate-300 text-right">Litros</TableHead>
-                  <TableHead className="text-slate-300 text-right">KM (Máx - Mín)</TableHead>
-                  <TableHead className="text-slate-300 text-right">M³</TableHead>
-                  <TableHead className="text-slate-300 text-right">Eficiência (KM/L)</TableHead>
+                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('month')}>Mês<SortIcon field="month" /></TableHead>
+                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
+                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
+                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('equipment')}>Equipamento<SortIcon field="equipment" /></TableHead>
+                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
+                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('fuelType')}>Combustível<SortIcon field="fuelType" /></TableHead>
+                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('totalLiters')}>Litros<SortIcon field="totalLiters" /></TableHead>
+                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('kmDelta')}>KM (Máx - Mín)<SortIcon field="kmDelta" /></TableHead>
+                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('m3')}>M³<SortIcon field="m3" /></TableHead>
+                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('efficiency')}>Eficiência (KM/L)<SortIcon field="efficiency" /></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
