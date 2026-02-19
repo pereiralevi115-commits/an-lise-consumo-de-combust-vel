@@ -170,7 +170,7 @@ export default function Dados() {
                       <TableCell className="text-slate-300">{motoristasMap[String(record.driver)] || frentistasMap[String(record.driver)] || record.driver || '-'}</TableCell>
                       <TableCell className="text-slate-300">{combustiveisMap[String(record.fuel_type)] || record.fuel_type || '-'}</TableCell>
                       <TableCell className="text-white text-right">{record.liters != null ? record.liters.toFixed(3) : '-'}</TableCell>
-                      <TableCell className="text-white text-right">{record.km_driven != null && record.km_driven > 0 ? record.km_driven.toFixed(0) : '-'}</TableCell>
+                      <TableCell className="text-white text-right">{record.km_driven != null && record.km_driven > 0 ? record.km_driven.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '-'}</TableCell>
                       <TableCell className="text-white text-right">{record.cost != null && record.cost > 0 ? `R$ ${record.cost.toFixed(2)}` : '-'}</TableCell>
                       <TableCell className="text-white text-right">{record.cubic_meters != null ? record.cubic_meters.toFixed(2) : '-'}</TableCell>
                     </TableRow>
