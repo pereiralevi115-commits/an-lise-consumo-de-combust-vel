@@ -57,7 +57,10 @@ export default function Dados() {
     else if (sortBy === 'driver') { valA = motoristasMap[String(a.driver)] || a.driver || ''; valB = motoristasMap[String(b.driver)] || b.driver || ''; }
     else if (sortBy === 'equipamento') { valA = placaEquipamentosMap[String(a.vehicle_plate).toUpperCase()] || a.vehicle_type || ''; valB = placaEquipamentosMap[String(b.vehicle_plate).toUpperCase()] || b.vehicle_type || ''; }
     const cmp = valA < valB ? -1 : valA > valB ? 1 : 0;
-    return sortDir === 'asc' ? cmp : -cmp;
+    const primarySort = sortDir === 'asc' ? cmp : -cmp;
+    if (primarySort !== 0) return primarySort;
+    // Sempre data decrescente como critério secundário
+    return (b.date || '') < (a.date || '') ? -1 : (b.date || '') > (a.date || '') ? 1 : 0;
   });
 
   const toggleSort = (field) => {
