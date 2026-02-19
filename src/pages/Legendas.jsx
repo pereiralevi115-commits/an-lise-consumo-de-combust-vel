@@ -121,6 +121,144 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
   );
 }
 
+function PlacaEquipamentoSection() {
+  const queryClient = useQueryClient();
+  const [nova, setNova] = useState({ placa: '', tipo: '' });
+  const [bulkText, setBulkText] = useState('');
+  const [showBulk, setShowBulk] = useState(false);
+
+  const { data: items = [] } = useQuery({
+    queryKey: ['PlacaEquipamento'],
+    queryFn: () => base44.entities.PlacaEquipamento.list('placa', 10000)
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data) => base44.entities.PlacaEquipamento.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['PlacaEquipamento'] });
+      setNova({ placa: '', tipo: '' });
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.PlacaEquipamento.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['PlacaEquipamento'] })
+  });
+
+  const bulkCreateMutation = useMutation({
+    mutationFn: async (records) => {
+      await base44.entities.PlacaEquipamento.bulkCreate(records);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['PlacaEquipamento'] });
+      setBulkText('');
+      setShowBulk(false);
+    }
+  });
+
+  const handleAdd = () => {
+    if (!nova.placa.trim() || !nova.tipo.trim()) return;
+    createMutation.mutate({ placa: nova.placa.trim().toUpperCase(), tipo: nova.tipo.trim().toUpperCase() });
+  };
+
+  const handleBulkImport = () => {
+    const lines = bulkText.split('\n').map(l => l.trim()).filter(Boolean);
+    const records = lines.map(line => {
+      const parts = line.split('\t');
+      if (parts.length >= 2) return { placa: parts[0].trim().toUpperCase(), tipo: parts[1].trim().toUpperCase() };
+      return null;
+    }).filter(Boolean);
+    if (records.length === 0) return;
+    bulkCreateMutation.mutate(records);
+  };
+
+  return (
+    <Card className="bg-slate-800 border border-purple-700 md:col-span-3">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-white flex items-center gap-2">
+          <Truck className="w-5 h-5 text-purple-400" />
+          Placa / Equipamento
+          <span className="ml-auto text-sm font-normal text-slate-400">{items.length} cadastrados</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowBulk(!showBulk)}
+            className="text-purple-400 hover:text-purple-300 hover:bg-purple-900/30 ml-2"
+          >
+            <Upload className="w-4 h-4 mr-1" />
+            Importar em lote
+          </Button>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Formulário individual */}
+        <div className="flex gap-2 flex-wrap">
+          <Input
+            placeholder="Placa"
+            value={nova.placa}
+            onChange={(e) => setNova({ ...nova, placa: e.target.value })}
+            className="bg-slate-700 border-slate-600 text-white w-32"
+          />
+          <Input
+            placeholder="Tipo de equipamento"
+            value={nova.tipo}
+            onChange={(e) => setNova({ ...nova, tipo: e.target.value })}
+            className="bg-slate-700 border-slate-600 text-white flex-1 min-w-[200px]"
+          />
+          <Button
+            onClick={handleAdd}
+            disabled={createMutation.isPending || !nova.placa || !nova.tipo}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Importação em lote */}
+        {showBulk && (
+          <div className="space-y-2 bg-slate-700/40 rounded-lg p-3">
+            <p className="text-slate-400 text-xs">Cole os dados no formato: PLACA [TAB] TIPO (uma por linha)</p>
+            <textarea
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+              rows={8}
+              placeholder={"APS9D92\tBOMBA LANÇA\nAYC4D06\tCAMINHÃO BETONEIRA"}
+              className="w-full bg-slate-800 border border-slate-600 text-white rounded px-3 py-2 text-sm font-mono"
+            />
+            <Button
+              onClick={handleBulkImport}
+              disabled={bulkCreateMutation.isPending || !bulkText.trim()}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              {bulkCreateMutation.isPending ? 'Importando...' : 'Importar'}
+            </Button>
+          </div>
+        )}
+
+        {/* Lista */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 max-h-72 overflow-y-auto">
+          {items.map((item) => (
+            <div key={item.id} className="flex items-center justify-between bg-slate-700/50 rounded px-2 py-1.5 gap-1">
+              <div className="min-w-0">
+                <p className="text-white font-mono text-xs truncate">{item.placa}</p>
+                <p className="text-slate-400 text-xs truncate">{item.tipo}</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => deleteMutation.mutate(item.id)}
+                className="h-6 w-6 shrink-0 text-slate-500 hover:text-red-400"
+              >
+                <Trash2 className="w-3 h-3" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Legendas() {
   return (
     <div className="space-y-6">
@@ -161,6 +299,7 @@ export default function Legendas() {
           labelNome="Nome da usina"
           color="green"
         />
+        <PlacaEquipamentoSection />
       </div>
     </div>
   );
