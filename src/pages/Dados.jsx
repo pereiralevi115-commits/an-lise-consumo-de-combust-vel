@@ -74,7 +74,7 @@ export default function Dados() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full">
       <div>
          <h1 className="text-3xl font-bold text-white mb-6">Dados de Combustível</h1>
 
