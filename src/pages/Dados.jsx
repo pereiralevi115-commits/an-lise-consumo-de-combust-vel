@@ -186,7 +186,15 @@ export default function Dados() {
           </select>
         </div>
 
-        <p className="text-slate-400">Total de {filtered.length} registros</p>
+        <div className="flex items-center gap-4">
+          <p className="text-slate-400">Total de {filtered.length} registros</p>
+          {kmInconsistencyIds.size > 0 && (
+            <span className="flex items-center gap-2 text-red-400 text-sm">
+              <span className="inline-block w-3 h-3 rounded bg-red-700"></span>
+              {kmInconsistencyIds.size} registro(s) com inconsistência de KM
+            </span>
+          )}
+        </div>
         </div>
   
       {/* Table */}
