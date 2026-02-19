@@ -228,11 +228,15 @@ export default function Graficos() {
     byUnitAndEquipmentData[key].km += r.km_driven || 0;
     byUnitAndEquipmentData[key].cost += r.cost || 0;
   });
-  const unitEquipmentArray = Object.entries(byEquipmentData)
-    .map(([type, data]) => ({
-      name: type,
-      kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0
-    }))
+  const equipmentTypes = ['BOMBA ESTACIONÁRIA', 'BOMBA LANÇA', 'CAMINHÃO BASCULANTE', 'CAMINHÃO BETONEIRA'];
+  const unitEquipmentArray = equipmentTypes
+    .map(type => {
+      const data = byEquipmentData[type] || { liters: 0, km: 0 };
+      return {
+        name: type,
+        kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0
+      };
+    })
     .sort((a, b) => parseFloat(a.kmPerLiter) - parseFloat(b.kmPerLiter));
 
   const equipmentArray = Object.entries(byEquipmentData)
