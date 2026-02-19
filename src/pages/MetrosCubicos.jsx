@@ -71,7 +71,7 @@ export default function MetrosCubicos() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-slate-400 text-sm">
-            O arquivo deve conter as colunas na ordem: <span className="text-white font-semibold">MÊS | PLACA | M³</span>
+            O arquivo deve conter as colunas na ordem: <span className="text-white font-semibold">MÊS | PLACA | EQUIPAMENTO | M³</span>
           </p>
 
           <label className={`flex items-center gap-3 cursor-pointer w-fit px-5 py-2.5 rounded-lg font-medium text-sm transition
