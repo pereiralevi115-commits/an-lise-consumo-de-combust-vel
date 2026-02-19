@@ -220,7 +220,7 @@ export default function Dados() {
                     </TableRow>
                   ) : (
                     filtered.map((record) => (
-                    <TableRow key={record.id} className="border-slate-700 hover:bg-slate-700/30">
+                    <TableRow key={record.id} className={`border-slate-700 ${kmInconsistencyIds.has(record.id) ? 'bg-red-900/40 hover:bg-red-900/50' : 'hover:bg-slate-700/30'}`}>
                       <TableCell className="text-white">
                         {record.date ? format(parseISO(record.date), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
                       </TableCell>
