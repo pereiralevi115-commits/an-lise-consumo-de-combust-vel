@@ -130,6 +130,15 @@ export default function Dados() {
     return <span className="text-yellow-400 ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>;
   };
 
+  const saveKm = async (id, value) => {
+    const km = parseFloat(String(value).replace(',', '.'));
+    if (!isNaN(km)) {
+      await base44.entities.FuelRecord.update(id, { km_driven: km });
+      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+    }
+    setEditingKm(null);
+  };
+
   const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
   if (isLoading) {
