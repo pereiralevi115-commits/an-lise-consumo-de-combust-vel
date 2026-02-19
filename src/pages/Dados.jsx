@@ -220,12 +220,10 @@ export default function Dados() {
                   <TableHead className="text-slate-300">Hora</TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('equipamento')}>Equipamento<SortIcon field="equipamento" /></TableHead>
-                  <TableHead className="text-slate-300">Frentista</TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
                   <TableHead className="text-slate-300">Combustível</TableHead>
-                  <TableHead className="text-slate-300 text-right">Litros</TableHead>
-                   <TableHead className="text-slate-300 text-right">KM</TableHead>
+                   <TableHead className="text-slate-300 text-right">Litros</TableHead>
+                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('equipamento')}>Equipamento<SortIcon field="equipamento" /></TableHead>
+                   <TableHead className="text-slate-300">Detalhes (Hora/KM/Motorista)</TableHead>
                    <TableHead className="text-slate-300 text-right">Valor (R$)</TableHead>
                    <TableHead className="text-slate-300">Data Criação</TableHead>
                    <TableHead className="text-slate-300">Criado por</TableHead>
@@ -234,7 +232,7 @@ export default function Dados() {
               <TableBody>
                 {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={13} className="text-center text-slate-400 py-8">
+                      <TableCell colSpan={10} className="text-center text-slate-400 py-8">
                         Nenhum registro encontrado
                       </TableCell>
                     </TableRow>
@@ -248,12 +246,10 @@ export default function Dados() {
                       <TableCell className="text-white font-mono">{record.vehicle_plate}</TableCell>
 
                       <TableCell className="text-slate-300 text-xs">{pontosMap[String(record.unit)] || record.unit || '-'}</TableCell>
-                      <TableCell className="text-slate-300">{placaEquipamentosMap[String(record.vehicle_plate).toUpperCase()] || '-'}</TableCell>
-                      <TableCell className="text-slate-300">{frentistasMap[String(record.attendant)] || motoristasMap[String(record.attendant)] || record.attendant || '-'}</TableCell>
-                      <TableCell className="text-slate-300">{motoristasMap[String(record.driver)] || frentistasMap[String(record.driver)] || record.driver || '-'}</TableCell>
                       <TableCell className="text-slate-300">{combustiveisMap[String(record.fuel_type)] || record.fuel_type || '-'}</TableCell>
-                      <TableCell className="text-white text-right">{record.liters != null ? record.liters.toFixed(3) : '-'}</TableCell>
-                      <TableCell className="text-white text-right">
+                       <TableCell className="text-white text-right">{record.liters != null ? record.liters.toFixed(3) : '-'}</TableCell>
+                       <TableCell className="text-slate-300">{placaEquipamentosMap[String(record.vehicle_plate).toUpperCase()] || record.vehicle_type || '-'}</TableCell>
+                       <TableCell className="text-slate-300 text-sm"><div className="space-y-1"><div><span className="font-semibold">Hora:</span> {record.time || '-'}</div><div><span className="font-semibold">KM:</span> 
                         {kmInconsistencyIds.has(record.id) ? (
                           editingKm?.id === record.id ? (
                             <div className="flex items-center gap-1 justify-end">
