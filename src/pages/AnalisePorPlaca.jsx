@@ -256,7 +256,7 @@ export default function AnalisePorPlaca() {
                   <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('m3')}>M³<SortIcon field="m3" /></TableHead>
                   <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('cost')}>Valor (R$)<SortIcon field="cost" /></TableHead>
                   <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('efficiency')}>Eficiência (KM/L)<SortIcon field="efficiency" /></TableHead>
-                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('efficiencyCost')}>Eficiência (KM/R$)<SortIcon field="efficiencyCost" /></TableHead>
+                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('efficiencyCost')}>Eficiência (R$/KM)<SortIcon field="efficiencyCost" /></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
