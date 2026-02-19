@@ -131,6 +131,7 @@ export default function MetrosCubicos() {
                     <TableRow key={r.id} className="border-slate-700 hover:bg-slate-700/30">
                       <TableCell className="text-white">{formatMes(r.mes)}</TableCell>
                       <TableCell className="text-white font-mono">{r.placa}</TableCell>
+                      <TableCell className="text-slate-300">{r.equipamento || '-'}</TableCell>
                       <TableCell className="text-white text-right">
                         {r.metros_cubicos?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </TableCell>
