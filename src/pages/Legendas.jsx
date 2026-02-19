@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, Plus, Users, Fuel, MapPin } from 'lucide-react';
+import ValorCalculado from '@/components/ValorCalculado';
 
 function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, color }) {
   const queryClient = useQueryClient();
