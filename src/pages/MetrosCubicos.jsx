@@ -112,6 +112,7 @@ export default function MetrosCubicos() {
                 <TableRow className="border-slate-700 hover:bg-slate-700/50">
                   <TableHead className="text-slate-300">Mês</TableHead>
                   <TableHead className="text-slate-300">Placa</TableHead>
+                  <TableHead className="text-slate-300">Equipamento</TableHead>
                   <TableHead className="text-slate-300 text-right">M³</TableHead>
                   <TableHead className="text-slate-300 text-right w-16"></TableHead>
                 </TableRow>
