@@ -83,6 +83,12 @@ export default function Graficos() {
           queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
         });
 
+        const { data: pontos = [] } = useQuery({
+          queryKey: ['Ponto'],
+          queryFn: () => base44.entities.Ponto.list()
+        });
+        const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
+
   const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
   
   // Get unique filter values
