@@ -56,7 +56,6 @@ export default function AnalisePorPlaca() {
   const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
   const combustiveisMap = Object.fromEntries(combustiveis.map(c => [String(c.codigo), c.nome]));
   const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
-  const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
 
   const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
@@ -65,7 +64,6 @@ export default function AnalisePorPlaca() {
   const years = [...new Set(records.map(r => r.date ? parseISO(r.date).getFullYear() : null))].filter(y => y !== null).sort((a, b) => b - a);
   const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
   const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
-  const equipments = [...new Set(records.map(r => r.vehicle_type))].filter(Boolean).sort();
   const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort();
 
   // Agrupar por mês e placa
@@ -245,7 +243,7 @@ export default function AnalisePorPlaca() {
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center text-slate-400 py-8">
+                    <TableCell colSpan={11} className="text-center text-slate-400 py-8">
                       Nenhum registro encontrado
                     </TableCell>
                   </TableRow>
