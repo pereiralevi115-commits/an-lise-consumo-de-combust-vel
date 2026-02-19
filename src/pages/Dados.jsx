@@ -84,7 +84,7 @@ export default function Dados() {
             className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
           >
             <option value="">Todas usinas</option>
-            {units.map(u => <option key={u} value={u}>{u}</option>)}
+            {units.map(u => <option key={u} value={u}>{pontosMap[String(u)] || u}</option>)}
           </select>
 
           <select 
