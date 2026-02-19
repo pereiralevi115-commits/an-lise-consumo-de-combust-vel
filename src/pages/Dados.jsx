@@ -35,6 +35,7 @@ export default function Dados() {
   const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
   const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
   const combustiveisMap = Object.fromEntries(combustiveis.map(c => [String(c.codigo), c.nome]));
+  const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
 
   // Get unique filter values
   const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b);
