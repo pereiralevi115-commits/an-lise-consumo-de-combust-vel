@@ -16,6 +16,13 @@ export default function MetrosCubicos() {
     queryFn: () => base44.entities.CubicMetros.list('-mes', 10000)
   });
 
+  const { data: placaEquipamentos = [] } = useQuery({
+    queryKey: ['PlacaEquipamento'],
+    queryFn: () => base44.entities.PlacaEquipamento.list('placa', 10000)
+  });
+
+  const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
+
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
