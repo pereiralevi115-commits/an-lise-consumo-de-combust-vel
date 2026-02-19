@@ -75,7 +75,8 @@ function mapearRegistro(item) {
     liters: item.litragem ? parseFloat(item.litragem) : 0,
     km_driven: item.medidor_unidade === 'km' ? parseFloat(item.medidor || 0) : 0,
     cost: 0,
-    cubic_meters: null
+    cubic_meters: null,
+    korth_id: item.id || item.identificador || null
   };
 }
 
@@ -117,8 +118,26 @@ Deno.serve(async (req) => {
     const records = abastecimentos.map(mapearRegistro).filter(r => r.date && r.vehicle_plate);
     console.log(`${records.length} registros válidos`);
 
-    const saved = await base44.asServiceRole.entities.FuelRecord.bulkCreate(records);
-    console.log(`${saved.length} registros salvos`);
+    // Verificar registros duplicados
+    const korthIds = records.filter(r => r.korth_id).map(r => r.korth_id);
+    let existingIds = [];
+    if (korthIds.length > 0) {
+      const existing = await base44.asServiceRole.entities.FuelRecord.filter({
+        korth_id: { '$in': korthIds }
+      });
+      existingIds = existing.map(e => e.korth_id);
+      console.log(`${existingIds.length} registros já existem`);
+    }
+
+    // Filtrar apenas novos registros
+    const newRecords = records.filter(r => !existingIds.includes(r.korth_id));
+    console.log(`${newRecords.length} novos registros para salvar`);
+
+    let saved = [];
+    if (newRecords.length > 0) {
+      saved = await base44.asServiceRole.entities.FuelRecord.bulkCreate(newRecords);
+      console.log(`${saved.length} registros salvos`);
+    }
 
     return Response.json({
       success: true,
