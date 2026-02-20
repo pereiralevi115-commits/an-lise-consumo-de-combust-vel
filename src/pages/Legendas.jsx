@@ -127,11 +127,7 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
                          <Button
                            variant="ghost"
                            size="icon"
-                           onClick={() => {
-                             const data = { codigo: editing.codigo, nome: editing.nome };
-                             if (entity.name === 'Ponto') data.codigo2 = editing.codigo2 || '';
-                             updateMutation.mutate({ entityName: entity.name, id: item.id, data });
-                           }}
+                           onClick={() => updateMutation.mutate({ entityName: entity.name, id: item.id, data: { codigo: editing.codigo, nome: editing.nome } })}
                            className="h-6 w-6 text-green-400 hover:text-green-300"
                          >
                            <Check className="w-4 h-4" />
