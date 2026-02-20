@@ -53,6 +53,7 @@ export default function Dados() {
     if (filters.plate && r.vehicle_plate !== filters.plate) return false;
     if (filters.driver && r.driver !== filters.driver) return false;
 
+    if (filters.onlyInconsistent && !kmInconsistencyIds.has(r.id)) return false;
     return true;
   }).sort((a, b) => {
     let valA, valB;
