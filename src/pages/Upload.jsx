@@ -183,6 +183,52 @@ export default function Upload() {
         </CardContent>
       </Card>
 
+      {/* Upload Abastecimentos Externos */}
+      <Card className="bg-gradient-to-r from-yellow-900/20 to-yellow-800/20 border-yellow-600">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Truck className="w-5 h-5 text-yellow-400" />
+            Importar Abastecimentos Externos (Excel)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-slate-400 text-sm mb-4">
+            Colunas esperadas: DATA | HORA | PLACA | USINA | EQUIPAMENTOS | FRENTISTA | MOTORISTA | COMBUSTIVEL | LITROS | Hodômetro | Valor total
+          </p>
+          <label className="block">
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleExternoUpload}
+              disabled={isProcessingExterno}
+              className="hidden"
+            />
+            <div className="border-2 border-dashed border-yellow-600 rounded-lg p-10 cursor-pointer hover:border-yellow-500 hover:bg-yellow-900/10 transition text-center">
+              {isProcessingExterno ? (
+                <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="w-10 h-10 text-yellow-400 animate-spin" />
+                  <p className="text-white font-medium">Processando...</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3">
+                  <Truck className="w-10 h-10 text-yellow-400" />
+                  <p className="text-white font-medium">Clique para selecionar o Excel de externos</p>
+                  <p className="text-slate-400 text-sm">Arquivos .xlsx ou .xls</p>
+                </div>
+              )}
+            </div>
+          </label>
+          {externoResult && (
+            <Alert className={`mt-3 ${externoResult.success ? 'bg-yellow-900/20 border-yellow-600 text-yellow-100' : 'bg-red-900/20 border-red-600 text-red-100'}`}>
+              <AlertDescription className="flex items-center gap-2">
+                {externoResult.success ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                {externoResult.message}
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Upload Excel */}
           <Card className="bg-gradient-to-r from-green-900/20 to-green-800/20 border-green-600">
         <CardHeader>
