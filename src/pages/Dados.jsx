@@ -90,6 +90,22 @@ export default function Dados() {
     const kmsWithValue = sorted.filter(r => Number(r.km_driven) > 0).map(r => Number(r.km_driven));
     const threshold = KM_MAX_DIFF;
 
+    // Regra 4: mesma placa, datas diferentes, mesmo KM
+    const kmDateMap = {};
+    sorted.forEach(r => {
+      const km = Number(r.km_driven);
+      if (km > 0) {
+        if (!kmDateMap[km]) kmDateMap[km] = [];
+        kmDateMap[km].push(r);
+      }
+    });
+    Object.values(kmDateMap).forEach(sameKmRecords => {
+      const uniqueDates = new Set(sameKmRecords.map(r => r.date));
+      if (uniqueDates.size > 1) {
+        sameKmRecords.forEach(r => kmInconsistencyIds.add(r.id));
+      }
+    });
+
     for (let i = 0; i < sorted.length; i++) {
       const r = sorted[i];
       const km = Number(r.km_driven);

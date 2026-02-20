@@ -31,6 +31,32 @@ Deno.serve(async (req) => {
       const kmsWithValue = sorted.filter(r => Number(r.km_driven) > 0).map(r => Number(r.km_driven));
       const threshold = KM_MAX_DIFF;
 
+      // Regra 4: mesma placa, datas diferentes, mesmo KM
+      const kmDateMap = {};
+      sorted.forEach(r => {
+        const km = Number(r.km_driven);
+        if (km > 0) {
+          if (!kmDateMap[km]) kmDateMap[km] = [];
+          kmDateMap[km].push(r);
+        }
+      });
+      Object.values(kmDateMap).forEach(sameKmRecords => {
+        const uniqueDates = new Set(sameKmRecords.map(r => r.date));
+        if (uniqueDates.size > 1) {
+          sameKmRecords.forEach(r => {
+            inconsistencies.push({
+              id: r.id,
+              plate: plate,
+              date: r.date,
+              time: r.time,
+              km: r.km_driven,
+              motivo: 'KM duplicado em datas diferentes',
+              detalhe: `KM ${Number(r.km_driven).toLocaleString('pt-BR')} aparece em ${uniqueDates.size} datas distintas`
+            });
+          });
+        }
+      });
+
       for (let i = 0; i < sorted.length; i++) {
         const r = sorted[i];
         const km = Number(r.km_driven);
