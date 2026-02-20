@@ -275,7 +275,16 @@ export default function AnalisePorPlaca() {
           </select>
         </div>
 
-        <p className="text-slate-400 mb-6">Total de {filtered.length} registros</p>
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-slate-400">Total de {filtered.length} registros</p>
+          <button
+            onClick={exportPDF}
+            className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-semibold px-4 py-2 rounded-lg transition text-sm"
+          >
+            <FileDown className="w-4 h-4" />
+            Baixar PDF
+          </button>
+        </div>
       </div>
 
       {/* Table */}
