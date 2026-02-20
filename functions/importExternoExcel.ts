@@ -110,16 +110,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Nenhum registro válido encontrado' }, { status: 400 });
     }
 
-    // Verificar duplicatas por data+placa+km_driven
+    // Verificar duplicatas por data+placa+litros (apenas externos sem korth_id)
     const existingRecords = await base44.asServiceRole.entities.FuelRecord.list('-date', 50000);
     const existingKeys = new Set(
       existingRecords
-        .filter(r => r.date && r.vehicle_plate && r.km_driven)
-        .map(r => `${r.date}|${String(r.vehicle_plate).toUpperCase()}|${r.km_driven}`)
+        .filter(r => !r.korth_id && r.date && r.vehicle_plate)
+        .map(r => `${r.date}|${String(r.vehicle_plate).toUpperCase()}|${r.liters}`)
     );
 
     const newRecords = records.filter(r => {
-      const key = `${r.date}|${r.vehicle_plate}|${r.km_driven}`;
+      const key = `${r.date}|${r.vehicle_plate}|${r.liters}`;
       return !existingKeys.has(key);
     });
 
