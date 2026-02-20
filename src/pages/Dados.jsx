@@ -46,6 +46,7 @@ export default function Dados() {
 
   // Apply filters
   const filtered = records.filter(r => {
+    if (!r.korth_id) return false; // Excluir abastecimentos externos
     if (filters.month && parseISO(r.date).getMonth() !== parseInt(filters.month)) return false;
     if (filters.unit && r.unit !== filters.unit) return false;
     if (filters.equipment && placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()] !== filters.equipment) return false;
