@@ -11,8 +11,10 @@ import { useQueryClient } from '@tanstack/react-query';
 export default function Upload() {
   const [isProcessingExcel, setIsProcessingExcel] = useState(false);
   const [isImportingKorth, setIsImportingKorth] = useState(false);
+  const [isProcessingExterno, setIsProcessingExterno] = useState(false);
   const [result, setResult] = useState(null);
   const [korthResult, setKorthResult] = useState(null);
+  const [externoResult, setExternoResult] = useState(null);
   const [dataIni, setDataIni] = useState('');
   const [dataFim, setDataFim] = useState('');
   const queryClient = useQueryClient();
