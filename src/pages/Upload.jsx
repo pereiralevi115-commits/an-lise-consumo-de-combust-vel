@@ -229,52 +229,6 @@ export default function Upload() {
         </CardContent>
       </Card>
 
-      {/* Upload Excel */}
-          <Card className="bg-gradient-to-r from-green-900/20 to-green-800/20 border-green-600">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <FileSpreadsheet className="w-5 h-5 text-green-500" />
-            Importar Excel
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <label className="block">
-            <input
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleExcelUpload}
-              disabled={isProcessingExcel}
-              className="hidden"
-            />
-            <div className="border-2 border-dashed border-green-600 rounded-lg p-12 cursor-pointer hover:border-green-500 hover:bg-green-900/10 transition text-center">
-              {isProcessingExcel ? (
-                <div className="flex flex-col items-center gap-3">
-                  <Loader2 className="w-12 h-12 text-green-500 animate-spin" />
-                  <p className="text-white font-medium">Processando Excel...</p>
-                  <p className="text-slate-400 text-sm">Aguarde enquanto lemos o arquivo</p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-3">
-                  <FileSpreadsheet className="w-12 h-12 text-green-400" />
-                  <div>
-                    <p className="text-white font-medium mb-1">Clique para selecionar um Excel</p>
-                    <p className="text-slate-400 text-sm">Arquivos .xlsx ou .xls com dados de combustível</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </label>
-
-          {result && (
-            <Alert className={result.success ? 'bg-green-900/20 border-green-600 text-green-100' : 'bg-red-900/20 border-red-600 text-red-100'}>
-              <AlertDescription className="flex items-center gap-2">
-                {result.success ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-                {result.message}
-              </AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }
