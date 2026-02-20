@@ -156,7 +156,7 @@ export default function Graficos() {
         String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() && 
         cm.mes === item.monthKey
       );
-      const m3 = m3Data ? Number(m3Data.metros_cubicos) : 0;
+      const m3 = m3Data ? Number(m3Data.metros_cubicos) : item.fuelRecordM3;
 
       return {
         month: item.month,
