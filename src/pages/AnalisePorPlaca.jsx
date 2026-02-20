@@ -201,6 +201,7 @@ export default function AnalisePorPlaca() {
       `R$ ${item.efficiencyCost}`
     ]);
 
+    // jspdf-autotable is loaded via jsPDF plugin
     doc.autoTable({
       head,
       body,
