@@ -5,6 +5,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import jsPDF from 'jspdf';
+import { autoTable } from 'jspdf-autotable';
+import { FileDown } from 'lucide-react';
 
 export default function AnalisePorPlaca() {
   const [filters, setFilters] = useState({
