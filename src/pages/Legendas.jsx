@@ -144,14 +144,11 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
                      ) : (
                        <div className="flex items-center justify-between bg-slate-700/50 rounded px-3 py-1.5">
                          <span className="text-slate-400 font-mono text-sm w-20">{item.codigo}</span>
-                         {entity.name === 'Ponto' && (
-                           <span className="text-slate-500 font-mono text-sm w-20">{item.codigo2 || '-'}</span>
-                         )}
                          <span className="text-white flex-1 text-sm">{item.nome}</span>
                          <Button
                            variant="ghost"
                            size="icon"
-                           onClick={() => setEditing({ entityName: entity.name, id: item.id, codigo: item.codigo, codigo2: item.codigo2 || '', nome: item.nome })}
+                           onClick={() => setEditing({ entityName: entity.name, id: item.id, codigo: item.codigo, nome: item.nome })}
                            className="h-7 w-7 text-slate-500 hover:text-yellow-400"
                          >
                            <Edit2 className="w-4 h-4" />
