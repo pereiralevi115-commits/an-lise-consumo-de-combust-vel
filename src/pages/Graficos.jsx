@@ -235,10 +235,13 @@ export default function Graficos() {
     .filter(d => d.liters > 0 || d.km > 0 || d.cost > 0)
     .sort((a, b) => a.cost - b.cost);
 
-  // By equipment - agregado de analysisData
+  // By equipment - agrupa por placaEquipamentosMap (equipment), calcula km por placa e soma total
   const byEquipmentData = {};
+  // Para KM/Lt correto: precisamos do KM total por placa dentro de cada tipo de equipamento
+  // Agrupamos por equipment (tipo correto do mapa), somando liters e km de cada placa
   filtered.forEach(d => {
-    const eqType = d.vehicle_type;
+    const eqType = d.equipment && d.equipment !== '-' ? d.equipment : null;
+    if (!eqType) return;
     if (!byEquipmentData[eqType]) {
       byEquipmentData[eqType] = { liters: 0, cost: 0, m3: 0, km: 0 };
     }
@@ -248,16 +251,13 @@ export default function Graficos() {
     byEquipmentData[eqType].km += d.kmDelta || 0;
   });
 
-  const equipmentTypes = ['BOMBA ESTACIONÁRIA', 'BOMBA LANÇA', 'CAMINHÃO BASCULANTE', 'CAMINHÃO BETONEIRA'];
-  const unitEquipmentArray = equipmentTypes
-    .map(type => {
-      const data = byEquipmentData[type] || { liters: 0, km: 0 };
-      return {
-        name: type,
-        kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0
-      };
-    })
-    .sort((a, b) => parseFloat(a.kmPerLiter) - parseFloat(b.kmPerLiter));
+  const unitEquipmentArray = Object.entries(byEquipmentData)
+    .map(([type, data]) => ({
+      name: type,
+      kmPerLiter: data.liters > 0 ? parseFloat((data.km / data.liters).toFixed(2)) : 0
+    }))
+    .filter(d => d.kmPerLiter > 0)
+    .sort((a, b) => a.kmPerLiter - b.kmPerLiter);
 
   const equipmentArray = Object.entries(byEquipmentData)
       .map(([type, data]) => ({
