@@ -129,6 +129,15 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
                            onChange={(e) => setEditing({ ...editing, codigo: e.target.value })}
                            className="bg-slate-600 text-white rounded px-2 py-1 text-sm w-20 font-mono"
                          />
+                         {entity.name === 'Ponto' && (
+                           <input
+                             type="text"
+                             value={editing.codigo2 || ''}
+                             onChange={(e) => setEditing({ ...editing, codigo2: e.target.value })}
+                             placeholder="Código 2"
+                             className="bg-slate-600 text-white rounded px-2 py-1 text-sm w-20 font-mono"
+                           />
+                         )}
                          <input
                            type="text"
                            value={editing.nome}
@@ -138,7 +147,11 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
                          <Button
                            variant="ghost"
                            size="icon"
-                           onClick={() => updateMutation.mutate({ entityName: entity.name, id: item.id, data: { codigo: editing.codigo, nome: editing.nome } })}
+                           onClick={() => {
+                             const data = { codigo: editing.codigo, nome: editing.nome };
+                             if (entity.name === 'Ponto') data.codigo2 = editing.codigo2 || '';
+                             updateMutation.mutate({ entityName: entity.name, id: item.id, data });
+                           }}
                            className="h-6 w-6 text-green-400 hover:text-green-300"
                          >
                            <Check className="w-4 h-4" />
@@ -155,11 +168,14 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
                      ) : (
                        <div className="flex items-center justify-between bg-slate-700/50 rounded px-3 py-1.5">
                          <span className="text-slate-400 font-mono text-sm w-20">{item.codigo}</span>
+                         {entity.name === 'Ponto' && (
+                           <span className="text-slate-500 font-mono text-sm w-20">{item.codigo2 || '-'}</span>
+                         )}
                          <span className="text-white flex-1 text-sm">{item.nome}</span>
                          <Button
                            variant="ghost"
                            size="icon"
-                           onClick={() => setEditing({ entityName: entity.name, id: item.id, codigo: item.codigo, nome: item.nome })}
+                           onClick={() => setEditing({ entityName: entity.name, id: item.id, codigo: item.codigo, codigo2: item.codigo2 || '', nome: item.nome })}
                            className="h-7 w-7 text-slate-500 hover:text-yellow-400"
                          >
                            <Edit2 className="w-4 h-4" />
