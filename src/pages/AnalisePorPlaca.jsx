@@ -177,39 +177,68 @@ export default function AnalisePorPlaca() {
 
   const exportPDF = () => {
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-    
-    doc.setFontSize(14);
-    doc.setTextColor(40, 40, 40);
-    doc.text('Análise por Placa - Concretar Concreto Usinado', 14, 15);
-    doc.setFontSize(9);
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 10;
+    const colWidths = [18, 18, 38, 30, 38, 22, 14, 18, 12, 20, 14, 16];
+    const headers = ['Mês', 'Placa', 'Usina', 'Equipamento', 'Motorista', 'Combustível', 'Litros', 'KM', 'M³', 'Valor (R$)', 'KM/L', 'R$/KM'];
+    const rowH = 6;
+    let y = 20;
+
+    // Title
+    doc.setFontSize(13);
+    doc.setTextColor(30, 41, 59);
+    doc.text('Análise por Placa - Concretar Concreto Usinado', margin, y);
+    y += 6;
+    doc.setFontSize(8);
     doc.setTextColor(100, 100, 100);
-    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} | ${filtered.length} registros`, 14, 21);
+    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} | ${filtered.length} registros`, margin, y);
+    y += 6;
 
-    const head = [['Mês', 'Placa', 'Usina', 'Equipamento', 'Motorista', 'Combustível', 'Litros', 'KM', 'M³', 'Valor (R$)', 'KM/L', 'R$/KM']];
-    const body = filtered.map(item => [
-      item.month,
-      item.plate,
-      item.unit,
-      item.equipment,
-      item.driver,
-      item.fuelType,
-      item.totalLiters.toFixed(2),
-      item.kmDelta.toLocaleString('pt-BR', { maximumFractionDigits: 0 }),
-      item.m3.toFixed(2),
-      `R$ ${item.cost.toFixed(2)}`,
-      `${item.efficiency}`,
-      `R$ ${item.efficiencyCost}`
-    ]);
+    const drawRow = (cols, isBg, isHeader) => {
+      if (y + rowH > pageH - 10) {
+        doc.addPage();
+        y = 15;
+      }
+      let x = margin;
+      if (isHeader) {
+        doc.setFillColor(30, 41, 59);
+        doc.rect(x, y, colWidths.reduce((a, b) => a + b, 0), rowH, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(7);
+        doc.setFont(undefined, 'bold');
+      } else {
+        if (isBg) {
+          doc.setFillColor(248, 250, 252);
+          doc.rect(x, y, colWidths.reduce((a, b) => a + b, 0), rowH, 'F');
+        }
+        doc.setTextColor(40, 40, 40);
+        doc.setFontSize(7);
+        doc.setFont(undefined, 'normal');
+      }
+      cols.forEach((text, i) => {
+        doc.text(String(text ?? '-'), x + 1.5, y + rowH - 1.5, { maxWidth: colWidths[i] - 2 });
+        x += colWidths[i];
+      });
+      y += rowH;
+    };
 
-    // jspdf-autotable is loaded via jsPDF plugin
-    doc.autoTable({
-      head,
-      body,
-      startY: 26,
-      styles: { fontSize: 7, cellPadding: 2 },
-      headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold' },
-      alternateRowStyles: { fillColor: [248, 250, 252] },
-      margin: { left: 14, right: 14 }
+    drawRow(headers, false, true);
+    filtered.forEach((item, idx) => {
+      drawRow([
+        item.month,
+        item.plate,
+        item.unit,
+        item.equipment,
+        item.driver,
+        item.fuelType,
+        item.totalLiters.toFixed(2),
+        item.kmDelta.toLocaleString('pt-BR', { maximumFractionDigits: 0 }),
+        item.m3.toFixed(2),
+        `R$ ${item.cost.toFixed(2)}`,
+        item.efficiency,
+        `R$ ${item.efficiencyCost}`
+      ], idx % 2 === 0, false);
     });
 
     doc.save('analise-por-placa.pdf');
