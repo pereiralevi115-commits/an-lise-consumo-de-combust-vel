@@ -45,6 +45,68 @@ export default function Dados() {
   const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort();
 
 
+  // Detectar inconsistências de KM por placa
+  const kmInconsistencyIds = new Set();
+  const KM_MAX_DIFF = 1450;
+
+  const plateGroups = {};
+  records.forEach(r => {
+    const plate = r.vehicle_plate;
+    if (!plate) return;
+    if (!plateGroups[plate]) plateGroups[plate] = [];
+    plateGroups[plate].push(r);
+  });
+
+  Object.values(plateGroups).forEach(group => {
+    const sorted = [...group].sort((a, b) => {
+      const da = (a.date || '') + ' ' + (a.time || '');
+      const db = (b.date || '') + ' ' + (b.time || '');
+      return da < db ? -1 : da > db ? 1 : 0;
+    });
+
+    const kmsWithValue = sorted.filter(r => Number(r.km_driven) > 0).map(r => Number(r.km_driven));
+
+    const kmDateMap = {};
+    sorted.forEach(r => {
+      const km = Number(r.km_driven);
+      if (km > 0) {
+        if (!kmDateMap[km]) kmDateMap[km] = [];
+        kmDateMap[km].push(r);
+      }
+    });
+    Object.values(kmDateMap).forEach(sameKmRecords => {
+      const uniqueDates = new Set(sameKmRecords.map(r => r.date));
+      if (uniqueDates.size > 1) {
+        sameKmRecords.forEach(r => kmInconsistencyIds.add(r.id));
+      }
+    });
+
+    for (let i = 0; i < sorted.length; i++) {
+      const r = sorted[i];
+      const km = Number(r.km_driven);
+      if ((km == null || km === 0 || isNaN(km)) && kmsWithValue.length > 0) {
+        kmInconsistencyIds.add(r.id);
+        continue;
+      }
+      if (km > 0 && i > 0) {
+        let prev = null;
+        for (let j = i - 1; j >= 0; j--) {
+          if (Number(sorted[j].km_driven) > 0) { prev = sorted[j]; break; }
+        }
+        if (prev) {
+          const diff = km - Number(prev.km_driven);
+          if (diff < 0) {
+            kmInconsistencyIds.add(r.id);
+            kmInconsistencyIds.add(prev.id);
+          }
+          if (diff > KM_MAX_DIFF) {
+            kmInconsistencyIds.add(r.id);
+          }
+        }
+      }
+    }
+  });
+
   // Apply filters
   const filtered = records.filter(r => {
     if (filters.month && (!r.date || parseISO(r.date).getMonth() !== parseInt(filters.month))) return false;
@@ -52,7 +114,6 @@ export default function Dados() {
     if (filters.equipment && placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()] !== filters.equipment) return false;
     if (filters.plate && r.vehicle_plate !== filters.plate) return false;
     if (filters.driver && r.driver !== filters.driver) return false;
-
     if (filters.onlyInconsistent && !kmInconsistencyIds.has(r.id)) return false;
     return true;
   }).sort((a, b) => {
