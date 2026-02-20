@@ -68,6 +68,8 @@ const CustomLabel = (props) => {
   );
 };
 
+const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
 export default function Graficos() {
         const [filters, setFilters] = useState({
           year: '',
