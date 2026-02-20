@@ -8,7 +8,7 @@ Deno.serve(async (req) => {
 
     const records = await base44.asServiceRole.entities.FuelRecord.list('-date', 100000);
 
-    const KM_MAX_DIFF = 1300;
+    const KM_MAX_DIFF = 1400;
 
     // Agrupar por placa
     const plateGroups = {};

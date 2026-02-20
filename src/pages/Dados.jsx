@@ -70,7 +70,7 @@ export default function Dados() {
 
   // Detectar inconsistências de KM por placa
   const kmInconsistencyIds = new Set();
-  const KM_MAX_DIFF = 1300;
+  const KM_MAX_DIFF = 1400;
 
   const plateGroups = {};
   records.forEach(r => {
