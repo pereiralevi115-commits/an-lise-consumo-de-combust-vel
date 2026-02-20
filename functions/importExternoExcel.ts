@@ -110,24 +110,8 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Nenhum registro válido encontrado' }, { status: 400 });
     }
 
-    // Verificar duplicatas por data+placa+litros (apenas externos sem korth_id)
-    const existingRecords = await base44.asServiceRole.entities.FuelRecord.list('-date', 50000);
-    const existingKeys = new Set(
-      existingRecords
-        .filter(r => !r.korth_id && r.date && r.vehicle_plate)
-        .map(r => `${r.date}|${String(r.vehicle_plate).toUpperCase()}|${r.liters}`)
-    );
-
-    const newRecords = records.filter(r => {
-      const key = `${r.date}|${r.vehicle_plate}|${r.liters}`;
-      return !existingKeys.has(key);
-    });
-
-    console.log(`${existingRecords.length} existentes, ${records.length - newRecords.length} duplicatas ignoradas, ${newRecords.length} novos`);
-
-    if (newRecords.length === 0) {
-      return Response.json({ success: true, count: 0, duplicates: records.length, message: 'Todos os registros já existem no banco' });
-    }
+    // DUPLICATAS DESATIVADAS TEMPORARIAMENTE - reimportação forçada
+    const newRecords = records;
 
     const saved = await base44.asServiceRole.entities.FuelRecord.bulkCreate(newRecords);
     console.log(`${saved.length} registros salvos`);
