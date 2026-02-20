@@ -7,7 +7,6 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { FileDown } from 'lucide-react';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 
 export default function AnalisePorPlaca() {
   const [filters, setFilters] = useState({
