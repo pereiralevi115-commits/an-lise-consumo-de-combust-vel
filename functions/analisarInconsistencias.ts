@@ -29,8 +29,7 @@ Deno.serve(async (req) => {
       });
 
       const kmsWithValue = sorted.filter(r => Number(r.km_driven) > 0).map(r => Number(r.km_driven));
-      const avgKm = kmsWithValue.length > 0 ? kmsWithValue.reduce((s, v) => s + v, 0) / kmsWithValue.length : 0;
-      const threshold = Math.max(KM_MAX_DIFF, avgKm * 3);
+      const threshold = KM_MAX_DIFF;
 
       for (let i = 0; i < sorted.length; i++) {
         const r = sorted[i];
