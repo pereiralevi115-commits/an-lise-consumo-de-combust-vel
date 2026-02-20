@@ -118,15 +118,6 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
                            onChange={(e) => setEditing({ ...editing, codigo: e.target.value })}
                            className="bg-slate-600 text-white rounded px-2 py-1 text-sm w-20 font-mono"
                          />
-                         {entity.name === 'Ponto' && (
-                           <input
-                             type="text"
-                             value={editing.codigo2 || ''}
-                             onChange={(e) => setEditing({ ...editing, codigo2: e.target.value })}
-                             placeholder="Código 2"
-                             className="bg-slate-600 text-white rounded px-2 py-1 text-sm w-20 font-mono"
-                           />
-                         )}
                          <input
                            type="text"
                            value={editing.nome}
