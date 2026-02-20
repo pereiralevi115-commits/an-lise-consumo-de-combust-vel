@@ -157,11 +157,7 @@ export default function Dados() {
     setEditingKm(null);
   };
 
-  const saveUnit = async (id, value) => {
-    await base44.entities.FuelRecord.update(id, { unit: value });
-    queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
-    setEditingUnit(null);
-  };
+
 
   const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
