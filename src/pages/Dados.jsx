@@ -267,33 +267,7 @@ export default function Dados() {
                       <TableCell className="text-white">{record.time}</TableCell>
                       <TableCell className="text-white font-mono">{record.vehicle_plate}</TableCell>
 
-                      <TableCell className="text-slate-300 text-xs">
-                        {editingUnit?.id === record.id ? (
-                          <div className="flex items-center gap-1">
-                            <select
-                              autoFocus
-                              className="bg-slate-700 text-white border border-yellow-400 rounded px-2 py-0.5 text-xs"
-                              value={editingUnit.value}
-                              onChange={e => setEditingUnit({ id: record.id, value: e.target.value })}
-                              onKeyDown={e => { if (e.key === 'Escape') setEditingUnit(null); }}
-                            >
-                              {units.map(u => (
-                                <option key={u} value={u}>{pontosMap[String(u)] || u}</option>
-                              ))}
-                            </select>
-                            <button onClick={() => saveUnit(record.id, editingUnit.value)} className="text-green-400 hover:text-green-300"><Check className="w-4 h-4" /></button>
-                            <button onClick={() => setEditingUnit(null)} className="text-red-400 hover:text-red-300"><X className="w-4 h-4" /></button>
-                          </div>
-                        ) : (
-                          <span
-                            className="cursor-pointer hover:text-yellow-300 underline decoration-dotted"
-                            title="Clique para editar"
-                            onClick={() => setEditingUnit({ id: record.id, value: record.unit || '' })}
-                          >
-                            {pontosMap[String(record.unit)] || record.unit || '-'}
-                          </span>
-                        )}
-                      </TableCell>
+                      <TableCell className="text-slate-300 text-xs">{pontosMap[String(record.unit)] || record.unit || '-'}</TableCell>
                       <TableCell className="text-slate-300">{placaEquipamentosMap[String(record.vehicle_plate).toUpperCase()] || '-'}</TableCell>
                       <TableCell className="text-slate-300">{frentistasMap[String(record.attendant)] || motoristasMap[String(record.attendant)] || record.attendant || '-'}</TableCell>
                       <TableCell className="text-slate-300">{motoristasMap[String(record.driver)] || frentistasMap[String(record.driver)] || record.driver || '-'}</TableCell>
