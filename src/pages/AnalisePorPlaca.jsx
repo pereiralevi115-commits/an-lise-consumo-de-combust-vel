@@ -174,6 +174,45 @@ export default function AnalisePorPlaca() {
     return <span className="text-yellow-400 ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>;
   };
 
+  const exportPDF = () => {
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text('Análise por Placa - Concretar Concreto Usinado', 14, 15);
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} | ${filtered.length} registros`, 14, 21);
+
+    const head = [['Mês', 'Placa', 'Usina', 'Equipamento', 'Motorista', 'Combustível', 'Litros', 'KM', 'M³', 'Valor (R$)', 'KM/L', 'R$/KM']];
+    const body = filtered.map(item => [
+      item.month,
+      item.plate,
+      item.unit,
+      item.equipment,
+      item.driver,
+      item.fuelType,
+      item.totalLiters.toFixed(2),
+      item.kmDelta.toLocaleString('pt-BR', { maximumFractionDigits: 0 }),
+      item.m3.toFixed(2),
+      `R$ ${item.cost.toFixed(2)}`,
+      `${item.efficiency}`,
+      `R$ ${item.efficiencyCost}`
+    ]);
+
+    doc.autoTable({
+      head,
+      body,
+      startY: 26,
+      styles: { fontSize: 7, cellPadding: 2 },
+      headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      margin: { left: 14, right: 14 }
+    });
+
+    doc.save('analise-por-placa.pdf');
+  };
+
   return (
     <div className="space-y-6">
       <div>
