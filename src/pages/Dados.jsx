@@ -46,8 +46,7 @@ export default function Dados() {
 
   // Apply filters
   const filtered = records.filter(r => {
-    // if (!r.korth_id) return false; // externos incluídos
-    if (filters.month && parseISO(r.date).getMonth() !== parseInt(filters.month)) return false;
+    if (filters.month && (!r.date || parseISO(r.date).getMonth() !== parseInt(filters.month))) return false;
     if (filters.unit && r.unit !== filters.unit) return false;
     if (filters.equipment && placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()] !== filters.equipment) return false;
     if (filters.plate && r.vehicle_plate !== filters.plate) return false;
