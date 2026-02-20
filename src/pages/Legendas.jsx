@@ -86,6 +86,14 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
             onChange={(e) => setNovo({ ...novo, codigo: e.target.value })}
             className="bg-slate-700 border-slate-600 text-white w-28"
           />
+          {isPointEntity(novo.entity) && (
+            <Input
+              placeholder="Código 2"
+              value={novo.codigo2}
+              onChange={(e) => setNovo({ ...novo, codigo2: e.target.value })}
+              className="bg-slate-700 border-slate-600 text-white w-28"
+            />
+          )}
           <Input
             placeholder={labelNome}
             value={novo.nome}
