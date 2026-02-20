@@ -13,7 +13,8 @@ export default function Dados() {
     unit: '',
     equipment: '',
     plate: '',
-    driver: ''
+    driver: '',
+    onlyInconsistent: false
   });
   const [sortBy, setSortBy] = useState('date');
   const [sortDir, setSortDir] = useState('desc');
