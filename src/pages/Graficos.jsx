@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-      import { base44 } from '@/api/base44Client';
-      import { useQuery, useQueryClient } from '@tanstack/react-query';
-      import { ComposedChart, Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LabelList } from 'recharts';
-      import { parseISO } from 'date-fns';
-      
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
+import { parseISO } from 'date-fns';
+
 
 const YELLOW = '#FCD34D';
 const BLUE = '#E5E7EB';
