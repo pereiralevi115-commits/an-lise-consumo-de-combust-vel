@@ -61,6 +61,7 @@ export default function Dados() {
     else if (sortBy === 'equipment') { valA = placaEquipamentosMap[String(a.vehicle_plate).toUpperCase()] || ''; valB = placaEquipamentosMap[String(b.vehicle_plate).toUpperCase()] || ''; }
     else if (sortBy === 'driver') { valA = motoristasMap[String(a.driver)] || a.driver || ''; valB = motoristasMap[String(b.driver)] || b.driver || ''; }
     else if (sortBy === 'fuel') { valA = combustiveisMap[String(a.fuel_type)] || a.fuel_type || ''; valB = combustiveisMap[String(b.fuel_type)] || b.fuel_type || ''; }
+    else if (sortBy === 'time') { valA = a.time || ''; valB = b.time || ''; }
 
     const cmp = valA < valB ? -1 : valA > valB ? 1 : 0;
     const primarySort = sortDir === 'asc' ? cmp : -cmp;
