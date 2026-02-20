@@ -240,7 +240,7 @@ export default function Dados() {
               <TableHeader>
                 <TableRow className="border-slate-700 hover:bg-slate-700/50">
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('date')}>Data<SortIcon field="date" /></TableHead>
-                  <TableHead className="text-slate-300">Hora</TableHead>
+                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('time')}>Hora<SortIcon field="time" /></TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('equipment')}>Equipamentos<SortIcon field="equipment" /></TableHead>
