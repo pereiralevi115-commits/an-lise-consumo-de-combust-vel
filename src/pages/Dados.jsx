@@ -242,7 +242,7 @@ export default function Dados() {
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('equipment')}>Equipamentos<SortIcon field="equipment" /></TableHead>
                   <TableHead className="text-slate-300">Frentista</TableHead>
                   <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
-                  <TableHead className="text-slate-300">Combustível</TableHead>
+                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('fuel')}>Combustível<SortIcon field="fuel" /></TableHead>
                   <TableHead className="text-slate-300 text-right">Litros</TableHead>
                    <TableHead className="text-slate-300 text-right">KM</TableHead>
                    <TableHead className="text-slate-300 text-right">Valor (R$)</TableHead>
