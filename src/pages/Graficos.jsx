@@ -170,6 +170,7 @@ export default function Graficos() {
         totalLiters: item.totalLiters,
         kmDelta: kmDelta,
         m3: m3,
+        fuelRecordM3: item.fuelRecordM3,
         cost: item.cost,
         efficiency: item.totalLiters > 0 ? (kmDelta / item.totalLiters).toFixed(2) : 0
       };
