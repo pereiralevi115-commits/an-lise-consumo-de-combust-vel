@@ -224,9 +224,13 @@ export default function Dados() {
         <div className="flex items-center gap-4">
           <p className="text-slate-400">Total de {filtered.length} registros</p>
           {kmInconsistencyIds.size > 0 && (
-            <span className="flex items-center gap-2 text-red-400 text-sm">
-              <span className="inline-block w-3 h-3 rounded bg-red-700"></span>
-              {kmInconsistencyIds.size} registro(s) com inconsistência de KM
+            <span
+              className="flex items-center gap-2 text-red-400 text-sm cursor-pointer hover:text-red-300 select-none"
+              onClick={() => setFilters(f => ({...f, onlyInconsistent: !f.onlyInconsistent}))}
+              title="Clique para filtrar inconsistências"
+            >
+              <span className={`inline-block w-3 h-3 rounded ${filters.onlyInconsistent ? 'bg-red-400' : 'bg-red-700'}`}></span>
+              {kmInconsistencyIds.size} registro(s) com inconsistência de KM {filters.onlyInconsistent ? '(mostrando apenas)' : ''}
             </span>
           )}
         </div>
