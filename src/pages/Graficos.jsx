@@ -107,8 +107,6 @@ export default function Graficos() {
         const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
         const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
 
-  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-
   // Compute analysisData like AnalisePorPlaca does
   const analysisData = useMemo(() => {
     const groupedData = {};
