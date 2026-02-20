@@ -42,9 +42,13 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
     }
   });
 
+  const isPointEntity = (entityName) => entityName === 'Ponto';
+
   const handleAdd = () => {
     if (!novo.codigo.trim() || !novo.nome.trim()) return;
-    createMutation.mutate({ entityName: novo.entity, data: { codigo: novo.codigo.trim(), nome: novo.nome.trim() } });
+    const data = { codigo: novo.codigo.trim(), nome: novo.nome.trim() };
+    if (isPointEntity(novo.entity) && novo.codigo2.trim()) data.codigo2 = novo.codigo2.trim();
+    createMutation.mutate({ entityName: novo.entity, data });
   };
 
   const totalItems = allItems.reduce((acc, e) => acc + e.items.length, 0);
