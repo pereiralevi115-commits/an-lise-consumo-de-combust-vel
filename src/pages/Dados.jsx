@@ -107,7 +107,7 @@ export default function Dados() {
     }
   });
 
-  // Apply filters
+  // Apply filters (kmInconsistencyIds computed above)
   const filtered = records.filter(r => {
     if (filters.month && (!r.date || parseISO(r.date).getMonth() !== parseInt(filters.month))) return false;
     if (filters.unit && r.unit !== filters.unit) return false;
