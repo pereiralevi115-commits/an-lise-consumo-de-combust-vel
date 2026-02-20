@@ -65,6 +65,39 @@ export default function Upload() {
 
 
 
+  const handleExternoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const fileName = file.name.toLowerCase();
+    if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xls')) {
+      setExternoResult({ success: false, message: 'Use apenas arquivos Excel (.xlsx ou .xls)' });
+      return;
+    }
+
+    setIsProcessingExterno(true);
+    setExternoResult(null);
+
+    try {
+      const uploadResult = await base44.integrations.Core.UploadFile({ file });
+      const response = await base44.functions.invoke('importExternoExcel', { fileUrl: uploadResult.file_url });
+      const { count, duplicates } = response.data;
+      setExternoResult({
+        success: true,
+        message: `${count} registros importados com sucesso!${duplicates > 0 ? ` (${duplicates} duplicatas ignoradas)` : ''}`
+      });
+      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+      event.target.value = '';
+    } catch (error) {
+      setExternoResult({
+        success: false,
+        message: error.response?.data?.error || error.message || 'Erro ao processar arquivo'
+      });
+    } finally {
+      setIsProcessingExterno(false);
+    }
+  };
+
   const handleKorthImport = async () => {
     setIsImportingKorth(true);
     setKorthResult(null);
