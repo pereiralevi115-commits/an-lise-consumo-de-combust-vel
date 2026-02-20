@@ -134,12 +134,14 @@ export default function Graficos() {
           driver: r.driver,
           totalLiters: 0,
           kmRecords: [],
-          cost: 0
+          cost: 0,
+          fuelRecordM3: 0
         };
       }
 
       groupedData[groupKey].totalLiters += r.liters || 0;
       groupedData[groupKey].cost += r.cost || 0;
+      groupedData[groupKey].fuelRecordM3 += r.cubic_meters || 0;
       if (Number(r.km_driven) > 0) {
         groupedData[groupKey].kmRecords.push(Number(r.km_driven));
       }
