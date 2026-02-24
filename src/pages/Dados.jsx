@@ -155,6 +155,15 @@ export default function Dados() {
     setEditingKm(null);
   };
 
+  const savePlate = async (id, value) => {
+    const plate = String(value).trim().toUpperCase();
+    if (plate) {
+      await base44.entities.FuelRecord.update(id, { vehicle_plate: plate });
+      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+    }
+    setEditingPlate(null);
+  };
+
 
 
   const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']; // months pt-BR
