@@ -276,7 +276,33 @@ export default function Dados() {
                         {record.date ? format(parseISO(record.date), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
                       </TableCell>
                       <TableCell className="text-white">{record.time}</TableCell>
-                      <TableCell className="text-white font-mono">{record.vehicle_plate}</TableCell>
+                      <TableCell className="text-white font-mono">
+                        {editingPlate?.id === record.id ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="text"
+                              className="w-24 bg-slate-700 text-white border border-yellow-400 rounded px-2 py-0.5 text-sm font-mono uppercase"
+                              value={editingPlate.value}
+                              onChange={e => setEditingPlate({ id: record.id, value: e.target.value.toUpperCase() })}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') savePlate(record.id, editingPlate.value);
+                                if (e.key === 'Escape') setEditingPlate(null);
+                              }}
+                              autoFocus
+                            />
+                            <button onClick={() => savePlate(record.id, editingPlate.value)} className="text-green-400 hover:text-green-300"><Check className="w-4 h-4" /></button>
+                            <button onClick={() => setEditingPlate(null)} className="text-red-400 hover:text-red-300"><X className="w-4 h-4" /></button>
+                          </div>
+                        ) : (
+                          <span
+                            className="cursor-pointer underline decoration-dotted hover:text-yellow-300"
+                            title="Clique para editar"
+                            onClick={() => setEditingPlate({ id: record.id, value: record.vehicle_plate || '' })}
+                          >
+                            {record.vehicle_plate || '-'}
+                          </span>
+                        )}
+                      </TableCell>
 
                       <TableCell className="text-slate-300 text-xs">{pontosMap[String(record.unit)] || record.unit || '-'}</TableCell>
                       <TableCell className="text-slate-300">{placaEquipamentosMap[String(record.vehicle_plate).toUpperCase()] || '-'}</TableCell>
