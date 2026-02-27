@@ -227,17 +227,8 @@ export default function AnalisePorPlaca() {
         const str = String(text ?? '-');
         const col = cols[i];
         const maxW = colWidths[i] - 3;
-        // Truncate text to fit
+        // No truncation - show full text
         let displayStr = str;
-        const strW = doc.getStringUnitWidth(str) * 6.5 * 0.352778;
-        if (strW > maxW) {
-          // Truncate with ellipsis
-          let truncated = str;
-          while (truncated.length > 1 && doc.getStringUnitWidth(truncated + '…') * 6.5 * 0.352778 > maxW) {
-            truncated = truncated.slice(0, -1);
-          }
-          displayStr = truncated + '…';
-        }
         const cellX = col.align === 'right' ? x + colWidths[i] - 1.5 : x + 1.5;
         doc.text(displayStr, cellX, yPos + 4.8, { align: col.align === 'right' ? 'right' : 'left' });
         x += colWidths[i];
