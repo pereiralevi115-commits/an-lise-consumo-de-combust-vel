@@ -179,53 +179,103 @@ export default function AnalisePorPlaca() {
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     const pageW = doc.internal.pageSize.getWidth();
     const pageH = doc.internal.pageSize.getHeight();
-    const margin = 10;
-    const colWidths = [18, 18, 38, 30, 38, 22, 14, 18, 12, 20, 14, 16];
-    const headers = ['Mês', 'Placa', 'Usina', 'Equipamento', 'Motorista', 'Combustível', 'Litros', 'KM', 'M³', 'Valor (R$)', 'KM/L', 'R$/KM'];
-    const rowH = 6;
-    let y = 20;
+    const margin = 8;
+    const usableW = pageW - margin * 2;
 
-    // Title
-    doc.setFontSize(13);
-    doc.setTextColor(30, 41, 59);
-    doc.text('Análise por Placa - Concretar Concreto Usinado', margin, y);
-    y += 6;
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} | ${filtered.length} registros`, margin, y);
-    y += 6;
+    // Column definitions: [header, width_fraction, align]
+    const cols = [
+      { h: 'Mês',         w: 0.07, align: 'left'  },
+      { h: 'Placa',       w: 0.07, align: 'left'  },
+      { h: 'Usina',       w: 0.11, align: 'left'  },
+      { h: 'Equipamento', w: 0.10, align: 'left'  },
+      { h: 'Motorista',   w: 0.15, align: 'left'  },
+      { h: 'Combustível', w: 0.07, align: 'left'  },
+      { h: 'Litros',      w: 0.08, align: 'right' },
+      { h: 'KM',          w: 0.07, align: 'right' },
+      { h: 'M³',          w: 0.06, align: 'right' },
+      { h: 'Valor (R$)',  w: 0.09, align: 'right' },
+      { h: 'KM/L',        w: 0.06, align: 'right' },
+      { h: 'R$/KM',       w: 0.07, align: 'right' },
+    ];
+    const colWidths = cols.map(c => c.w * usableW);
+    const totalW = colWidths.reduce((a, b) => a + b, 0);
 
-    const drawRow = (cols, isBg, isHeader) => {
-      if (y + rowH > pageH - 10) {
-        doc.addPage();
-        y = 15;
-      }
+    const drawHeaders = (yPos) => {
       let x = margin;
-      if (isHeader) {
-        doc.setFillColor(30, 41, 59);
-        doc.rect(x, y, colWidths.reduce((a, b) => a + b, 0), rowH, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(7);
-        doc.setFont(undefined, 'bold');
-      } else {
-        if (isBg) {
-          doc.setFillColor(248, 250, 252);
-          doc.rect(x, y, colWidths.reduce((a, b) => a + b, 0), rowH, 'F');
-        }
-        doc.setTextColor(40, 40, 40);
-        doc.setFontSize(7);
-        doc.setFont(undefined, 'normal');
-      }
-      cols.forEach((text, i) => {
-        doc.text(String(text ?? '-'), x + 1.5, y + rowH - 1.5, { maxWidth: colWidths[i] - 2 });
+      doc.setFillColor(30, 41, 59);
+      doc.rect(margin, yPos, totalW, 7, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(7);
+      doc.setFont(undefined, 'bold');
+      cols.forEach((col, i) => {
+        const cellX = col.align === 'right' ? x + colWidths[i] - 1.5 : x + 1.5;
+        doc.text(col.h, cellX, yPos + 4.8, { align: col.align === 'right' ? 'right' : 'left' });
         x += colWidths[i];
       });
-      y += rowH;
     };
 
-    drawRow(headers, false, true);
+    const drawDataRow = (rowData, yPos, isBg) => {
+      let x = margin;
+      if (isBg) {
+        doc.setFillColor(245, 247, 250);
+        doc.rect(margin, yPos, totalW, 7, 'F');
+      }
+      doc.setTextColor(40, 40, 40);
+      doc.setFontSize(6.5);
+      doc.setFont(undefined, 'normal');
+      rowData.forEach((text, i) => {
+        const str = String(text ?? '-');
+        const col = cols[i];
+        const maxW = colWidths[i] - 3;
+        // Truncate text to fit
+        let displayStr = str;
+        const strW = doc.getStringUnitWidth(str) * 6.5 * 0.352778;
+        if (strW > maxW) {
+          // Truncate with ellipsis
+          let truncated = str;
+          while (truncated.length > 1 && doc.getStringUnitWidth(truncated + '…') * 6.5 * 0.352778 > maxW) {
+            truncated = truncated.slice(0, -1);
+          }
+          displayStr = truncated + '…';
+        }
+        const cellX = col.align === 'right' ? x + colWidths[i] - 1.5 : x + 1.5;
+        doc.text(displayStr, cellX, yPos + 4.8, { align: col.align === 'right' ? 'right' : 'left' });
+        x += colWidths[i];
+      });
+      // Bottom border line
+      doc.setDrawColor(220, 220, 220);
+      doc.line(margin, yPos + 7, margin + totalW, yPos + 7);
+    };
+
+    // Title
+    let y = 14;
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(30, 41, 59);
+    doc.text('Análise por Placa - Concretar Concreto Usinado', margin, y);
+    y += 5;
+    doc.setFontSize(7.5);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} | ${filtered.length} registros`, margin, y);
+    y += 5;
+
+    drawHeaders(y);
+    y += 7;
+
     filtered.forEach((item, idx) => {
-      drawRow([
+      if (y + 7 > pageH - 8) {
+        doc.addPage();
+        y = 10;
+        drawHeaders(y);
+        y += 7;
+      }
+      const effVal = parseFloat(item.efficiencyCost);
+      const rsKm = isNaN(effVal) || !isFinite(effVal) ? '-' : `R$ ${effVal.toFixed(2)}`;
+      const effKm = parseFloat(item.efficiency);
+      const kmL = isNaN(effKm) ? '0' : effKm.toFixed(2);
+
+      drawDataRow([
         item.month,
         item.plate,
         item.unit,
@@ -233,12 +283,13 @@ export default function AnalisePorPlaca() {
         item.driver,
         item.fuelType,
         item.totalLiters.toFixed(2),
-        item.kmDelta.toLocaleString('pt-BR', { maximumFractionDigits: 0 }),
+        item.kmDelta > 0 ? item.kmDelta.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '0',
         item.m3.toFixed(2),
         `R$ ${item.cost.toFixed(2)}`,
-        item.efficiency,
-        `R$ ${item.efficiencyCost}`
-      ], idx % 2 === 0, false);
+        kmL,
+        rsKm
+      ], y, idx % 2 === 0);
+      y += 7;
     });
 
     doc.save('analise-por-placa.pdf');
