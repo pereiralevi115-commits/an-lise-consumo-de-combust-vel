@@ -184,18 +184,18 @@ export default function AnalisePorPlaca() {
 
     // Column definitions: [header, width_fraction, align]
     const cols = [
-      { h: 'Mês',         w: 0.07, align: 'left'  },
-      { h: 'Placa',       w: 0.07, align: 'left'  },
-      { h: 'Usina',       w: 0.11, align: 'left'  },
-      { h: 'Equipamento', w: 0.10, align: 'left'  },
-      { h: 'Motorista',   w: 0.15, align: 'left'  },
-      { h: 'Combustível', w: 0.07, align: 'left'  },
-      { h: 'Litros',      w: 0.08, align: 'right' },
-      { h: 'KM',          w: 0.07, align: 'right' },
-      { h: 'M³',          w: 0.06, align: 'right' },
-      { h: 'Valor (R$)',  w: 0.09, align: 'right' },
-      { h: 'KM/L',        w: 0.06, align: 'right' },
-      { h: 'R$/KM',       w: 0.07, align: 'right' },
+      { h: 'Mês',         w: 0.06, align: 'left'  },
+      { h: 'Placa',       w: 0.06, align: 'left'  },
+      { h: 'Usina',       w: 0.10, align: 'left'  },
+      { h: 'Equipamento', w: 0.13, align: 'left'  },
+      { h: 'Motorista',   w: 0.20, align: 'left'  },
+      { h: 'Combustível', w: 0.06, align: 'left'  },
+      { h: 'Litros',      w: 0.07, align: 'right' },
+      { h: 'KM',          w: 0.06, align: 'right' },
+      { h: 'M³',          w: 0.05, align: 'right' },
+      { h: 'Valor (R$)',  w: 0.08, align: 'right' },
+      { h: 'KM/L',        w: 0.05, align: 'right' },
+      { h: 'R$/KM',       w: 0.08, align: 'right' },
     ];
     const colWidths = cols.map(c => c.w * usableW);
     const totalW = colWidths.reduce((a, b) => a + b, 0);
