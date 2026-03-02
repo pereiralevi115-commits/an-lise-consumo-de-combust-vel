@@ -70,7 +70,9 @@ export default function MetrosCubicos() {
   };
 
   const handleDelete = async (id) => {
-    await base44.entities.CubicMetros.delete(id);
+    try {
+      await base44.entities.CubicMetros.delete(id);
+    } catch (_) {}
     queryClient.invalidateQueries({ queryKey: ['CubicMetros'] });
   };
 
