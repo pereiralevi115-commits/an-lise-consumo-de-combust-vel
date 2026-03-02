@@ -10,7 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 
 export default function MetrosCubicos() {
   const [uploading, setUploading] = useState(false);
-  const [status, setStatus] = useState(null); // { type: 'success'|'error', message: string }
+  const [status, setStatus] = useState(null);
+  const [deleteMes, setDeleteMes] = useState('2026-02');
+  const [isDeletingMes, setIsDeletingMes] = useState(false);
+  const [deleteStatus, setDeleteStatus] = useState(null);
   const [sortBy, setSortBy] = useState('mes');
   const [sortDir, setSortDir] = useState('asc');
   const queryClient = useQueryClient();
