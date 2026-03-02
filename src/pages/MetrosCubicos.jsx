@@ -159,6 +159,44 @@ export default function MetrosCubicos() {
         </CardContent>
       </Card>
 
+      {/* Delete by month */}
+      <Card className="bg-gradient-to-r from-red-900/20 to-red-800/20 border-red-700">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-white flex items-center gap-2">
+            <Trash2 className="w-5 h-5 text-red-400" />
+            Excluir Registros por Mês
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex gap-3 items-end">
+            <div className="space-y-1 flex-1 max-w-xs">
+              <Label className="text-slate-300 text-sm">Mês / Ano</Label>
+              <Input
+                type="month"
+                value={deleteMes}
+                onChange={(e) => setDeleteMes(e.target.value)}
+                className="bg-slate-800 border-slate-600 text-white"
+              />
+            </div>
+            <Button
+              onClick={handleDeleteMes}
+              disabled={isDeletingMes || !deleteMes}
+              className="bg-red-700 hover:bg-red-600 text-white"
+            >
+              {isDeletingMes ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Excluindo...</> : <><Trash2 className="w-4 h-4 mr-2" />Excluir</>}
+            </Button>
+          </div>
+          {deleteStatus && (
+            <div className={`flex items-center gap-2 text-sm px-4 py-3 rounded-lg ${
+              deleteStatus.type === 'success' ? 'bg-green-900/40 text-green-300 border border-green-700' : 'bg-red-900/40 text-red-300 border border-red-700'
+            }`}>
+              {deleteStatus.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+              {deleteStatus.message}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Table */}
       <Card className="bg-slate-800 border-slate-700">
         <CardHeader className="pb-2">
