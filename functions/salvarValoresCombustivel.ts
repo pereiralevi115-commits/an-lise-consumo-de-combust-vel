@@ -12,16 +12,18 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Preço inválido' }, { status: 400 });
     }
 
-    // Busca todos os registros
-    const records = await base44.asServiceRole.entities.FuelRecord.list('-date', 100000);
+    // Filtra direto no banco por unidade (reduz drasticamente os registros)
+    const queryFilter = {};
+    if (unitFilter) queryFilter.unit = unitFilter;
 
-    // Filtra no servidor
+    const records = await base44.asServiceRole.entities.FuelRecord.filter(queryFilter, '-date', 100000);
+
+    // Filtra por ano e mês no servidor
     const filtered = records.filter(r => {
       if (!r.date) return false;
       const d = new Date(r.date);
-      if (anoFilter && d.getFullYear() !== parseInt(anoFilter)) return false;
-      if (mesFilter !== '' && mesFilter !== undefined && mesFilter !== null && d.getMonth() !== parseInt(mesFilter)) return false;
-      if (unitFilter && r.unit !== unitFilter) return false;
+      if (anoFilter && d.getUTCFullYear() !== parseInt(anoFilter)) return false;
+      if (mesFilter !== '' && mesFilter !== undefined && mesFilter !== null && d.getUTCMonth() !== parseInt(mesFilter)) return false;
       return true;
     });
 
@@ -29,7 +31,7 @@ Deno.serve(async (req) => {
       return Response.json({ updated: 0 });
     }
 
-    // Atualiza em lotes de 20 sem delay
+    // Atualiza em lotes de 20
     const batchSize = 20;
     let updated = 0;
     for (let i = 0; i < filtered.length; i += batchSize) {
