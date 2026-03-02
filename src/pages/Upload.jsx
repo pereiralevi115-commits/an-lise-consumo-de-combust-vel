@@ -226,7 +226,7 @@ export default function Upload() {
       </Card>
 
       {/* Upload Abastecimentos Externos */}
-      <Card className="bg-gradient-to-r from-yellow-900/20 to-yellow-800/20 border-yellow-600">
+      <Card className="bg-slate-800/60 border-yellow-600">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <Truck className="w-5 h-5 text-yellow-400" />
