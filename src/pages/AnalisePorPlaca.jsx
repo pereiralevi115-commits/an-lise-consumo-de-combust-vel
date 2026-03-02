@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { FileDown } from 'lucide-react';
+import { FileDown, Pencil, Check, X } from 'lucide-react';
 import jsPDF from 'jspdf';
 
 export default function AnalisePorPlaca() {
@@ -19,6 +19,8 @@ export default function AnalisePorPlaca() {
   });
   const [sortBy, setSortBy] = useState('month');
   const [sortDir, setSortDir] = useState('asc');
+  const [editingRow, setEditingRow] = useState(null);
+  const [editValues, setEditValues] = useState({ unit: '', equipment: '' });
 
   const { data: records = [] } = useQuery({
     queryKey: ['fuelRecords'],
@@ -153,7 +155,7 @@ export default function AnalisePorPlaca() {
         month: monthNames[month - 1],
         monthKey: cm.mes,
         plate: cm.placa,
-        unit: '-',
+        unit: cm.unidade || '-',
         equipment: placaEquipamentosMap[plateKey] || cm.equipamento || '-',
         vehicle_type: '-',
         driver: '-',
@@ -196,6 +198,41 @@ export default function AnalisePorPlaca() {
     const cmp = typeof valA === 'string' ? valA.localeCompare(valB) : (valA < valB ? -1 : valA > valB ? 1 : 0);
     return sortDir === 'asc' ? cmp : -cmp;
   });
+
+  const startEdit = (item) => {
+    setEditingRow({ plate: item.plate, monthKey: item.monthKey });
+    setEditValues({ unit: item.unit === '-' ? '' : item.unit, equipment: item.equipment === '-' ? '' : item.equipment });
+  };
+
+  const cancelEdit = () => setEditingRow(null);
+
+  const saveEdit = async (item) => {
+    // Update CubicMetros record
+    const cm = cubicMetros.find(c =>
+      String(c.placa).toUpperCase() === String(item.plate).toUpperCase() &&
+      c.mes === item.monthKey
+    );
+    if (cm) {
+      const updateData = {};
+      if (editValues.equipment !== '') updateData.equipamento = editValues.equipment;
+      // For unit, store the raw unit code/name as a note on CubicMetros
+      if (editValues.unit !== '') updateData.unidade = editValues.unit;
+      await base44.entities.CubicMetros.update(cm.id, updateData);
+      queryClient.invalidateQueries({ queryKey: ['cubicMetros'] });
+    }
+
+    // Update PlacaEquipamento if equipment changed
+    if (editValues.equipment !== '') {
+      const pe = placaEquipamentos.find(p => String(p.placa).toUpperCase() === String(item.plate).toUpperCase());
+      if (pe) {
+        await base44.entities.PlacaEquipamento.update(pe.id, { tipo: editValues.equipment });
+      } else {
+        await base44.entities.PlacaEquipamento.create({ placa: item.plate, tipo: editValues.equipment });
+      }
+      queryClient.invalidateQueries({ queryKey: ['PlacaEquipamento'] });
+    }
+    setEditingRow(null);
+  };
 
   const toggleSort = (field) => {
     if (sortBy === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -421,12 +458,32 @@ export default function AnalisePorPlaca() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filtered.map((item, idx) => (
-                    <TableRow key={idx} className="border-slate-700 hover:bg-slate-700/30">
+                  filtered.map((item, idx) => {
+                    const isM3Only = item.totalLiters === 0 && item.kmDelta === 0 && item.cost === 0 && item.driver === '-';
+                    const isEditing = editingRow && editingRow.plate === item.plate && editingRow.monthKey === item.monthKey;
+                    return <TableRow key={idx} className={`border-slate-700 ${isM3Only ? 'bg-green-900/30 hover:bg-green-900/50' : 'hover:bg-slate-700/30'}`}>
                       <TableCell className="text-white">{item.month}</TableCell>
                       <TableCell className="text-white font-mono font-bold">{item.plate}</TableCell>
-                      <TableCell className="text-slate-300 text-sm">{item.unit}</TableCell>
-                      <TableCell className="text-slate-300 text-sm">{item.equipment}</TableCell>
+                      <TableCell className="text-slate-300 text-sm">
+                        {isM3Only && isEditing ? (
+                          <input
+                            className="bg-slate-700 text-white rounded px-2 py-1 text-xs w-28 border border-green-500 outline-none"
+                            value={editValues.unit}
+                            onChange={e => setEditValues(v => ({ ...v, unit: e.target.value }))}
+                            placeholder="Usina..."
+                          />
+                        ) : item.unit}
+                      </TableCell>
+                      <TableCell className="text-slate-300 text-sm">
+                        {isM3Only && isEditing ? (
+                          <input
+                            className="bg-slate-700 text-white rounded px-2 py-1 text-xs w-36 border border-green-500 outline-none"
+                            value={editValues.equipment}
+                            onChange={e => setEditValues(v => ({ ...v, equipment: e.target.value }))}
+                            placeholder="Equipamento..."
+                          />
+                        ) : item.equipment}
+                      </TableCell>
                       <TableCell className="text-slate-300 text-sm">{item.driver}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{item.fuelType}</TableCell>
                       <TableCell className="text-white text-right">{item.totalLiters.toFixed(2)} L</TableCell>
@@ -434,10 +491,24 @@ export default function AnalisePorPlaca() {
                       <TableCell className="text-white text-right">{item.m3.toFixed(2)} m³</TableCell>
                       <TableCell className="text-white text-right">R$ {item.cost.toFixed(2)}</TableCell>
                       <TableCell className="text-yellow-400 text-right font-bold">{item.efficiency} km/L</TableCell>
-                      <TableCell className="text-yellow-400 text-right font-bold">R$ {item.efficiencyCost}/km</TableCell>
-                    </TableRow>
-                  ))
+                      <TableCell className="text-yellow-400 text-right font-bold">
+                        {isM3Only ? (
+                          isEditing ? (
+                            <div className="flex gap-1 justify-end">
+                              <button onClick={() => saveEdit(item)} className="text-green-400 hover:text-green-300"><Check className="w-4 h-4" /></button>
+                              <button onClick={cancelEdit} className="text-red-400 hover:text-red-300"><X className="w-4 h-4" /></button>
+                            </div>
+                          ) : (
+                            <button onClick={() => startEdit(item)} className="text-green-400 hover:text-green-300 flex items-center gap-1 ml-auto">
+                              <Pencil className="w-3 h-3" />
+                            </button>
+                          )
+                        ) : `R$ ${item.efficiencyCost}/km`}
+                      </TableCell>
+                    </TableRow>;
+                  })
                 )}
+
               </TableBody>
             </Table>
           </div>
