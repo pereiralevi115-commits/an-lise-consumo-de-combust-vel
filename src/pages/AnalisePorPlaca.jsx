@@ -441,6 +441,7 @@ export default function AnalisePorPlaca() {
                     );
                   })
                 )}
+
               </TableBody>
             </Table>
           </div>
