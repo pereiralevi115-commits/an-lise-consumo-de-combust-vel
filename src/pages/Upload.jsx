@@ -12,12 +12,54 @@ export default function Upload() {
   const [isProcessingExcel, setIsProcessingExcel] = useState(false);
   const [isImportingKorth, setIsImportingKorth] = useState(false);
   const [isProcessingExterno, setIsProcessingExterno] = useState(false);
+  const [isDeletingExterno, setIsDeletingExterno] = useState(false);
   const [result, setResult] = useState(null);
   const [korthResult, setKorthResult] = useState(null);
   const [externoResult, setExternoResult] = useState(null);
+  const [deleteResult, setDeleteResult] = useState(null);
+  const [deleteMes, setDeleteMes] = useState('2026-02');
   const [dataIni, setDataIni] = useState('');
   const [dataFim, setDataFim] = useState('');
   const queryClient = useQueryClient();
+
+  const handleDeleteExterno = async () => {
+    if (!deleteMes) return;
+    const [ano, mes] = deleteMes.split('-').map(Number);
+    const confirmMsg = `Tem certeza que deseja excluir todos os abastecimentos EXTERNOS (sem korth_id) de ${mes.toString().padStart(2,'0')}/${ano}?`;
+    if (!window.confirm(confirmMsg)) return;
+
+    setIsDeletingExterno(true);
+    setDeleteResult(null);
+    try {
+      // Busca todos sem korth_id do mês/ano selecionado
+      const allRecords = await base44.entities.FuelRecord.list('-date', 100000);
+      const toDelete = allRecords.filter(r => {
+        if (r.korth_id) return false;
+        if (!r.date) return false;
+        const d = new Date(r.date);
+        return d.getUTCFullYear() === ano && d.getUTCMonth() + 1 === mes;
+      });
+
+      if (toDelete.length === 0) {
+        setDeleteResult({ success: false, message: 'Nenhum registro externo encontrado para este período.' });
+        return;
+      }
+
+      // Deleta em lotes
+      const batchSize = 20;
+      for (let i = 0; i < toDelete.length; i += batchSize) {
+        const batch = toDelete.slice(i, i + batchSize);
+        await Promise.all(batch.map(r => base44.entities.FuelRecord.delete(r.id)));
+      }
+
+      setDeleteResult({ success: true, message: `${toDelete.length} registros externos excluídos com sucesso!` });
+      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+    } catch (error) {
+      setDeleteResult({ success: false, message: error.message || 'Erro ao excluir registros' });
+    } finally {
+      setIsDeletingExterno(false);
+    }
+  };
 
   const handleExcelUpload = async (event) => {
     const file = event.target.files?.[0];
