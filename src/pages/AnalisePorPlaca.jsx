@@ -109,7 +109,7 @@ export default function AnalisePorPlaca() {
   });
 
   // Calcular delta KM e M³
-  const analysisData = Object.values(groupedData).map(item => {
+  const fuelAnalysis = Object.values(groupedData).map(item => {
     const kmDelta = item.kmRecords.length > 0 
       ? Math.max(...item.kmRecords) - Math.min(...item.kmRecords)
       : 0;
@@ -122,6 +122,7 @@ export default function AnalisePorPlaca() {
 
     return {
       month: item.month,
+      monthKey: item.monthKey,
       plate: item.plate,
       unit: pontosMap[String(item.unit)] || item.unit || '-',
       equipment: placaEquipamentosMap[String(item.plate).toUpperCase()] || '-',
@@ -136,6 +137,37 @@ export default function AnalisePorPlaca() {
       efficiencyCost: item.cost > 0 ? (item.cost / kmDelta).toFixed(2) : 0
     };
   });
+
+  // Adicionar registros de M³ que não têm correspondência em FuelRecords
+  const fuelKeys = new Set(fuelAnalysis.map(d => `${d.monthKey}-${String(d.plate).toUpperCase()}`));
+  const m3OnlyRows = cubicMetros
+    .filter(cm => {
+      if (!cm.mes || !cm.placa) return false;
+      const key = `${cm.mes}-${String(cm.placa).toUpperCase()}`;
+      return !fuelKeys.has(key);
+    })
+    .map(cm => {
+      const [year, month] = cm.mes.split('-').map(Number);
+      const plateKey = String(cm.placa).toUpperCase();
+      return {
+        month: monthNames[month - 1],
+        monthKey: cm.mes,
+        plate: cm.placa,
+        unit: '-',
+        equipment: placaEquipamentosMap[plateKey] || cm.equipamento || '-',
+        vehicle_type: '-',
+        driver: '-',
+        fuelType: '-',
+        totalLiters: 0,
+        kmDelta: 0,
+        m3: Number(cm.metros_cubicos),
+        cost: 0,
+        efficiency: 0,
+        efficiencyCost: 0
+      };
+    });
+
+  const analysisData = [...fuelAnalysis, ...m3OnlyRows];
 
   // Aplicar filtros
   const filtered = analysisData.filter(item => {
