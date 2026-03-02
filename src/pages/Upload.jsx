@@ -271,6 +271,51 @@ export default function Upload() {
         </CardContent>
       </Card>
 
+      {/* Excluir Externos */}
+      <Card className="bg-gradient-to-r from-red-900/20 to-red-800/20 border-red-700">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Trash2 className="w-5 h-5 text-red-400" />
+            Excluir Abastecimentos Externos por Mês
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-slate-400 text-sm">
+            Remove todos os registros importados via Excel externo (sem korth_id) do mês selecionado.
+          </p>
+          <div className="flex gap-3 items-end">
+            <div className="space-y-1 flex-1">
+              <Label className="text-slate-300 text-sm">Mês / Ano</Label>
+              <Input
+                type="month"
+                value={deleteMes}
+                onChange={(e) => setDeleteMes(e.target.value)}
+                className="bg-slate-800 border-slate-600 text-white"
+              />
+            </div>
+            <Button
+              onClick={handleDeleteExterno}
+              disabled={isDeletingExterno || !deleteMes}
+              className="bg-red-700 hover:bg-red-600 text-white"
+            >
+              {isDeletingExterno ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Excluindo...</>
+              ) : (
+                <><Trash2 className="w-4 h-4 mr-2" /> Excluir</>
+              )}
+            </Button>
+          </div>
+          {deleteResult && (
+            <Alert className={`mt-3 ${deleteResult.success ? 'bg-green-900/20 border-green-600 text-green-100' : 'bg-red-900/20 border-red-600 text-red-100'}`}>
+              <AlertDescription className="flex items-center gap-2">
+                {deleteResult.success ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                {deleteResult.message}
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
     </div>
   );
 }
