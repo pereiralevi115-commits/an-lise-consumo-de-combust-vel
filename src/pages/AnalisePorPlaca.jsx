@@ -438,7 +438,8 @@ export default function AnalisePorPlaca() {
                       <TableCell className="text-yellow-400 text-right font-bold">{item.efficiency} km/L</TableCell>
                       <TableCell className="text-yellow-400 text-right font-bold">R$ {item.efficiencyCost}/km</TableCell>
                     </TableRow>
-                  ))
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
