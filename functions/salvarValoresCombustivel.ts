@@ -29,8 +29,8 @@ Deno.serve(async (req) => {
       return Response.json({ updated: 0 });
     }
 
-    // Atualiza em paralelo com lotes de 15
-    const batchSize = 15;
+    // Atualiza em paralelo com lotes de 50 sem delay
+    const batchSize = 50;
     let updated = 0;
     for (let i = 0; i < filtered.length; i += batchSize) {
       const batch = filtered.slice(i, i + batchSize);
@@ -40,9 +40,6 @@ Deno.serve(async (req) => {
         )
       );
       updated += batch.length;
-      if (i + batchSize < filtered.length) {
-        await new Promise(res => setTimeout(res, 500));
-      }
     }
 
     return Response.json({ updated });
