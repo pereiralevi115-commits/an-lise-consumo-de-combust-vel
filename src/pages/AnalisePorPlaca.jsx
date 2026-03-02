@@ -421,8 +421,10 @@ export default function AnalisePorPlaca() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filtered.map((item, idx) => (
-                    <TableRow key={idx} className="border-slate-700 hover:bg-slate-700/30">
+                  filtered.map((item, idx) => {
+                    const isM3Only = item.totalLiters === 0 && item.kmDelta === 0 && item.cost === 0 && item.driver === '-' && item.unit === '-';
+                    return (
+                    <TableRow key={idx} className={`border-slate-700 ${isM3Only ? 'bg-green-900/30 hover:bg-green-900/50' : 'hover:bg-slate-700/30'}`}>
                       <TableCell className="text-white">{item.month}</TableCell>
                       <TableCell className="text-white font-mono font-bold">{item.plate}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{item.unit}</TableCell>
