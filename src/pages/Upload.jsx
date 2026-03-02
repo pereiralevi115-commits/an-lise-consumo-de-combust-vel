@@ -272,7 +272,7 @@ export default function Upload() {
       </Card>
 
       {/* Excluir Externos */}
-      <Card className="bg-gradient-to-r from-red-900/20 to-red-800/20 border-red-700">
+      <Card className="bg-slate-800/60 border-red-700">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <Trash2 className="w-5 h-5 text-red-400" />
