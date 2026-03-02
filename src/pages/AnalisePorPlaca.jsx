@@ -19,9 +19,6 @@ export default function AnalisePorPlaca() {
   });
   const [sortBy, setSortBy] = useState('month');
   const [sortDir, setSortDir] = useState('asc');
-  const [editingRow, setEditingRow] = useState(null); // { plate, monthKey }
-  const [editValues, setEditValues] = useState({ unit: '', equipment: '' });
-  const queryClient = useQueryClient();
 
   const { data: records = [] } = useQuery({
     queryKey: ['fuelRecords'],
