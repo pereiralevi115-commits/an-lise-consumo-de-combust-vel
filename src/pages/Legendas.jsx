@@ -142,9 +142,9 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
                          </Button>
                        </div>
                      ) : (
-                       <div className="flex items-center justify-between bg-slate-700/50 rounded px-3 py-1.5">
-                         <span className="text-slate-400 font-mono text-sm w-20">{item.codigo}</span>
-                         <span className="text-white flex-1 text-sm">{item.nome}</span>
+                       <div className="flex items-center justify-between bg-slate-700/50 rounded px-3 py-1.5 gap-2">
+                         <span className="text-slate-400 font-mono text-xs w-24 shrink-0 truncate">{item.codigo}</span>
+                         <span className="text-white flex-1 text-sm truncate">{item.nome}</span>
                          <Button
                            variant="ghost"
                            size="icon"
