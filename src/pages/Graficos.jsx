@@ -198,11 +198,16 @@ export default function Graficos() {
 
   const totalLiters = filtered.reduce((sum, d) => sum + (d.totalLiters || 0), 0);
   const totalCost = filtered.reduce((sum, d) => sum + (d.cost || 0), 0);
-  const totalM3 = filtered.filter(d => {
-    const eq = (d.equipment || '').toUpperCase();
-    return eq.includes('BETONEIRA');
-  }).reduce((sum, d) => sum + (d.m3 || 0), 0);
   const totalKm = filtered.reduce((sum, d) => sum + (d.kmDelta || 0), 0);
+
+  // Total M³: soma todos os registros de CubicMetros que batem com os filtros de mês/ano
+  const totalM3 = cubicMetros.filter(cm => {
+    if (!cm.mes || !/^\d{4}-\d{2}$/.test(cm.mes)) return false;
+    const [cmYear, cmMonth] = cm.mes.split('-').map(Number);
+    if (filters.year && cmYear !== parseInt(filters.year)) return false;
+    if (filters.month && cmMonth - 1 !== parseInt(filters.month)) return false;
+    return true;
+  }).reduce((sum, cm) => sum + (cm.metros_cubicos || 0), 0);
 
   // Monthly data - agregado de analysisData
   const monthlyData = {};
