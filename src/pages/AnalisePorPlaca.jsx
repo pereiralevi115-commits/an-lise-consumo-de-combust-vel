@@ -21,6 +21,7 @@ export default function AnalisePorPlaca() {
   const [sortDir, setSortDir] = useState('asc');
   const [editingRow, setEditingRow] = useState(null);
   const [editValues, setEditValues] = useState({ unit: '', equipment: '' });
+  const queryClient = useQueryClient();
 
   const { data: records = [] } = useQuery({
     queryKey: ['fuelRecords'],
