@@ -29,13 +29,18 @@ Deno.serve(async (req) => {
       return Response.json({ updated: 0 });
     }
 
-    // Atualiza todos em paralelo de uma vez
-    await Promise.all(
-      filtered.map(r =>
-        base44.asServiceRole.entities.FuelRecord.update(r.id, { cost: (r.liters || 0) * preco })
-      )
-    );
-    const updated = filtered.length;
+    // Atualiza em lotes de 20 sem delay
+    const batchSize = 20;
+    let updated = 0;
+    for (let i = 0; i < filtered.length; i += batchSize) {
+      const batch = filtered.slice(i, i + batchSize);
+      await Promise.all(
+        batch.map(r =>
+          base44.asServiceRole.entities.FuelRecord.update(r.id, { cost: (r.liters || 0) * preco })
+        )
+      );
+      updated += batch.length;
+    }
 
     return Response.json({ updated });
   } catch (error) {
