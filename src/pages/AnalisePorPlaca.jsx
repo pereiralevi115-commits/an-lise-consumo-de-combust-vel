@@ -235,6 +235,37 @@ export default function AnalisePorPlaca() {
     setEditingRow(null);
   };
 
+  const startEdit = (item) => {
+    setEditingRow({ plate: item.plate, monthKey: item.monthKey });
+    setEditValues({ unit: item.unit === '-' ? '' : item.unit, equipment: item.equipment === '-' ? '' : item.equipment });
+  };
+
+  const cancelEdit = () => setEditingRow(null);
+
+  const saveEdit = async (item) => {
+    const cm = cubicMetros.find(c =>
+      String(c.placa).toUpperCase() === String(item.plate).toUpperCase() &&
+      c.mes === item.monthKey
+    );
+    if (cm) {
+      const updateData = {};
+      if (editValues.equipment !== '') updateData.equipamento = editValues.equipment;
+      if (editValues.unit !== '') updateData.unidade = editValues.unit;
+      await base44.entities.CubicMetros.update(cm.id, updateData);
+      queryClient.invalidateQueries({ queryKey: ['cubicMetros'] });
+    }
+    if (editValues.equipment !== '') {
+      const pe = placaEquipamentos.find(p => String(p.placa).toUpperCase() === String(item.plate).toUpperCase());
+      if (pe) {
+        await base44.entities.PlacaEquipamento.update(pe.id, { tipo: editValues.equipment });
+      } else {
+        await base44.entities.PlacaEquipamento.create({ placa: item.plate, tipo: editValues.equipment });
+      }
+      queryClient.invalidateQueries({ queryKey: ['PlacaEquipamento'] });
+    }
+    setEditingRow(null);
+  };
+
   const toggleSort = (field) => {
     if (sortBy === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setSortBy(field); setSortDir('asc'); }
