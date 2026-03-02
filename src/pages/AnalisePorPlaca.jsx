@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { FileDown } from 'lucide-react';
+import { FileDown, Pencil, Check, X } from 'lucide-react';
 import jsPDF from 'jspdf';
 
 export default function AnalisePorPlaca() {
