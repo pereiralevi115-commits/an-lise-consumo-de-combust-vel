@@ -156,7 +156,7 @@ export default function AnalisePorPlaca() {
         month: monthNames[month - 1],
         monthKey: cm.mes,
         plate: cm.placa,
-        unit: '-',
+        unit: cm.unidade || '-',
         equipment: placaEquipamentosMap[plateKey] || cm.equipamento || '-',
         vehicle_type: '-',
         driver: '-',
