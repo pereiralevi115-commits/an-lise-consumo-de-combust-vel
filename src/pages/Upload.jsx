@@ -172,7 +172,7 @@ export default function Upload() {
       </div>
 
       {/* Korth Guardian Integration */}
-      <Card className="bg-gradient-to-r from-blue-900/20 to-blue-800/20 border-blue-600">
+      <Card className="bg-slate-800/60 border-blue-600">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <RefreshCw className="w-5 h-5 text-blue-400" />
