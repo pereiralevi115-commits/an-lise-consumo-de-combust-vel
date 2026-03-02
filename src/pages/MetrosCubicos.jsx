@@ -74,6 +74,32 @@ export default function MetrosCubicos() {
     queryClient.invalidateQueries({ queryKey: ['CubicMetros'] });
   };
 
+  const handleDeleteMes = async () => {
+    if (!deleteMes) return;
+    const [ano, mes] = deleteMes.split('-').map(Number);
+    const mesStr = `${ano}-${String(mes).padStart(2, '0')}`;
+    if (!window.confirm(`Excluir todos os registros de M³ de ${mesStr}?`)) return;
+    setIsDeletingMes(true);
+    setDeleteStatus(null);
+    try {
+      const toDelete = records.filter(r => r.mes === mesStr);
+      if (toDelete.length === 0) {
+        setDeleteStatus({ type: 'error', message: 'Nenhum registro encontrado para este mês.' });
+        return;
+      }
+      const batchSize = 20;
+      for (let i = 0; i < toDelete.length; i += batchSize) {
+        await Promise.all(toDelete.slice(i, i + batchSize).map(r => base44.entities.CubicMetros.delete(r.id)));
+      }
+      setDeleteStatus({ type: 'success', message: `${toDelete.length} registros excluídos com sucesso!` });
+      queryClient.invalidateQueries({ queryKey: ['CubicMetros'] });
+    } catch (err) {
+      setDeleteStatus({ type: 'error', message: err.message });
+    } finally {
+      setIsDeletingMes(false);
+    }
+  };
+
   const formatMes = (mes) => {
     if (!mes) return '-';
     const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
