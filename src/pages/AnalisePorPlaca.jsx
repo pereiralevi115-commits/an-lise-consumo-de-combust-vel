@@ -460,12 +460,31 @@ export default function AnalisePorPlaca() {
                   </TableRow>
                 ) : (
                   filtered.map((item, idx) => {
-                    const isM3Only = item.totalLiters === 0 && item.kmDelta === 0 && item.cost === 0 && item.driver === '-' && item.unit === '-';
+                    const isM3Only = item.totalLiters === 0 && item.kmDelta === 0 && item.cost === 0 && item.driver === '-';
+                    const isEditing = editingRow && editingRow.plate === item.plate && editingRow.monthKey === item.monthKey;
                     return <TableRow key={idx} className={`border-slate-700 ${isM3Only ? 'bg-green-900/30 hover:bg-green-900/50' : 'hover:bg-slate-700/30'}`}>
                       <TableCell className="text-white">{item.month}</TableCell>
                       <TableCell className="text-white font-mono font-bold">{item.plate}</TableCell>
-                      <TableCell className="text-slate-300 text-sm">{item.unit}</TableCell>
-                      <TableCell className="text-slate-300 text-sm">{item.equipment}</TableCell>
+                      <TableCell className="text-slate-300 text-sm">
+                        {isM3Only && isEditing ? (
+                          <input
+                            className="bg-slate-700 text-white rounded px-2 py-1 text-xs w-28 border border-green-500 outline-none"
+                            value={editValues.unit}
+                            onChange={e => setEditValues(v => ({ ...v, unit: e.target.value }))}
+                            placeholder="Usina..."
+                          />
+                        ) : item.unit}
+                      </TableCell>
+                      <TableCell className="text-slate-300 text-sm">
+                        {isM3Only && isEditing ? (
+                          <input
+                            className="bg-slate-700 text-white rounded px-2 py-1 text-xs w-36 border border-green-500 outline-none"
+                            value={editValues.equipment}
+                            onChange={e => setEditValues(v => ({ ...v, equipment: e.target.value }))}
+                            placeholder="Equipamento..."
+                          />
+                        ) : item.equipment}
+                      </TableCell>
                       <TableCell className="text-slate-300 text-sm">{item.driver}</TableCell>
                       <TableCell className="text-slate-300 text-sm">{item.fuelType}</TableCell>
                       <TableCell className="text-white text-right">{item.totalLiters.toFixed(2)} L</TableCell>
@@ -473,7 +492,20 @@ export default function AnalisePorPlaca() {
                       <TableCell className="text-white text-right">{item.m3.toFixed(2)} m³</TableCell>
                       <TableCell className="text-white text-right">R$ {item.cost.toFixed(2)}</TableCell>
                       <TableCell className="text-yellow-400 text-right font-bold">{item.efficiency} km/L</TableCell>
-                      <TableCell className="text-yellow-400 text-right font-bold">R$ {item.efficiencyCost}/km</TableCell>
+                      <TableCell className="text-yellow-400 text-right font-bold">
+                        {isM3Only ? (
+                          isEditing ? (
+                            <div className="flex gap-1 justify-end">
+                              <button onClick={() => saveEdit(item)} className="text-green-400 hover:text-green-300"><Check className="w-4 h-4" /></button>
+                              <button onClick={cancelEdit} className="text-red-400 hover:text-red-300"><X className="w-4 h-4" /></button>
+                            </div>
+                          ) : (
+                            <button onClick={() => startEdit(item)} className="text-green-400 hover:text-green-300 flex items-center gap-1 ml-auto">
+                              <Pencil className="w-3 h-3" />
+                            </button>
+                          )
+                        ) : `R$ ${item.efficiencyCost}/km`}
+                      </TableCell>
                     </TableRow>;
                   })
                 )}
