@@ -317,7 +317,33 @@ export default function Dados() {
                       <TableCell className="text-slate-300 text-xs">{pontosMap[String(record.unit)] || record.unit || '-'}</TableCell>
                       <TableCell className="text-slate-300">{placaEquipamentosMap[String(record.vehicle_plate).toUpperCase()] || '-'}</TableCell>
                       <TableCell className="text-slate-300">{frentistasMap[String(record.attendant)] || motoristasMap[String(record.attendant)] || record.attendant || '-'}</TableCell>
-                      <TableCell className="text-slate-300">{motoristasMap[String(record.driver)] || frentistasMap[String(record.driver)] || record.driver || '-'}</TableCell>
+                      <TableCell className="text-slate-300">
+                        {editingDriver?.id === record.id ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="text"
+                              className="w-36 bg-slate-700 text-white border border-yellow-400 rounded px-2 py-0.5 text-sm"
+                              value={editingDriver.value}
+                              onChange={e => setEditingDriver({ id: record.id, value: e.target.value })}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') saveDriver(record.id, editingDriver.value);
+                                if (e.key === 'Escape') setEditingDriver(null);
+                              }}
+                              autoFocus
+                            />
+                            <button onClick={() => saveDriver(record.id, editingDriver.value)} className="text-green-400 hover:text-green-300"><Check className="w-4 h-4" /></button>
+                            <button onClick={() => setEditingDriver(null)} className="text-red-400 hover:text-red-300"><X className="w-4 h-4" /></button>
+                          </div>
+                        ) : (
+                          <span
+                            className="cursor-pointer underline decoration-dotted hover:text-yellow-300"
+                            title="Clique para editar"
+                            onClick={() => setEditingDriver({ id: record.id, value: motoristasMap[String(record.driver)] || frentistasMap[String(record.driver)] || record.driver || '' })}
+                          >
+                            {motoristasMap[String(record.driver)] || frentistasMap[String(record.driver)] || record.driver || '-'}
+                          </span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-slate-300">{combustiveisMap[String(record.fuel_type)] || record.fuel_type || '-'}</TableCell>
                       <TableCell className="text-white text-right">{record.liters != null ? record.liters.toFixed(3) : '-'}</TableCell>
                       <TableCell className="text-white text-right">
