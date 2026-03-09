@@ -165,6 +165,15 @@ export default function Dados() {
     setEditingPlate(null);
   };
 
+  const saveDriver = async (id, value) => {
+    const driver = String(value).trim();
+    if (driver) {
+      await base44.entities.FuelRecord.update(id, { driver });
+      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+    }
+    setEditingDriver(null);
+  };
+
 
 
   const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']; // months pt-BR
