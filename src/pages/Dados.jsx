@@ -6,7 +6,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Check, X, AlertTriangle } from 'lucide-react';
-import { useState as useTooltipState } from 'react';
 
 export default function Dados() {
   const [filters, setFilters] = useState({
