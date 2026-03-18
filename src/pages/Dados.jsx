@@ -47,9 +47,16 @@ export default function Dados() {
   const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort();
 
 
-  // Detectar inconsistências de KM por placa
+  // Detectar inconsistências de KM por placa — guarda razão para tooltip
   const kmInconsistencyIds = new Set();
+  const kmInconsistencyReasons = {}; // id -> string[]
   const KM_MAX_DIFF = 1700;
+
+  const addReason = (id, reason) => {
+    if (!kmInconsistencyReasons[id]) kmInconsistencyReasons[id] = [];
+    if (!kmInconsistencyReasons[id].includes(reason)) kmInconsistencyReasons[id].push(reason);
+    kmInconsistencyIds.add(id);
+  };
 
   const plateGroups = {};
   records.forEach(r => {
@@ -79,7 +86,7 @@ export default function Dados() {
     Object.values(kmDateMap).forEach(sameKmRecords => {
       const uniqueDates = new Set(sameKmRecords.map(r => r.date));
       if (uniqueDates.size > 1) {
-        sameKmRecords.forEach(r => kmInconsistencyIds.add(r.id));
+        sameKmRecords.forEach(r => addReason(r.id, `KM ${Number(r.km_driven).toLocaleString('pt-BR')} duplicado em datas diferentes. Verifique e corrija o hodômetro.`));
       }
     });
 
@@ -87,7 +94,7 @@ export default function Dados() {
       const r = sorted[i];
       const km = Number(r.km_driven);
       if ((km == null || km === 0 || isNaN(km)) && kmsWithValue.length > 0) {
-        kmInconsistencyIds.add(r.id);
+        addReason(r.id, `KM não informado (hodômetro zerado). Clique no campo KM para corrigir.`);
         continue;
       }
       if (km > 0 && i > 0) {
@@ -98,11 +105,11 @@ export default function Dados() {
         if (prev) {
           const diff = km - Number(prev.km_driven);
           if (diff < 0) {
-            kmInconsistencyIds.add(r.id);
-            kmInconsistencyIds.add(prev.id);
+            addReason(r.id, `KM ${km.toLocaleString('pt-BR')} é menor que o anterior (${Number(prev.km_driven).toLocaleString('pt-BR')}). O hodômetro regrediu — verifique se a placa está correta ou corrija o KM.`);
+            addReason(prev.id, `KM ${Number(prev.km_driven).toLocaleString('pt-BR')} seguido de regressão no registro de ${r.date}. Verifique os dois registros.`);
           }
           if (diff > KM_MAX_DIFF) {
-            kmInconsistencyIds.add(r.id);
+            addReason(r.id, `Variação de KM muito alta: +${diff.toLocaleString('pt-BR')} km desde o abastecimento anterior (limite: ${KM_MAX_DIFF.toLocaleString('pt-BR')} km). Verifique se o hodômetro foi digitado corretamente.`);
           }
         }
       }
