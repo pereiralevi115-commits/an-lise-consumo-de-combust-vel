@@ -322,7 +322,12 @@ export default function Dados() {
                     filtered.map((record) => (
                     <TableRow key={record.id} className={`border-slate-700 ${kmInconsistencyIds.has(record.id) ? 'bg-red-900/40 hover:bg-red-900/50' : !record.korth_id ? 'bg-green-900/30 hover:bg-green-900/40' : 'hover:bg-slate-700/30'}`}>
                       <TableCell className="text-white">
-                        {record.date ? format(parseISO(record.date), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
+                        <span className="flex items-center gap-1">
+                          {record.date ? format(parseISO(record.date), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
+                          {kmInconsistencyIds.has(record.id) && kmInconsistencyReasons[record.id] && (
+                            <InconsistencyTooltip reasons={kmInconsistencyReasons[record.id]} />
+                          )}
+                        </span>
                       </TableCell>
                       <TableCell className="text-white">{record.time}</TableCell>
                       <TableCell className="text-white font-mono">
