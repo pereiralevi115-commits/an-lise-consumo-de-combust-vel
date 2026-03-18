@@ -424,6 +424,17 @@ export default function Dados() {
                         )}
                       </TableCell>
                       <TableCell className="text-white text-right">{record.cost != null && record.cost > 0 ? `R$ ${record.cost.toFixed(2)}` : '-'}</TableCell>
+                      <TableCell className="text-center">
+                        {!record.korth_id && (
+                          <button
+                            onClick={() => deleteRecord(record)}
+                            className="text-red-500 hover:text-red-400 p-1 rounded hover:bg-red-900/30 transition"
+                            title="Excluir registro externo"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </TableCell>
                       </TableRow>
                   ))
                 )}
