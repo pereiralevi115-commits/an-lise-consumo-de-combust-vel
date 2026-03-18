@@ -186,6 +186,37 @@ export default function Dados() {
 
   const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']; // months pt-BR
 
+  const InconsistencyTooltip = ({ reasons }) => {
+    const [open, setOpen] = useTooltipState(false);
+    return (
+      <div className="relative inline-block ml-1">
+        <button
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
+          onClick={() => setOpen(v => !v)}
+          className="text-red-400 hover:text-red-300 align-middle"
+        >
+          <AlertTriangle className="w-3.5 h-3.5" />
+        </button>
+        {open && (
+          <div className="absolute z-50 left-5 top-0 w-72 bg-slate-900 border border-red-600 rounded-lg shadow-xl p-3 text-xs text-slate-200">
+            <p className="font-bold text-red-400 mb-2 flex items-center gap-1">
+              <AlertTriangle className="w-3.5 h-3.5" /> Inconsistência de KM
+            </p>
+            <ul className="space-y-1.5">
+              {reasons.map((r, i) => (
+                <li key={i} className="border-l-2 border-red-500 pl-2 leading-snug">{r}</li>
+              ))}
+            </ul>
+            <p className="mt-2 text-slate-400 border-t border-slate-700 pt-2">
+              💡 Clique no campo KM da linha para editar e corrigir.
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   if (isLoading) {
     return <div className="text-white text-center py-12">Carregando dados...</div>;
   }
