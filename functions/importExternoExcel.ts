@@ -1,5 +1,5 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
-import ExcelJS from 'npm:exceljs@4.4.0';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import * as XLSX from 'npm:xlsx@0.18.5';
 
 Deno.serve(async (req) => {
   try {
@@ -22,10 +22,15 @@ Deno.serve(async (req) => {
     const response = await fetch(fileUrl);
     const arrayBuffer = await response.arrayBuffer();
 
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(arrayBuffer);
+    const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array', cellDates: true });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, dateNF: 'yyyy-mm-dd' });
 
-    const worksheet = workbook.worksheets[0];
+    console.log(`Total de linhas na planilha: ${rows.length}`);
+    if (rows.length > 1) console.log('Cabeçalho:', rows[0]);
+    if (rows.length > 2) console.log('Primeira linha de dados:', rows[1]);
+
     const records = [];
 
     // Converter data no formato DD/MM/YYYY ou Date para YYYY-MM-DD
