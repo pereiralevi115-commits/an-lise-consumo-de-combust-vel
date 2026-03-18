@@ -186,7 +186,7 @@ export default function Dados() {
   const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']; // months pt-BR
 
   const InconsistencyTooltip = ({ reasons }) => {
-    const [open, setOpen] = useTooltipState(false);
+    const [open, setOpen] = useState(false);
     return (
       <div className="relative inline-block ml-1">
         <button
