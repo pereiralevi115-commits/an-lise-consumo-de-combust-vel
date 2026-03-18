@@ -181,6 +181,12 @@ export default function Dados() {
     setEditingDriver(null);
   };
 
+  const deleteRecord = async (record) => {
+    if (!window.confirm(`Excluir o abastecimento externo de ${record.date ? format(parseISO(record.date), 'dd/MM/yyyy') : '?'} — placa ${record.vehicle_plate || '?'}?`)) return;
+    await base44.entities.FuelRecord.delete(record.id);
+    queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+  };
+
 
 
   const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']; // months pt-BR
