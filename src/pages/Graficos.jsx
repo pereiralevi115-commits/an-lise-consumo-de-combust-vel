@@ -109,13 +109,41 @@ export default function Graficos() {
         const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
         const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
 
-  // Compute analysisData like AnalisePorPlaca does
+  // Compute analysisData with correct KM: hodômetro_atual - hodômetro_anterior por placa
   const analysisData = useMemo(() => {
-    const groupedData = {};
-    
+    // Step 1: sort each plate's records chronologically and compute km percorrido per record
+    const byPlate = {};
     records.forEach(r => {
       if (!r.date || !r.vehicle_plate) return;
-      
+      const plate = String(r.vehicle_plate).toUpperCase();
+      if (!byPlate[plate]) byPlate[plate] = [];
+      byPlate[plate].push(r);
+    });
+    Object.values(byPlate).forEach(arr => {
+      arr.sort((a, b) => {
+        const da = (a.date || '') + ' ' + (a.time || '');
+        const db = (b.date || '') + ' ' + (b.time || '');
+        return da < db ? -1 : da > db ? 1 : 0;
+      });
+    });
+    const kmPercorridoMap = {};
+    Object.values(byPlate).forEach(arr => {
+      let lastKm = null;
+      arr.forEach(r => {
+        const km = Number(r.km_driven);
+        if (km > 0) {
+          if (lastKm !== null && km > lastKm) {
+            kmPercorridoMap[r.id] = km - lastKm;
+          }
+          lastKm = km;
+        }
+      });
+    });
+
+    // Step 2: group by plate+month, summing km percorrido and liters
+    const groupedData = {};
+    records.forEach(r => {
+      if (!r.date || !r.vehicle_plate) return;
       const month = parseISO(r.date).getMonth();
       const year = parseISO(r.date).getFullYear();
       const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
@@ -133,7 +161,7 @@ export default function Graficos() {
           vehicle_type: r.vehicle_type,
           driver: r.driver,
           totalLiters: 0,
-          kmRecords: [],
+          kmDelta: 0,
           cost: 0,
           fuelRecordM3: 0
         };
@@ -142,18 +170,12 @@ export default function Graficos() {
       groupedData[groupKey].totalLiters += r.liters || 0;
       groupedData[groupKey].cost += r.cost || 0;
       groupedData[groupKey].fuelRecordM3 += r.cubic_meters || 0;
-      if (Number(r.km_driven) > 0) {
-        groupedData[groupKey].kmRecords.push(Number(r.km_driven));
-      }
+      groupedData[groupKey].kmDelta += kmPercorridoMap[r.id] || 0;
     });
 
     return Object.values(groupedData).map(item => {
-      const kmDelta = item.kmRecords.length > 0 
-        ? Math.max(...item.kmRecords) - Math.min(...item.kmRecords)
-        : 0;
-
-      const m3Data = cubicMetros.find(cm => 
-        String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() && 
+      const m3Data = cubicMetros.find(cm =>
+        String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() &&
         cm.mes === item.monthKey
       );
       const m3 = m3Data ? Number(m3Data.metros_cubicos) : item.fuelRecordM3;
@@ -168,11 +190,11 @@ export default function Graficos() {
         vehicle_type: item.vehicle_type,
         driver: motoristasMap[String(item.driver)] || item.driver || '-',
         totalLiters: item.totalLiters,
-        kmDelta: kmDelta,
+        kmDelta: item.kmDelta,
         m3: m3,
         fuelRecordM3: item.fuelRecordM3,
         cost: item.cost,
-        efficiency: item.totalLiters > 0 ? (kmDelta / item.totalLiters).toFixed(2) : 0
+        efficiency: item.totalLiters > 0 ? (item.kmDelta / item.totalLiters).toFixed(2) : 0
       };
     });
   }, [records, cubicMetros, placaEquipamentosMap, motoristasMap, pontosMap, monthNames]);
