@@ -64,6 +64,7 @@ export const PAGES = {
     "Legendas": Legendas,
     "MetrosCubicos": MetrosCubicos,
     "Upload": Upload,
+    "RankingMotoristas": RankingMotoristas,
 }
 
 export const pagesConfig = {
