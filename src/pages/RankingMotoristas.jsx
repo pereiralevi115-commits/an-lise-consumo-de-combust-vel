@@ -65,33 +65,57 @@ export default function RankingMotoristas() {
     return map;
   }, [records]);
 
+  // analysisData: agrupa por placa+mês igual ao Graficos.jsx
+  const analysisData = useMemo(() => {
+    const grouped = {};
+    records.forEach(r => {
+      if (!r.date || !r.vehicle_plate) return;
+      const d = parseISO(r.date);
+      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const plateKey = String(r.vehicle_plate).toUpperCase();
+      const key = `${monthKey}-${plateKey}`;
+      if (!grouped[key]) {
+        grouped[key] = {
+          monthKey, monthNum: d.getMonth(), year: d.getFullYear(),
+          plate: r.vehicle_plate, unit: r.unit, driver: r.driver,
+          totalLiters: 0, kmDelta: 0, cost: 0
+        };
+      }
+      grouped[key].totalLiters += r.liters || 0;
+      grouped[key].kmDelta += kmPercorridoMap[r.id] || 0;
+      grouped[key].cost += r.cost || 0;
+    });
+    return Object.values(grouped);
+  }, [records, kmPercorridoMap]);
+
   // Opções de filtro
-  const years = [...new Set(records.map(r => r.date ? parseISO(r.date).getFullYear() : null))].filter(Boolean).sort((a, b) => b - a);
-  const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b);
+  const years = [...new Set(analysisData.map(d => d.year))].sort((a, b) => b - a);
+  const months = [...new Set(analysisData.map(d => d.monthNum))].sort((a, b) => a - b);
   const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
   const equipments = [...new Set(placaEquipamentos.map(p => p.tipo))].filter(Boolean).sort();
   const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
 
-  // Agrupar diretamente por motorista somando km percorrido + litros (igual ao byDriverData do Graficos)
+  // Ranking: agrupa por motorista somando km+litros de analysisData filtrado
   const ranking = useMemo(() => {
+    const filtered = analysisData.filter(d => {
+      if (filters.year && d.year !== parseInt(filters.year)) return false;
+      if (filters.month !== '' && d.monthNum !== parseInt(filters.month)) return false;
+      if (filters.unit && d.unit !== filters.unit) return false;
+      if (filters.plate && d.plate !== filters.plate) return false;
+      if (filters.equipment && placaEquipamentosMap[String(d.plate).toUpperCase()] !== filters.equipment) return false;
+      return true;
+    });
+
     const byDriver = {};
-
-    records.forEach(r => {
-      if (!r.date || !r.driver) return;
-      const d = parseISO(r.date);
-      if (filters.year && d.getFullYear() !== parseInt(filters.year)) return;
-      if (filters.month !== '' && d.getMonth() !== parseInt(filters.month)) return;
-      if (filters.unit && r.unit !== filters.unit) return;
-      if (filters.plate && r.vehicle_plate !== filters.plate) return;
-      if (filters.equipment && placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()] !== filters.equipment) return;
-
-      const driverName = motoristasMap[String(r.driver)] || frentistasMap[String(r.driver)] || r.driver;
-      if (!byDriver[r.driver]) {
-        byDriver[r.driver] = { driver: r.driver, driverName, totalLiters: 0, totalKm: 0, totalCost: 0 };
+    filtered.forEach(d => {
+      if (!d.driver) return;
+      const driverName = motoristasMap[String(d.driver)] || frentistasMap[String(d.driver)] || d.driver;
+      if (!byDriver[d.driver]) {
+        byDriver[d.driver] = { driver: d.driver, driverName, totalLiters: 0, totalKm: 0, totalCost: 0 };
       }
-      byDriver[r.driver].totalLiters += r.liters || 0;
-      byDriver[r.driver].totalKm += kmPercorridoMap[r.id] || 0;
-      byDriver[r.driver].totalCost += r.cost || 0;
+      byDriver[d.driver].totalLiters += d.totalLiters;
+      byDriver[d.driver].totalKm += d.kmDelta;
+      byDriver[d.driver].totalCost += d.cost;
     });
 
     return Object.values(byDriver)
@@ -102,7 +126,7 @@ export default function RankingMotoristas() {
       }))
       .filter(d => d.kmPerLiter > 0)
       .sort((a, b) => b.kmPerLiter - a.kmPerLiter);
-  }, [records, filters, kmPercorridoMap, motoristasMap, frentistasMap, placaEquipamentosMap]);
+  }, [analysisData, filters, motoristasMap, frentistasMap, placaEquipamentosMap]);
 
   const medalColor = (i) => {
     if (i === 0) return 'text-yellow-400';
