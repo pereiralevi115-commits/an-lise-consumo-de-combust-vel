@@ -33,77 +33,71 @@ export default function RankingMotoristas() {
   const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort();
 
   const ranking = useMemo(() => {
-    // Apply filters
-    const filtered = records.filter(r => {
-      if (!r.date || !r.driver) return false;
-      const d = parseISO(r.date);
-      if (filters.month !== '' && d.getMonth() !== parseInt(filters.month)) return false;
-      if (filters.year !== '' && d.getFullYear() !== parseInt(filters.year)) return false;
-      if (filters.plate && r.vehicle_plate !== filters.plate) return false;
-      if (filters.unit && r.unit !== filters.unit) return false;
-      if (filters.equipment && placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()] !== filters.equipment) return false;
-      if (filters.driver && r.driver !== filters.driver) return false;
-      return true;
+    // Step 1: For ALL records (unfiltered), sort each plate chronologically
+    // and compute km_percorrido = hodômetro_atual - hodômetro_anterior (da mesma placa)
+    const byPlate = {};
+    records.forEach(r => {
+      if (!r.date || !r.vehicle_plate) return;
+      const plate = String(r.vehicle_plate).toUpperCase();
+      if (!byPlate[plate]) byPlate[plate] = [];
+      byPlate[plate].push(r);
     });
 
-    // Step 1: Group by PLATE + MONTH to compute KM delta (km_final - km_inicial) per placa/mês
-    // The hodometer belongs to the plate, so delta must be calculated per plate.
-    const plateMontGroups = {};
-    filtered.forEach(r => {
-      const d = parseISO(r.date);
-      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      const plate = String(r.vehicle_plate || '').toUpperCase();
-      const key = `${plate}__${monthKey}`;
-
-      if (!plateMontGroups[key]) {
-        plateMontGroups[key] = { plate, monthKey, monthLabel: `${monthNames[d.getMonth()]}/${d.getFullYear()}`, kmRecords: [] };
-      }
-      if (Number(r.km_driven) > 0) {
-        plateMontGroups[key].kmRecords.push(Number(r.km_driven));
-      }
+    // Sort each plate's records by date+time ascending
+    Object.values(byPlate).forEach(arr => {
+      arr.sort((a, b) => {
+        const da = (a.date || '') + ' ' + (a.time || '');
+        const db = (b.date || '') + ' ' + (b.time || '');
+        return da < db ? -1 : da > db ? 1 : 0;
+      });
     });
 
-    // KM delta per plate+month: max - min of odometer readings
-    const plateDeltaMap = {};
-    Object.entries(plateMontGroups).forEach(([key, g]) => {
-      plateDeltaMap[key] = g.kmRecords.length >= 2
-        ? Math.max(...g.kmRecords) - Math.min(...g.kmRecords)
-        : 0;
+    // Build a map: record.id -> km_percorrido (diff from previous reading on same plate)
+    const kmPercorridoMap = {};
+    Object.values(byPlate).forEach(arr => {
+      let lastKm = null;
+      arr.forEach(r => {
+        const km = Number(r.km_driven);
+        if (km > 0) {
+          if (lastKm !== null && km > lastKm) {
+            kmPercorridoMap[r.id] = km - lastKm;
+          }
+          lastKm = km;
+        }
+      });
     });
 
-    // Step 2: Group by DRIVER + MONTH — sum liters and sum KM deltas from all plates they drove
+    // Step 2: Apply filters to records and group by driver+month
     const driverMonthGroups = {};
-    filtered.forEach(r => {
+    records.forEach(r => {
+      if (!r.date || !r.driver) return;
       const d = parseISO(r.date);
+      if (filters.month !== '' && d.getMonth() !== parseInt(filters.month)) return;
+      if (filters.year !== '' && d.getFullYear() !== parseInt(filters.year)) return;
+      if (filters.plate && r.vehicle_plate !== filters.plate) return;
+      if (filters.unit && r.unit !== filters.unit) return;
+      if (filters.equipment && placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()] !== filters.equipment) return;
+      if (filters.driver && r.driver !== filters.driver) return;
+
       const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      const driverKey = r.driver;
-      const plate = String(r.vehicle_plate || '').toUpperCase();
-      const plateMonthKey = `${plate}__${monthKey}`;
-      const dmKey = `${driverKey}__${monthKey}`;
+      const dmKey = `${r.driver}__${monthKey}`;
 
       if (!driverMonthGroups[dmKey]) {
         driverMonthGroups[dmKey] = {
-          driver: driverKey,
-          driverName: motoristasMap[String(driverKey)] || driverKey,
+          driver: r.driver,
+          driverName: motoristasMap[String(r.driver)] || r.driver,
           monthKey,
           monthLabel: `${monthNames[d.getMonth()]}/${d.getFullYear()}`,
           totalLiters: 0,
-          // Track which plate+month combos were already counted for KM to avoid double counting
-          countedPlates: new Set(),
           totalKm: 0,
         };
       }
 
       driverMonthGroups[dmKey].totalLiters += r.liters || 0;
-
-      // Add KM delta for this plate+month only once per plate
-      if (!driverMonthGroups[dmKey].countedPlates.has(plateMonthKey)) {
-        driverMonthGroups[dmKey].countedPlates.add(plateMonthKey);
-        driverMonthGroups[dmKey].totalKm += plateDeltaMap[plateMonthKey] || 0;
-      }
+      driverMonthGroups[dmKey].totalKm += kmPercorridoMap[r.id] || 0;
     });
 
-    // Step 3: Compute km/l per driver+month, then aggregate by driver
+    // Step 3: Aggregate by driver
     const byDriver = {};
     Object.values(driverMonthGroups).forEach(g => {
       const kml = g.totalLiters > 0 && g.totalKm > 0 ? g.totalKm / g.totalLiters : null;
