@@ -10,7 +10,8 @@ export default function Layout({ children, currentPageName }) {
     { name: 'Dados', page: 'Dados', icon: Table2 },
     { name: 'M³', page: 'MetrosCubicos', icon: Box },
     { name: 'Upload', page: 'Upload', icon: Upload },
-    { name: 'Legendas', page: 'Legendas', icon: BookOpen }
+    { name: 'Legendas', page: 'Legendas', icon: BookOpen },
+    { name: 'Ranking', page: 'RankingMotoristas', icon: Trophy }
   ];
 
   return (
