@@ -87,7 +87,7 @@ export default function RankingMotoristas() {
       if (!driverMonthGroups[dmKey]) {
         driverMonthGroups[dmKey] = {
           driver: r.driver,
-          driverName: motoristasMap[String(r.driver)] || r.driver,
+          driverName: motoristasMap[String(r.driver)] || frentistasMap[String(r.driver)] || r.driver,
           monthKey,
           monthLabel: `${monthNames[d.getMonth()]}/${d.getFullYear()}`,
           totalLiters: 0,
