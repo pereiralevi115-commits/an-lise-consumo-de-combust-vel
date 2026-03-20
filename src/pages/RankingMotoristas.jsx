@@ -116,7 +116,7 @@ export default function RankingMotoristas() {
     return Object.values(byDriver)
       .map(d => ({ ...d, avgKml: d.totalLiters > 0 ? d.totalKm / d.totalLiters : 0 }))
       .sort((a, b) => b.avgKml - a.avgKml);
-  }, [records, filters, motoristasMap, placaEquipamentosMap]);
+  }, [records, filters, motoristasMap, frentistasMap, placaEquipamentosMap]);
 
   const medalColor = (i) => {
     if (i === 0) return 'text-yellow-400';
