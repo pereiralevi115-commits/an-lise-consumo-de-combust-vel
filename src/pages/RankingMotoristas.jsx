@@ -178,7 +178,7 @@ export default function RankingMotoristas() {
         <select value={filters.driver} onChange={e => setFilters({ ...filters, driver: e.target.value })}
           className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2 text-sm">
           <option value="">Motorista</option>
-          {drivers.map(d => <option key={d} value={d}>{motoristasMap[String(d)] || d}</option>)}
+          {drivers.map(d => <option key={d} value={d}>{motoristasMap[String(d)] || frentistasMap[String(d)] || d}</option>)}
         </select>
       </div>
 
