@@ -33,9 +33,8 @@ export default function RankingMotoristas() {
   const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
   const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
 
-  // Mesma lógica do gráfico Graficos.jsx
-  const analysisData = useMemo(() => {
-    // Step 1: km percorrido por odômetro diff por placa (igual ao Graficos)
+  // Calcular km percorrido por odômetro diff por placa (igual ao Graficos.jsx)
+  const kmPercorridoMap = useMemo(() => {
     const byPlate = {};
     records.forEach(r => {
       if (!r.date || !r.vehicle_plate) return;
@@ -50,64 +49,33 @@ export default function RankingMotoristas() {
         return da < db ? -1 : da > db ? 1 : 0;
       });
     });
-    const kmPercorridoMap = {};
+    const map = {};
     Object.values(byPlate).forEach(arr => {
       let lastKm = null;
       arr.forEach(r => {
         const km = Number(r.km_driven);
         if (km > 0) {
           if (lastKm !== null && km > lastKm) {
-            kmPercorridoMap[r.id] = km - lastKm;
+            map[r.id] = km - lastKm;
           }
           lastKm = km;
         }
       });
     });
-
-    // Step 2: agrupar por placa+mês (igual ao Graficos)
-    const groupedData = {};
-    records.forEach(r => {
-      if (!r.date || !r.vehicle_plate) return;
-      const month = parseISO(r.date).getMonth();
-      const year = parseISO(r.date).getFullYear();
-      const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-      const plateKey = r.vehicle_plate.toUpperCase();
-      const groupKey = `${monthKey}-${plateKey}`;
-
-      if (!groupedData[groupKey]) {
-        groupedData[groupKey] = {
-          month: monthNames[month],
-          monthNum: month,
-          year,
-          monthKey,
-          plate: r.vehicle_plate,
-          unit: r.unit,
-          driver: r.driver,
-          totalLiters: 0,
-          kmDelta: 0,
-          cost: 0
-        };
-      }
-
-      groupedData[groupKey].totalLiters += r.liters || 0;
-      groupedData[groupKey].cost += r.cost || 0;
-      groupedData[groupKey].kmDelta += kmPercorridoMap[r.id] || 0;
-    });
-
-    return Object.values(groupedData);
+    return map;
   }, [records]);
 
   // Opções de filtro
-  const years = [...new Set(analysisData.map(d => d.year))].filter(Boolean).sort((a, b) => b - a);
-  const months = [...new Set(analysisData.map(d => d.monthNum))].sort((a, b) => a - b);
-  const units = [...new Set(analysisData.map(d => d.unit))].filter(Boolean).sort();
+  const years = [...new Set(records.map(r => r.date ? parseISO(r.date).getFullYear() : null))].filter(Boolean).sort((a, b) => b - a);
+  const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b);
+  const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
   const equipments = [...new Set(placaEquipamentos.map(p => p.tipo))].filter(Boolean).sort();
-  const plates = [...new Set(analysisData.map(d => d.plate))].filter(Boolean).sort();
+  const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
 
-  // Aplicar filtros e agrupar por motorista diretamente nos registros (igual ao driverKmLiterArray do Graficos)
+  // Agrupar diretamente por motorista somando km percorrido + litros (igual ao byDriverData do Graficos)
   const ranking = useMemo(() => {
-    // Filtrar registros brutos e somar km percorrido + litros por motorista
     const byDriver = {};
+
     records.forEach(r => {
       if (!r.date || !r.driver) return;
       const d = parseISO(r.date);
@@ -122,12 +90,7 @@ export default function RankingMotoristas() {
         byDriver[r.driver] = { driver: r.driver, driverName, totalLiters: 0, totalKm: 0, totalCost: 0 };
       }
       byDriver[r.driver].totalLiters += r.liters || 0;
-      byDriver[r.driver].totalKm += analysisData.length > 0
-        ? (() => {
-            // buscar km percorrido deste registro no kmPercorridoMap (calculado em analysisData)
-            return 0; // será substituído abaixo
-          })()
-        : 0;
+      byDriver[r.driver].totalKm += kmPercorridoMap[r.id] || 0;
       byDriver[r.driver].totalCost += r.cost || 0;
     });
 
@@ -139,7 +102,7 @@ export default function RankingMotoristas() {
       }))
       .filter(d => d.kmPerLiter > 0)
       .sort((a, b) => b.kmPerLiter - a.kmPerLiter);
-  }, [analysisData, filters, motoristasMap, frentistasMap, placaEquipamentosMap]);
+  }, [records, filters, kmPercorridoMap, motoristasMap, frentistasMap, placaEquipamentosMap]);
 
   const medalColor = (i) => {
     if (i === 0) return 'text-yellow-400';
@@ -211,12 +174,9 @@ export default function RankingMotoristas() {
             <Card key={item.driver} className={`border ${idx === 0 ? 'bg-yellow-900/20 border-yellow-600/50' : idx === 1 ? 'bg-slate-700/30 border-slate-500/50' : idx === 2 ? 'bg-amber-900/20 border-amber-700/50' : 'bg-slate-800 border-slate-700'}`}>
               <CardContent className="py-4 px-5">
                 <div className="flex items-center gap-4">
-                  {/* Posição */}
                   <div className={`text-2xl font-black w-10 text-center ${medalColor(idx)}`}>
                     {idx < 3 ? <Medal className="w-7 h-7 inline" /> : `#${idx + 1}`}
                   </div>
-
-                  {/* Nome + barra */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline justify-between gap-2 mb-1">
                       <span className="text-white font-semibold truncate text-base">{getFirstAndLastName(item.driverName)}</span>
