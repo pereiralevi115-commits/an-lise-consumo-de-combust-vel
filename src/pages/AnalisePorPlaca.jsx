@@ -60,6 +60,7 @@ export default function AnalisePorPlaca() {
 
   const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
   const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
+  const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
   const combustiveisMap = Object.fromEntries(combustiveis.map(c => [String(c.codigo), c.nome]));
   const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
 
