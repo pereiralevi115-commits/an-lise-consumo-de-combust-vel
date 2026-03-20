@@ -46,48 +46,75 @@ export default function RankingMotoristas() {
       return true;
     });
 
-    // Group by driver + month
+    // Step 1: Group by PLATE + MONTH to compute KM delta (km_final - km_inicial) per placa/mês
+    // The hodometer belongs to the plate, so delta must be calculated per plate.
+    const plateMontGroups = {};
+    filtered.forEach(r => {
+      const d = parseISO(r.date);
+      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const plate = String(r.vehicle_plate || '').toUpperCase();
+      const key = `${plate}__${monthKey}`;
+
+      if (!plateMontGroups[key]) {
+        plateMontGroups[key] = { plate, monthKey, monthLabel: `${monthNames[d.getMonth()]}/${d.getFullYear()}`, kmRecords: [] };
+      }
+      if (Number(r.km_driven) > 0) {
+        plateMontGroups[key].kmRecords.push(Number(r.km_driven));
+      }
+    });
+
+    // KM delta per plate+month: max - min of odometer readings
+    const plateDeltaMap = {};
+    Object.entries(plateMontGroups).forEach(([key, g]) => {
+      plateDeltaMap[key] = g.kmRecords.length >= 2
+        ? Math.max(...g.kmRecords) - Math.min(...g.kmRecords)
+        : 0;
+    });
+
+    // Step 2: Group by DRIVER + MONTH — sum liters and sum KM deltas from all plates they drove
     const driverMonthGroups = {};
     filtered.forEach(r => {
       const d = parseISO(r.date);
       const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       const driverKey = r.driver;
-      const key = `${driverKey}__${monthKey}`;
+      const plate = String(r.vehicle_plate || '').toUpperCase();
+      const plateMonthKey = `${plate}__${monthKey}`;
+      const dmKey = `${driverKey}__${monthKey}`;
 
-      if (!driverMonthGroups[key]) {
-        driverMonthGroups[key] = {
+      if (!driverMonthGroups[dmKey]) {
+        driverMonthGroups[dmKey] = {
           driver: driverKey,
           driverName: motoristasMap[String(driverKey)] || driverKey,
           monthKey,
           monthLabel: `${monthNames[d.getMonth()]}/${d.getFullYear()}`,
           totalLiters: 0,
-          kmRecords: [],
+          // Track which plate+month combos were already counted for KM to avoid double counting
+          countedPlates: new Set(),
+          totalKm: 0,
         };
       }
-      driverMonthGroups[key].totalLiters += r.liters || 0;
-      if (Number(r.km_driven) > 0) {
-        driverMonthGroups[key].kmRecords.push(Number(r.km_driven));
+
+      driverMonthGroups[dmKey].totalLiters += r.liters || 0;
+
+      // Add KM delta for this plate+month only once per plate
+      if (!driverMonthGroups[dmKey].countedPlates.has(plateMonthKey)) {
+        driverMonthGroups[dmKey].countedPlates.add(plateMonthKey);
+        driverMonthGroups[dmKey].totalKm += plateDeltaMap[plateMonthKey] || 0;
       }
     });
 
-    // Calculate KM delta (max - min) per group and derive km/l
-    const rows = Object.values(driverMonthGroups).map(g => {
-      const kmDelta = g.kmRecords.length >= 2
-        ? Math.max(...g.kmRecords) - Math.min(...g.kmRecords)
-        : 0;
-      const kml = g.totalLiters > 0 && kmDelta > 0 ? kmDelta / g.totalLiters : null;
-      return { ...g, kmDelta, kml };
-    }).filter(g => g.kml !== null);
-
-    // Aggregate by driver (average km/l across months, weighted by liters)
+    // Step 3: Compute km/l per driver+month, then aggregate by driver
     const byDriver = {};
-    rows.forEach(g => {
+    Object.values(driverMonthGroups).forEach(g => {
+      const kml = g.totalLiters > 0 && g.totalKm > 0 ? g.totalKm / g.totalLiters : null;
+      if (kml === null) return;
+
       if (!byDriver[g.driver]) {
         byDriver[g.driver] = { driver: g.driver, driverName: g.driverName, totalKm: 0, totalLiters: 0, months: [] };
       }
-      byDriver[g.driver].totalKm += g.kmDelta;
+      byDriver[g.driver].totalKm += g.totalKm;
       byDriver[g.driver].totalLiters += g.totalLiters;
-      byDriver[g.driver].months.push({ monthLabel: g.monthLabel, kml: g.kml, kmDelta: g.kmDelta, totalLiters: g.totalLiters });
+      byDriver[g.driver].months.push({ monthLabel: g.monthLabel, kml, kmDelta: g.totalKm, totalLiters: g.totalLiters });
     });
 
     return Object.values(byDriver)
