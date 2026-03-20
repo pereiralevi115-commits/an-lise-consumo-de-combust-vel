@@ -17,10 +17,12 @@ export default function RankingMotoristas() {
   });
 
   const { data: motoristas = [] } = useQuery({ queryKey: ['Motorista'], queryFn: () => base44.entities.Motorista.list() });
+  const { data: frentistas = [] } = useQuery({ queryKey: ['Frentista'], queryFn: () => base44.entities.Frentista.list() });
   const { data: pontos = [] } = useQuery({ queryKey: ['Ponto'], queryFn: () => base44.entities.Ponto.list() });
   const { data: placaEquipamentos = [] } = useQuery({ queryKey: ['PlacaEquipamento'], queryFn: () => base44.entities.PlacaEquipamento.list('placa', 10000) });
 
   const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
+  const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
   const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
   const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
 
