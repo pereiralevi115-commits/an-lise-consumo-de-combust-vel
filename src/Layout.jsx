@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from './utils';
-import { BarChart3, Table2, Upload, BookOpen, Box } from 'lucide-react';
+import { BarChart3, Table2, Upload, BookOpen, Box, Trophy } from 'lucide-react';
 
 export default function Layout({ children, currentPageName }) {
   const navItems = [
