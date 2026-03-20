@@ -95,26 +95,27 @@ export default function RankingMotoristas() {
   const equipments = [...new Set(placaEquipamentos.map(p => p.tipo))].filter(Boolean).sort();
   const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
 
-  // Ranking: agrupa por motorista diretamente dos records (igual ao byDriverData do Graficos)
+  // Ranking: agrupa por motorista usando analysisData com kmDelta (igual ao gráfico)
   const ranking = useMemo(() => {
+    const filtered = analysisData.filter(d => {
+      if (filters.year && d.year !== parseInt(filters.year)) return false;
+      if (filters.month !== '' && d.monthNum !== parseInt(filters.month)) return false;
+      if (filters.unit && d.unit !== filters.unit) return false;
+      if (filters.plate && d.plate !== filters.plate) return false;
+      if (filters.equipment && placaEquipamentosMap[String(d.plate).toUpperCase()] !== filters.equipment) return false;
+      return true;
+    });
+
     const byDriver = {};
-
-    records.forEach(r => {
-      if (!r.date || !r.driver) return;
-      const d = parseISO(r.date);
-      if (filters.year && d.getFullYear() !== parseInt(filters.year)) return;
-      if (filters.month !== '' && d.getMonth() !== parseInt(filters.month)) return;
-      if (filters.unit && r.unit !== filters.unit) return;
-      if (filters.plate && r.vehicle_plate !== filters.plate) return;
-      if (filters.equipment && placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()] !== filters.equipment) return;
-
-      const driverName = motoristasMap[String(r.driver)] || frentistasMap[String(r.driver)] || r.driver;
-      if (!byDriver[r.driver]) {
-        byDriver[r.driver] = { driver: r.driver, driverName, totalLiters: 0, totalKm: 0, totalCost: 0 };
+    filtered.forEach(d => {
+      if (!d.driver) return;
+      const driverName = motoristasMap[String(d.driver)] || frentistasMap[String(d.driver)] || d.driver;
+      if (!byDriver[d.driver]) {
+        byDriver[d.driver] = { driver: d.driver, driverName, totalLiters: 0, totalKm: 0, totalCost: 0 };
       }
-      byDriver[r.driver].totalLiters += r.liters || 0;
-      byDriver[r.driver].totalKm += kmPercorridoMap[r.id] || 0;
-      byDriver[r.driver].totalCost += r.cost || 0;
+      byDriver[d.driver].totalLiters += d.totalLiters;
+      byDriver[d.driver].totalKm += d.kmDelta;
+      byDriver[d.driver].totalCost += d.cost;
     });
 
     return Object.values(byDriver)
