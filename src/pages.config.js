@@ -48,6 +48,7 @@
  * The mainPage value must match a key in the PAGES object exactly.
  */
 import AnalisePorPlaca from './pages/AnalisePorPlaca';
+import RankingMotoristas from './pages/RankingMotoristas';
 import Dados from './pages/Dados';
 import Graficos from './pages/Graficos';
 import Legendas from './pages/Legendas';
