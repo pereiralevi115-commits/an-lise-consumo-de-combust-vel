@@ -16,6 +16,7 @@ export default function ValorCalculado() {
   const [unitFilter, setUnitFilter] = useState('');
   const [precoLitro, setPrecoLitro] = useState('');
   const [saved, setSaved] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const queryClient = useQueryClient();
 
@@ -60,6 +61,18 @@ export default function ValorCalculado() {
         mesFilter: mesFilter !== '' ? mesFilter : null,
         unitFilter: unitFilter || null,
       });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+      setSaved(true);
+      setErrorMsg('');
+      setTimeout(() => setSaved(false), 3000);
+    },
+    onError: (err) => {
+      setErrorMsg(err?.response?.data?.error || err?.message || 'Erro desconhecido');
+    }
+  });
       return response.data;
     },
     onSuccess: () => {
@@ -149,7 +162,12 @@ export default function ValorCalculado() {
             <><Save className="w-4 h-4 mr-2" /> Salvar Valores (R$)</>
           )}
         </Button>
-        {canSave && !saved && (
+        {errorMsg && (
+          <p className="text-red-400 text-xs text-center bg-red-900/30 rounded p-2">
+            ❌ Erro: {errorMsg}
+          </p>
+        )}
+        {canSave && !saved && !errorMsg && (
           <p className="text-slate-400 text-xs text-center">
             Irá atualizar o campo Valor (R$) de {filtered.length} registros
           </p>
