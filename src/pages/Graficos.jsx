@@ -85,6 +85,11 @@ export default function Graficos() {
           queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
         });
 
+        const { data: precosCombustivel = [] } = useQuery({
+          queryKey: ['PrecoCombustivel'],
+          queryFn: () => base44.entities.PrecoCombustivel.list()
+        });
+
         const { data: cubicMetros = [] } = useQuery({
           queryKey: ['cubicMetros'],
           queryFn: () => base44.entities.CubicMetros.list()
@@ -168,17 +173,22 @@ export default function Graficos() {
       }
 
       groupedData[groupKey].totalLiters += r.liters || 0;
-      groupedData[groupKey].cost += r.cost || 0;
+      // custo calculado dinamicamente via PrecoCombustivel
+      groupedData[groupKey]._litersForCost = (groupedData[groupKey]._litersForCost || 0) + (r.liters || 0);
+      groupedData[groupKey]._unit = r.unit;
+      groupedData[groupKey]._month = month;
+      groupedData[groupKey]._year = year;
       groupedData[groupKey].fuelRecordM3 += r.cubic_meters || 0;
       groupedData[groupKey].kmDelta += kmPercorridoMap[r.id] || 0;
     });
 
     return Object.values(groupedData).map(item => {
-      const m3Data = cubicMetros.find(cm =>
-        String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() &&
-        cm.mes === item.monthKey
+      const precoReg = precosCombustivel.find(p =>
+        p.ponto === item._unit &&
+        p.mes === item._month &&
+        p.ano === item._year
       );
-      const m3 = m3Data ? Number(m3Data.metros_cubicos) : item.fuelRecordM3;
+      const custoCalculado = precoReg ? (item._litersForCost || 0) * precoReg.preco_litro : 0;
 
       return {
         month: item.month,
