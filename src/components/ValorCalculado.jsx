@@ -188,9 +188,28 @@ export default function ValorCalculado() {
             <><Save className="w-4 h-4 mr-2" /> Salvar Valores (R$)</>
           )}
         </Button>
+        {progress && (
+          <div className="space-y-1">
+            <div className="flex justify-between text-xs text-slate-400">
+              <span>Atualizando...</span>
+              <span>{progress.done} / {progress.total}</span>
+            </div>
+            <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-orange-500 transition-all"
+                style={{ width: `${progress.total > 0 ? (progress.done / progress.total) * 100 : 0}%` }}
+              />
+            </div>
+          </div>
+        )}
         {errorMsg && (
           <p className="text-red-400 text-xs text-center bg-red-900/30 rounded p-2">
             ❌ Erro: {errorMsg}
+          </p>
+        )}
+        {canSave && !saved && !errorMsg && !progress && (
+          <p className="text-slate-400 text-xs text-center">
+            Irá atualizar o campo Valor (R$) de {filtered.length} registros
           </p>
         )}
         {canSave && !saved && !errorMsg && (
