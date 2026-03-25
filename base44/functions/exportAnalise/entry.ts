@@ -119,7 +119,7 @@ Deno.serve(async (req) => {
       const driver = motoristasMap[String(item.driver)] || item.driver || '-';
       const fuelType = combustiveisMap[String(item.fuelType)] || item.fuelType || '-';
       const efficiency = item.totalLiters > 0 ? parseFloat((kmDelta / item.totalLiters).toFixed(2)) : 0;
-      const efficiencyCost = kmDelta > 0 ? parseFloat((item.cost / kmDelta).toFixed(2)) : 0;
+      const efficiencyCost = kmDelta > 0 ? parseFloat((cost / kmDelta).toFixed(2)) : 0;
 
       return {
         mes: item.month,
@@ -130,11 +130,11 @@ Deno.serve(async (req) => {
         combustivel: fuelType,
         km_max_min: kmDelta,
         m3: parseFloat(m3.toFixed(2)),
-        valor_rs: parseFloat(item.cost.toFixed(2)),
+        valor_rs: parseFloat(cost.toFixed(2)),
         eficiencia_km_l: efficiency,
         eficiencia_rs_km: efficiencyCost,
         // internal fields for filtering
-        _monthIndex: item.monthIndex,
+        _monthIndex: monthNum,
         _year: item.year,
         _unitCode: item.unit
       };
