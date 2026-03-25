@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { parseISO } from 'date-fns';
@@ -17,7 +17,7 @@ export default function ValorCalculado() {
   const [precoLitro, setPrecoLitro] = useState('');
   const [saved, setSaved] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [progress, setProgress] = useState(null); // { done, total }
+  const [progress, setProgress] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -93,18 +93,6 @@ export default function ValorCalculado() {
     onError: (err) => {
       setErrorMsg(err?.response?.data?.error || err?.message || 'Erro desconhecido');
       setProgress(null);
-    }
-  });
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
-      setSaved(true);
-      setErrorMsg('');
-      setTimeout(() => setSaved(false), 3000);
-    },
-    onError: (err) => {
-      setErrorMsg(err?.response?.data?.error || err?.message || 'Erro desconhecido');
     }
   });
 
@@ -188,6 +176,7 @@ export default function ValorCalculado() {
             <><Save className="w-4 h-4 mr-2" /> Salvar Valores (R$)</>
           )}
         </Button>
+
         {progress && (
           <div className="space-y-1">
             <div className="flex justify-between text-xs text-slate-400">
@@ -202,17 +191,14 @@ export default function ValorCalculado() {
             </div>
           </div>
         )}
+
         {errorMsg && (
           <p className="text-red-400 text-xs text-center bg-red-900/30 rounded p-2">
             ❌ Erro: {errorMsg}
           </p>
         )}
+
         {canSave && !saved && !errorMsg && !progress && (
-          <p className="text-slate-400 text-xs text-center">
-            Irá atualizar o campo Valor (R$) de {filtered.length} registros
-          </p>
-        )}
-        {canSave && !saved && !errorMsg && (
           <p className="text-slate-400 text-xs text-center">
             Irá atualizar o campo Valor (R$) de {filtered.length} registros
           </p>
