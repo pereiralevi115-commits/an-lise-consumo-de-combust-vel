@@ -17,7 +17,6 @@ export default function ValorCalculado() {
   const [precoLitro, setPrecoLitro] = useState('');
   const [saved, setSaved] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [progress, setProgress] = useState(null);
 
   const queryClient = useQueryClient();
 
@@ -29,6 +28,11 @@ export default function ValorCalculado() {
   const { data: pontos = [] } = useQuery({
     queryKey: ['Ponto'],
     queryFn: () => base44.entities.Ponto.list()
+  });
+
+  const { data: precos = [] } = useQuery({
+    queryKey: ['PrecoCombustivel'],
+    queryFn: () => base44.entities.PrecoCombustivel.list()
   });
 
   const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
@@ -54,66 +58,55 @@ export default function ValorCalculado() {
   const preco = parseFloat(precoLitro.replace(',', '.')) || 0;
   const valorTotal = totalLitros * preco;
 
+  // Preço já salvo para esse filtro
+  const precoSalvo = mesFilter !== '' && anoFilter && unitFilter
+    ? precos.find(p => p.mes === parseInt(mesFilter) && p.ano === parseInt(anoFilter) && p.ponto === unitFilter)
+    : null;
+
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const BATCH = 50;
-      let offset = 0;
-      let total = null;
-      let totalUpdated = 0;
-
-      while (true) {
-        const response = await base44.functions.invoke('salvarValoresCombustivel', {
-          preco,
-          anoFilter: anoFilter || null,
-          mesFilter: mesFilter !== '' ? mesFilter : null,
-          unitFilter: unitFilter || null,
-          offset,
-          batchSize: BATCH,
-        });
-        const data = response.data;
-        if (data.error) throw new Error(data.error);
-
-        totalUpdated += data.updated;
-        total = data.total;
-        offset = data.nextOffset;
-        setProgress({ done: offset, total });
-
-        if (data.done) break;
-        await new Promise(r => setTimeout(r, 500));
+      const dadosPreco = {
+        mes: parseInt(mesFilter),
+        ano: parseInt(anoFilter),
+        ponto: unitFilter,
+        preco_litro: preco
+      };
+      if (precoSalvo) {
+        await base44.entities.PrecoCombustivel.update(precoSalvo.id, { preco_litro: preco });
+      } else {
+        await base44.entities.PrecoCombustivel.create(dadosPreco);
       }
-      return totalUpdated;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+      queryClient.invalidateQueries({ queryKey: ['PrecoCombustivel'] });
       setSaved(true);
       setErrorMsg('');
-      setProgress(null);
       setTimeout(() => setSaved(false), 3000);
     },
     onError: (err) => {
-      setErrorMsg(err?.response?.data?.error || err?.message || 'Erro desconhecido');
-      setProgress(null);
+      setErrorMsg(err?.message || 'Erro desconhecido');
     }
   });
 
-  const canSave = preco > 0 && filtered.length > 0;
+  const canSave = preco > 0 && mesFilter !== '' && anoFilter && unitFilter;
 
   return (
     <Card className="bg-slate-800 border-orange-700">
       <CardHeader className="pb-3">
         <CardTitle className="text-white flex items-center gap-2">
           <Calculator className="w-5 h-5 text-orange-400" />
-          Cálculo de Valor por Litro
+          Preço de Combustível por Mês/Usina
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <p className="text-slate-400 text-xs">Selecione mês, ano e usina para registrar o preço por litro. O custo será calculado dinamicamente.</p>
         <div className="grid grid-cols-1 gap-3">
           <select
             value={anoFilter}
             onChange={e => setAnoFilter(e.target.value)}
             className="bg-slate-700 border border-slate-600 text-white rounded px-3 py-2 text-sm"
           >
-            <option value="">Todos os anos</option>
+            <option value="">Selecione o ano *</option>
             {anos.map(a => <option key={a} value={a}>{a}</option>)}
           </select>
 
@@ -122,7 +115,7 @@ export default function ValorCalculado() {
             onChange={e => setMesFilter(e.target.value)}
             className="bg-slate-700 border border-slate-600 text-white rounded px-3 py-2 text-sm"
           >
-            <option value="">Todos os meses</option>
+            <option value="">Selecione o mês *</option>
             {meses.map(m => <option key={m} value={m}>{monthNames[m]}</option>)}
           </select>
 
@@ -131,18 +124,24 @@ export default function ValorCalculado() {
             onChange={e => setUnitFilter(e.target.value)}
             className="bg-slate-700 border border-slate-600 text-white rounded px-3 py-2 text-sm"
           >
-            <option value="">Todas as usinas</option>
+            <option value="">Selecione a usina *</option>
             {units.map(u => <option key={u} value={u}>{pontosMap[String(u)] || u}</option>)}
           </select>
 
           <Input
             type="text"
-            placeholder="Preço por litro (R$/L)"
+            placeholder="Preço por litro (R$/L) *"
             value={precoLitro}
             onChange={e => setPrecoLitro(e.target.value)}
             className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
           />
         </div>
+
+        {precoSalvo && (
+          <p className="text-blue-400 text-xs text-center bg-blue-900/20 rounded p-2">
+            Preço atual salvo: R$ {precoSalvo.preco_litro.toFixed(4)}/L — será atualizado
+          </p>
+        )}
 
         <div className="border-t border-slate-600 pt-3 space-y-2">
           <div className="flex justify-between text-sm">
@@ -169,28 +168,13 @@ export default function ValorCalculado() {
           className={`w-full ${saved ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-600 hover:bg-orange-700'} text-white`}
         >
           {saved ? (
-            <><CheckCircle className="w-4 h-4 mr-2" /> Salvo com sucesso!</>
+            <><CheckCircle className="w-4 h-4 mr-2" /> Preço salvo!</>
           ) : saveMutation.isPending ? (
             'Salvando...'
           ) : (
-            <><Save className="w-4 h-4 mr-2" /> Salvar Valores (R$)</>
+            <><Save className="w-4 h-4 mr-2" /> Salvar Preço</>
           )}
         </Button>
-
-        {progress && (
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs text-slate-400">
-              <span>Atualizando...</span>
-              <span>{progress.done} / {progress.total}</span>
-            </div>
-            <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-orange-500 transition-all"
-                style={{ width: `${progress.total > 0 ? (progress.done / progress.total) * 100 : 0}%` }}
-              />
-            </div>
-          </div>
-        )}
 
         {errorMsg && (
           <p className="text-red-400 text-xs text-center bg-red-900/30 rounded p-2">
@@ -198,9 +182,9 @@ export default function ValorCalculado() {
           </p>
         )}
 
-        {canSave && !saved && !errorMsg && !progress && (
-          <p className="text-slate-400 text-xs text-center">
-            Irá atualizar o campo Valor (R$) de {filtered.length} registros
+        {!canSave && (
+          <p className="text-slate-500 text-xs text-center">
+            * Selecione ano, mês, usina e informe o preço
           </p>
         )}
       </CardContent>
