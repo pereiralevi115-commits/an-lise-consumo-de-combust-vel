@@ -17,6 +17,7 @@ export default function ValorCalculado() {
   const [precoLitro, setPrecoLitro] = useState('');
   const [saved, setSaved] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [progress, setProgress] = useState(null); // { done, total }
 
   const queryClient = useQueryClient();
 
@@ -55,12 +56,45 @@ export default function ValorCalculado() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const response = await base44.functions.invoke('salvarValoresCombustivel', {
-        preco,
-        anoFilter: anoFilter || null,
-        mesFilter: mesFilter !== '' ? mesFilter : null,
-        unitFilter: unitFilter || null,
-      });
+      const BATCH = 50;
+      let offset = 0;
+      let total = null;
+      let totalUpdated = 0;
+
+      while (true) {
+        const response = await base44.functions.invoke('salvarValoresCombustivel', {
+          preco,
+          anoFilter: anoFilter || null,
+          mesFilter: mesFilter !== '' ? mesFilter : null,
+          unitFilter: unitFilter || null,
+          offset,
+          batchSize: BATCH,
+        });
+        const data = response.data;
+        if (data.error) throw new Error(data.error);
+
+        totalUpdated += data.updated;
+        total = data.total;
+        offset = data.nextOffset;
+        setProgress({ done: offset, total });
+
+        if (data.done) break;
+        await new Promise(r => setTimeout(r, 500));
+      }
+      return totalUpdated;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+      setSaved(true);
+      setErrorMsg('');
+      setProgress(null);
+      setTimeout(() => setSaved(false), 3000);
+    },
+    onError: (err) => {
+      setErrorMsg(err?.response?.data?.error || err?.message || 'Erro desconhecido');
+      setProgress(null);
+    }
+  });
       return response.data;
     },
     onSuccess: () => {
