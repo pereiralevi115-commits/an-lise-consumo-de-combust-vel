@@ -58,6 +58,11 @@ export default function AnalisePorPlaca() {
     queryFn: () => base44.entities.Frentista.list()
   });
 
+  const { data: precosCombustivel = [] } = useQuery({
+    queryKey: ['PrecoCombustivel'],
+    queryFn: () => base44.entities.PrecoCombustivel.list()
+  });
+
   const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
   const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
   const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
@@ -105,7 +110,10 @@ export default function AnalisePorPlaca() {
     }
 
     groupedData[groupKey].totalLiters += r.liters || 0;
-    groupedData[groupKey].cost += r.cost || 0;
+    groupedData[groupKey]._litros = (groupedData[groupKey]._litros || 0) + (r.liters || 0);
+    groupedData[groupKey]._unit = r.unit;
+    groupedData[groupKey]._month = month;
+    groupedData[groupKey]._year = year;
     if (Number(r.km_driven) > 0) {
       groupedData[groupKey].kmRecords.push(Number(r.km_driven));
     }
@@ -114,9 +122,12 @@ export default function AnalisePorPlaca() {
 
   // Calcular delta KM e M³
   const fuelAnalysis = Object.values(groupedData).map(item => {
-    const kmDelta = item.kmRecords.length > 0 
-      ? Math.max(...item.kmRecords) - Math.min(...item.kmRecords)
-      : 0;
+    const precoReg = precosCombustivel.find(p =>
+      p.ponto === item._unit &&
+      p.mes === item._month &&
+      p.ano === item._year
+    );
+    const custoCalculado = precoReg ? (item._litros || 0) * precoReg.preco_litro : 0;
 
     const m3Data = cubicMetros.find(cm => 
       String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() && 
@@ -136,9 +147,9 @@ export default function AnalisePorPlaca() {
       totalLiters: item.totalLiters,
       kmDelta: kmDelta,
       m3: m3,
-      cost: item.cost,
+      cost: custoCalculado,
       efficiency: item.totalLiters > 0 ? (kmDelta / item.totalLiters).toFixed(2) : 0,
-      efficiencyCost: item.cost > 0 ? (item.cost / kmDelta).toFixed(2) : 0
+      efficiencyCost: custoCalculado > 0 && kmDelta > 0 ? (custoCalculado / kmDelta).toFixed(2) : 0
     };
   });
 
