@@ -27,6 +27,7 @@ export default function RankingMotoristas() {
   const { data: frentistas = [] } = useQuery({ queryKey: ['Frentista'], queryFn: () => base44.entities.Frentista.list() });
   const { data: pontos = [] } = useQuery({ queryKey: ['Ponto'], queryFn: () => base44.entities.Ponto.list() });
   const { data: placaEquipamentos = [] } = useQuery({ queryKey: ['PlacaEquipamento'], queryFn: () => base44.entities.PlacaEquipamento.list('placa', 10000) });
+  const { data: precosCombustivel = [] } = useQuery({ queryKey: ['PrecoCombustivel'], queryFn: () => base44.entities.PrecoCombustivel.list() });
 
   const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
   const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
@@ -78,15 +79,27 @@ export default function RankingMotoristas() {
         grouped[key] = {
           monthKey, monthNum: d.getMonth(), year: d.getFullYear(),
           plate: r.vehicle_plate, unit: r.unit, driver: r.driver,
-          totalLiters: 0, kmDelta: 0, cost: 0
+          totalLiters: 0, kmDelta: 0, _korthLiters: 0, _externalCost: 0
         };
       }
       grouped[key].totalLiters += r.liters || 0;
       grouped[key].kmDelta += kmPercorridoMap[r.id] || 0;
-      grouped[key].cost += r.cost || 0;
+      if (r.korth_id) {
+        grouped[key]._korthLiters += r.liters || 0;
+      } else {
+        grouped[key]._externalCost += r.cost || 0;
+      }
     });
-    return Object.values(grouped);
-  }, [records, kmPercorridoMap]);
+    return Object.values(grouped).map(item => {
+      const precoReg = precosCombustivel.find(p =>
+        String(p.ponto) === String(item.unit) &&
+        Number(p.mes) === item.monthNum &&
+        Number(p.ano) === item.year
+      );
+      const cost = (precoReg ? item._korthLiters * precoReg.preco_litro : 0) + item._externalCost;
+      return { ...item, cost };
+    });
+  }, [records, kmPercorridoMap, precosCombustivel]);
 
   // Opções de filtro
   const years = [...new Set(analysisData.map(d => d.year))].sort((a, b) => b - a);
