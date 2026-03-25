@@ -127,9 +127,9 @@ export default function AnalisePorPlaca() {
   // Calcular delta KM e M³
   const fuelAnalysis = Object.values(groupedData).map(item => {
     const precoReg = precosCombustivel.find(p =>
-      p.ponto === item._unit &&
-      p.mes === item._month &&
-      p.ano === item._year
+      String(p.ponto) === String(item._unit) &&
+      Number(p.mes) === Number(item._month) &&
+      Number(p.ano) === Number(item._year)
     );
     const korthCost = precoReg ? (item._korthLiters || 0) * precoReg.preco_litro : 0;
     const custoCalculado = korthCost + (item._externalCost || 0);
