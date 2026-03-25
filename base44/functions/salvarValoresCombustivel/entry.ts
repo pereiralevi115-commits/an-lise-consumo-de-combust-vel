@@ -31,20 +31,12 @@ Deno.serve(async (req) => {
       return Response.json({ updated: 0 });
     }
 
-    // Atualiza em lotes de 5 com delay para evitar rate limit
-    const batchSize = 5;
+    // Atualiza sequencialmente com delay para evitar rate limit
     let updated = 0;
-    for (let i = 0; i < filtered.length; i += batchSize) {
-      const batch = filtered.slice(i, i + batchSize);
-      await Promise.all(
-        batch.map(r =>
-          base44.asServiceRole.entities.FuelRecord.update(r.id, { cost: (r.liters || 0) * preco })
-        )
-      );
-      updated += batch.length;
-      if (i + batchSize < filtered.length) {
-        await new Promise(resolve => setTimeout(resolve, 300));
-      }
+    for (const r of filtered) {
+      await base44.asServiceRole.entities.FuelRecord.update(r.id, { cost: (r.liters || 0) * preco });
+      updated++;
+      await new Promise(resolve => setTimeout(resolve, 150));
     }
 
     return Response.json({ updated });
