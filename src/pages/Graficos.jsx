@@ -201,7 +201,13 @@ export default function Graficos() {
         driver: motoristasMap[String(item.driver)] || item.driver || '-',
         totalLiters: item.totalLiters,
         kmDelta: item.kmDelta,
-        m3: m3,
+        m3: (() => {
+          const m3Data = cubicMetros.find(cm =>
+            String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() &&
+            cm.mes === item.monthKey
+          );
+          return m3Data ? Number(m3Data.metros_cubicos) : item.fuelRecordM3;
+        })(),
         fuelRecordM3: item.fuelRecordM3,
         cost: custoCalculado,
         efficiency: item.totalLiters > 0 ? (item.kmDelta / item.totalLiters).toFixed(2) : 0
