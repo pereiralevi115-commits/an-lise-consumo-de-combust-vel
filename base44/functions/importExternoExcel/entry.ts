@@ -73,30 +73,28 @@ Deno.serve(async (req) => {
       return parseFloat(str) || 0;
     };
 
-    // Colunas: DATA(1) HORA(2) PLACA(3) USINA(4) EQUIPAMENTOS(5) FRENTISTA(6) MOTORISTA(7) COMBUSTIVEL(8) LITROS(9) Hodômetro(10) Valor total(11)
-    worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber === 1) return; // pular cabeçalho
-
-      const cells = row.values;
-      if (!cells[1] || !cells[3]) return;
+    // Colunas: DATA(0) HORA(1) PLACA(2) USINA(3) EQUIPAMENTOS(4) FRENTISTA(5) MOTORISTA(6) COMBUSTIVEL(7) LITROS(8) Hodômetro(9) Valor total(10)
+    for (let rowNumber = 1; rowNumber < rows.length; rowNumber++) {
+      const cells = rows[rowNumber];
+      if (!cells || cells.length === 0) continue;
 
       try {
-        const date = parseDate(cells[1]);
-        const plate = cells[3] ? String(cells[3]).trim().toUpperCase() : null;
-        if (!date || !plate) return;
+        const date = parseDate(cells[0]);
+        const plate = cells[2] ? String(cells[2]).trim().toUpperCase() : null;
+        if (!date || !plate) continue;
 
-        const liters = cells[9] ? parseFloat(String(cells[9]).replace(',', '.')) : 0;
-        const km = cells[10] ? parseFloat(String(cells[10]).replace(/\./g, '').replace(',', '.')) : 0;
-        const cost = parseCost(cells[11]);
+        const liters = cells[8] ? parseFloat(String(cells[8]).replace(',', '.')) : 0;
+        const km = cells[9] ? parseFloat(String(cells[9]).replace(/\./g, '').replace(',', '.')) : 0;
+        const cost = parseCost(cells[10]);
 
         const record = {
           date,
-          time: cells[2] ? String(cells[2]).substring(0, 8) : '06:00',
+          time: cells[1] ? String(cells[1]).substring(0, 8) : '06:00',
           vehicle_plate: plate,
-          unit: cells[4] ? String(cells[4]).trim() : null,
-          attendant: cells[6] ? String(cells[6]).trim() : null,
-          driver: cells[7] ? String(cells[7]).trim() : null,
-          fuel_type: cells[8] ? String(cells[8]).trim() : null,
+          unit: cells[3] ? String(cells[3]).trim() : null,
+          attendant: cells[5] ? String(cells[5]).trim() : null,
+          driver: cells[6] ? String(cells[6]).trim() : null,
+          fuel_type: cells[7] ? String(cells[7]).trim() : null,
           liters,
           km_driven: km,
           cost,
@@ -107,7 +105,7 @@ Deno.serve(async (req) => {
       } catch (error) {
         console.error(`Erro na linha ${rowNumber}:`, error.message);
       }
-    });
+    }
 
     console.log(`${records.length} registros extraídos do Excel externo`);
 
