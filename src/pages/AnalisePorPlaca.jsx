@@ -134,6 +134,10 @@ export default function AnalisePorPlaca() {
     const korthCost = precoReg ? (item._korthLiters || 0) * precoReg.preco_litro : 0;
     const custoCalculado = korthCost + (item._externalCost || 0);
 
+    const kmDelta = item.kmRecords.length > 0
+      ? Math.max(...item.kmRecords) - Math.min(...item.kmRecords)
+      : 0;
+
     const m3Data = cubicMetros.find(cm => 
       String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() && 
       cm.mes === item.monthKey
