@@ -110,10 +110,14 @@ export default function AnalisePorPlaca() {
     }
 
     groupedData[groupKey].totalLiters += r.liters || 0;
-    groupedData[groupKey]._litros = (groupedData[groupKey]._litros || 0) + (r.liters || 0);
     groupedData[groupKey]._unit = r.unit;
     groupedData[groupKey]._month = month;
     groupedData[groupKey]._year = year;
+    if (r.korth_id) {
+      groupedData[groupKey]._korthLiters = (groupedData[groupKey]._korthLiters || 0) + (r.liters || 0);
+    } else {
+      groupedData[groupKey]._externalCost = (groupedData[groupKey]._externalCost || 0) + (r.cost || 0);
+    }
     if (Number(r.km_driven) > 0) {
       groupedData[groupKey].kmRecords.push(Number(r.km_driven));
     }
@@ -127,7 +131,8 @@ export default function AnalisePorPlaca() {
       p.mes === item._month &&
       p.ano === item._year
     );
-    const custoCalculado = precoReg ? (item._litros || 0) * precoReg.preco_litro : 0;
+    const korthCost = precoReg ? (item._korthLiters || 0) * precoReg.preco_litro : 0;
+    const custoCalculado = korthCost + (item._externalCost || 0);
 
     const m3Data = cubicMetros.find(cm => 
       String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() && 
