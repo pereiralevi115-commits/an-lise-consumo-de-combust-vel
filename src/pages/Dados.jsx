@@ -33,6 +33,7 @@ export default function Dados() {
   const { data: pontos = [] } = useQuery({ queryKey: ['Ponto'], queryFn: () => base44.entities.Ponto.list() });
   const { data: combustiveis = [] } = useQuery({ queryKey: ['Combustivel'], queryFn: () => base44.entities.Combustivel.list() });
   const { data: placaEquipamentos = [] } = useQuery({ queryKey: ['PlacaEquipamento'], queryFn: () => base44.entities.PlacaEquipamento.list('placa', 10000) });
+  const { data: precosCombustivel = [] } = useQuery({ queryKey: ['PrecoCombustivel'], queryFn: () => base44.entities.PrecoCombustivel.list() });
   const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
   const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
   const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
@@ -423,7 +424,20 @@ export default function Dados() {
                           </span>
                         )}
                       </TableCell>
-                      <TableCell className="text-white text-right">{record.cost != null && record.cost > 0 ? `R$ ${record.cost.toFixed(2)}` : '-'}</TableCell>
+                      <TableCell className="text-white text-right">{(() => {
+                        if (!record.korth_id) {
+                          return record.cost != null && record.cost > 0 ? `R$ ${record.cost.toFixed(2)}` : '-';
+                        }
+                        const d = record.date ? parseISO(record.date) : null;
+                        const precoReg = d ? precosCombustivel.find(p =>
+                          String(p.ponto) === String(record.unit) &&
+                          Number(p.mes) === d.getMonth() &&
+                          Number(p.ano) === d.getFullYear()
+                        ) : null;
+                        if (!precoReg) return '-';
+                        const val = (record.liters || 0) * precoReg.preco_litro;
+                        return `R$ ${val.toFixed(2)}`;
+                      })()}</TableCell>
                       <TableCell className="text-center">
                         {!record.korth_id && (
                           <button
