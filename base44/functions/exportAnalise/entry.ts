@@ -30,13 +30,14 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
 
     // Fetch all data in parallel
-    const [records, cubicMetros, pontos, motoristas, combustiveis, placaEquipamentos] = await Promise.all([
+    const [records, cubicMetros, pontos, motoristas, combustiveis, placaEquipamentos, precosCombustivel] = await Promise.all([
       base44.asServiceRole.entities.FuelRecord.list('-date', 10000),
       base44.asServiceRole.entities.CubicMetros.list(),
       base44.asServiceRole.entities.Ponto.list(),
       base44.asServiceRole.entities.Motorista.list(),
       base44.asServiceRole.entities.Combustivel.list(),
-      base44.asServiceRole.entities.PlacaEquipamento.list('placa', 10000)
+      base44.asServiceRole.entities.PlacaEquipamento.list('placa', 10000),
+      base44.asServiceRole.entities.PrecoCombustivel.list()
     ]);
 
     // Build lookup maps
@@ -81,7 +82,11 @@ Deno.serve(async (req) => {
       }
 
       groupedData[groupKey].totalLiters += r.liters || 0;
-      groupedData[groupKey].cost += r.cost || 0;
+      if (r.korth_id) {
+        groupedData[groupKey]._korthLiters = (groupedData[groupKey]._korthLiters || 0) + (r.liters || 0);
+      } else {
+        groupedData[groupKey]._externalCost = (groupedData[groupKey]._externalCost || 0) + (r.cost || 0);
+      }
       if (Number(r.km_driven) > 0) {
         groupedData[groupKey].kmRecords.push(Number(r.km_driven));
       }
@@ -92,6 +97,16 @@ Deno.serve(async (req) => {
       const kmDelta = item.kmRecords.length > 0
         ? Math.max(...item.kmRecords) - Math.min(...item.kmRecords)
         : 0;
+
+      const d = new Date(item.monthKey + '-01');
+      const monthNum = d.getUTCMonth();
+      const yearNum = d.getUTCFullYear();
+      const precoReg = precosCombustivel.find(p =>
+        String(p.ponto) === String(item.unit) &&
+        Number(p.mes) === monthNum &&
+        Number(p.ano) === yearNum
+      );
+      const cost = (precoReg ? (item._korthLiters || 0) * precoReg.preco_litro : 0) + (item._externalCost || 0);
 
       const m3Data = cubicMetros.find(cm =>
         String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() &&
