@@ -439,15 +439,13 @@ export default function Dados() {
                         return `R$ ${val.toFixed(2)}`;
                       })()}</TableCell>
                       <TableCell className="text-center">
-                        {!record.korth_id && (
-                          <button
-                            onClick={() => deleteRecord(record)}
-                            className="text-red-500 hover:text-red-400 p-1 rounded hover:bg-red-900/30 transition"
-                            title="Excluir registro externo"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
+                        <button
+                          onClick={() => deleteRecord(record)}
+                          className="text-red-500 hover:text-red-400 p-1 rounded hover:bg-red-900/30 transition"
+                          title="Excluir registro"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </TableCell>
                       </TableRow>
                   ))
