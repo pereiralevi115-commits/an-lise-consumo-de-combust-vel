@@ -203,11 +203,11 @@ export default function Graficos() {
         kmDelta: item.kmDelta,
         m3: m3,
         fuelRecordM3: item.fuelRecordM3,
-        cost: item.cost,
+        cost: custoCalculado,
         efficiency: item.totalLiters > 0 ? (item.kmDelta / item.totalLiters).toFixed(2) : 0
       };
     });
-  }, [records, cubicMetros, placaEquipamentosMap, motoristasMap, pontosMap, monthNames]);
+  }, [records, cubicMetros, placaEquipamentosMap, motoristasMap, pontosMap, monthNames, precosCombustivel]);
   
   // Get unique filter values
   const years = [...new Set(analysisData.map(d => d.year))].sort((a, b) => b - a);
