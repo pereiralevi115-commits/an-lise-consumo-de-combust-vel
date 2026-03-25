@@ -73,14 +73,6 @@ export default function ValorCalculado() {
       setErrorMsg(err?.response?.data?.error || err?.message || 'Erro desconhecido');
     }
   });
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    }
-  });
 
   const canSave = preco > 0 && filtered.length > 0;
 
