@@ -1,5 +1,25 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function updateWithRetry(base44, id, data, maxRetries = 5) {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      await base44.asServiceRole.entities.FuelRecord.update(id, data);
+      return;
+    } catch (err) {
+      const isRateLimit = err?.message?.includes('429') || err?.message?.includes('Rate limit');
+      if (isRateLimit && attempt < maxRetries) {
+        const waitMs = 1000 * (attempt + 1); // 1s, 2s, 3s...
+        console.log(`Rate limit - aguardando ${waitMs}ms (tentativa ${attempt + 1})`);
+        await sleep(waitMs);
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -31,16 +51,12 @@ Deno.serve(async (req) => {
       return Response.json({ updated: 0 });
     }
 
-    // Atualiza em lotes de 5 com 200ms entre lotes
-    const batchSize = 5;
+    // Atualiza sequencialmente com retry automático em caso de rate limit
     let updated = 0;
-    for (let i = 0; i < filtered.length; i += batchSize) {
-      const batch = filtered.slice(i, i + batchSize);
-      for (const r of batch) {
-        await base44.asServiceRole.entities.FuelRecord.update(r.id, { cost: (r.liters || 0) * preco });
-        updated++;
-      }
-      await new Promise(resolve => setTimeout(resolve, 200));
+    for (const r of filtered) {
+      await updateWithRetry(base44, r.id, { cost: (r.liters || 0) * preco });
+      updated++;
+      await sleep(100);
     }
     console.log(`Atualização concluída: ${updated} registros`);
 
