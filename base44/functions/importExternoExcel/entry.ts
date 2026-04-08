@@ -17,8 +17,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'URL do arquivo não fornecida' }, { status: 400 });
     }
 
-    console.log('Baixando arquivo Excel externo:', fileUrl);
-
     const response = await fetch(fileUrl);
     const arrayBuffer = await response.arrayBuffer();
 
@@ -31,77 +29,93 @@ Deno.serve(async (req) => {
     if (rows.length > 1) console.log('Cabeçalho:', rows[0]);
     if (rows.length > 2) console.log('Primeira linha de dados:', rows[1]);
 
-    const records = [];
-
-    // Converter data no formato DD/MM/YYYY ou Date para YYYY-MM-DD
+    // Converter data para YYYY-MM-DD
     const parseDate = (value) => {
       if (!value) return null;
       if (value instanceof Date) {
-        const year = value.getUTCFullYear();
-        const month = String(value.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(value.getUTCDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        return `${value.getUTCFullYear()}-${String(value.getUTCMonth() + 1).padStart(2, '0')}-${String(value.getUTCDate()).padStart(2, '0')}`;
       }
       if (typeof value === 'number') {
         const d = new Date((value - 25569) * 86400 * 1000);
-        const year = d.getUTCFullYear();
-        const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(d.getUTCDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+        return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
       }
       if (typeof value === 'string') {
-        // formato DD/MM/YYYY
         const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
         if (match) return `${match[3]}-${match[2]}-${match[1]}`;
-        // tentar ISO
         const d = new Date(value);
-        if (!isNaN(d)) {
-          const year = d.getUTCFullYear();
-          const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-          const day = String(d.getUTCDate()).padStart(2, '0');
-          return `${year}-${month}-${day}`;
-        }
+        if (!isNaN(d)) return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
       }
       return null;
     };
 
-    // Limpar valor monetário: "R$ 1.094,52" -> 1094.52
+    // Limpar valor monetário: "R$ 40.469,00" -> 40469.00
     const parseCost = (value) => {
       if (!value) return 0;
       if (typeof value === 'number') return value;
+      // Remove R$, espaços, pontos de milhar; troca vírgula decimal por ponto
       const str = String(value).replace(/R\$\s*/g, '').replace(/\./g, '').replace(',', '.').trim();
       return parseFloat(str) || 0;
     };
 
-    // Colunas: DATA(0) HORA(1) PLACA(2) USINA(3) EQUIPAMENTOS(4) FRENTISTA(5) MOTORISTA(6) COMBUSTIVEL(7) LITROS(8) Hodômetro(9) Valor total(10)
+    // Detectar colunas pelo cabeçalho
+    const header = rows[0].map(h => String(h || '').toLowerCase().trim());
+    const col = (names) => {
+      for (const name of names) {
+        const idx = header.findIndex(h => h.includes(name.toLowerCase()));
+        if (idx !== -1) return idx;
+      }
+      return -1;
+    };
+
+    const colData      = col(['data']);
+    const colHora      = col(['hora']);
+    const colPlaca     = col(['placa']);
+    const colUsina     = col(['usina', 'unidade']);
+    const colFrentista = col(['frentista']);
+    const colMotorista = col(['motorista']);
+    const colCombust   = col(['combustivel', 'combust']);
+    const colLitros    = col(['litros', 'litro', 'quantidade']);
+    const colKm        = col(['hodometro', 'km', 'quilometro']);
+    const colValor     = col(['valor total', 'valor', 'custo', 'total']);
+
+    console.log('Mapeamento de colunas:', { colData, colHora, colPlaca, colUsina, colFrentista, colMotorista, colCombust, colLitros, colKm, colValor });
+
+    const records = [];
+
     for (let rowNumber = 1; rowNumber < rows.length; rowNumber++) {
       const cells = rows[rowNumber];
       if (!cells || cells.length === 0) continue;
 
       try {
-        const date = parseDate(cells[0]);
-        const plate = cells[2] ? String(cells[2]).trim().toUpperCase() : null;
+        const dateVal = colData >= 0 ? cells[colData] : cells[0];
+        const date = parseDate(dateVal);
+        const plateVal = colPlaca >= 0 ? cells[colPlaca] : cells[2];
+        const plate = plateVal ? String(plateVal).trim().toUpperCase() : null;
         if (!date || !plate) continue;
 
-        const liters = cells[8] ? parseFloat(String(cells[8]).replace(',', '.')) : 0;
-        const km = cells[9] ? parseFloat(String(cells[9]).replace(/\./g, '').replace(',', '.')) : 0;
-        const cost = parseCost(cells[10]);
+        const litersRaw = colLitros >= 0 ? cells[colLitros] : cells[8];
+        const kmRaw     = colKm >= 0    ? cells[colKm]     : cells[9];
+        const costRaw   = colValor >= 0  ? cells[colValor]  : cells[10];
 
-        const record = {
+        const liters = litersRaw ? parseFloat(String(litersRaw).replace(',', '.')) : 0;
+        const km     = kmRaw ? parseFloat(String(kmRaw).replace(/\./g, '').replace(',', '.')) : 0;
+        const cost   = parseCost(costRaw);
+
+        console.log(`Linha ${rowNumber}: costRaw="${costRaw}" -> cost=${cost}`);
+
+        records.push({
           date,
-          time: cells[1] ? String(cells[1]).substring(0, 8) : '06:00',
+          time: colHora >= 0 && cells[colHora] ? String(cells[colHora]).substring(0, 8) : '06:00',
           vehicle_plate: plate,
-          unit: cells[3] ? String(cells[3]).trim() : null,
-          attendant: cells[5] ? String(cells[5]).trim() : null,
-          driver: cells[6] ? String(cells[6]).trim() : null,
-          fuel_type: cells[7] ? String(cells[7]).trim() : null,
+          unit: colUsina >= 0 && cells[colUsina] ? String(cells[colUsina]).trim() : null,
+          attendant: colFrentista >= 0 && cells[colFrentista] ? String(cells[colFrentista]).trim() : null,
+          driver: colMotorista >= 0 && cells[colMotorista] ? String(cells[colMotorista]).trim() : null,
+          fuel_type: colCombust >= 0 && cells[colCombust] ? String(cells[colCombust]).trim() : null,
           liters,
           km_driven: km,
           cost,
           korth_id: null
-        };
-
-        records.push(record);
+        });
       } catch (error) {
         console.error(`Erro na linha ${rowNumber}:`, error.message);
       }
@@ -113,17 +127,10 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Nenhum registro válido encontrado' }, { status: 400 });
     }
 
-    // DUPLICATAS DESATIVADAS TEMPORARIAMENTE - reimportação forçada
-    const newRecords = records;
-
-    const saved = await base44.asServiceRole.entities.FuelRecord.bulkCreate(newRecords);
+    const saved = await base44.asServiceRole.entities.FuelRecord.bulkCreate(records);
     console.log(`${saved.length} registros salvos`);
 
-    return Response.json({
-      success: true,
-      count: saved.length,
-      duplicates: records.length - newRecords.length
-    });
+    return Response.json({ success: true, count: saved.length, duplicates: 0 });
 
   } catch (error) {
     console.error('Erro:', error.message);
