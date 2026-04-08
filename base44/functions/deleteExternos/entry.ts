@@ -31,14 +31,12 @@ Deno.serve(async (req) => {
       return Response.json({ count: 0, message: 'Nenhum registro externo encontrado para este período.' });
     }
 
-    // Delete in small batches with delay to avoid rate limit
-    const batchSize = 10;
-    for (let i = 0; i < toDelete.length; i += batchSize) {
-      const batch = toDelete.slice(i, i + batchSize);
-      await Promise.all(batch.map(r => base44.asServiceRole.entities.FuelRecord.delete(r.id)));
-      if (i + batchSize < toDelete.length) {
-        await new Promise(resolve => setTimeout(resolve, 200));
-      }
+    // Delete one by one with delay to avoid rate limit
+    let deleted = 0;
+    for (const r of toDelete) {
+      await base44.asServiceRole.entities.FuelRecord.delete(r.id);
+      deleted++;
+      await new Promise(resolve => setTimeout(resolve, 350));
     }
 
     return Response.json({ count: toDelete.length, message: `${toDelete.length} registros excluídos com sucesso!` });
