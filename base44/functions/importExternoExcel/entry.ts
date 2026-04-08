@@ -23,7 +23,8 @@ Deno.serve(async (req) => {
     const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array', cellDates: true });
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
-    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, dateNF: 'yyyy-mm-dd' });
+    // raw: true retorna números como números reais, evitando problemas de formatação brasileira
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true });
 
     console.log(`Total de linhas na planilha: ${rows.length}`);
     if (rows.length > 1) console.log('Cabeçalho:', rows[0]);
@@ -48,11 +49,12 @@ Deno.serve(async (req) => {
       return null;
     };
 
-    // Limpar valor monetário: "R$ 40.469,00" -> 40469.00
+    // Limpar valor monetário
     const parseCost = (value) => {
-      if (!value) return 0;
+      if (!value && value !== 0) return 0;
+      // Com raw:true, valores numéricos já vêm como número
       if (typeof value === 'number') return value;
-      // Remove R$, espaços, pontos de milhar; troca vírgula decimal por ponto
+      // Fallback para strings: "R$ 40.469,00" -> 40469.00
       const str = String(value).replace(/R\$\s*/g, '').replace(/\./g, '').replace(',', '.').trim();
       return parseFloat(str) || 0;
     };
@@ -77,6 +79,12 @@ Deno.serve(async (req) => {
     const colLitros    = col(['litros', 'litro', 'quantidade']);
     const colKm        = col(['hodometro', 'km', 'quilometro']);
     const colValor     = col(['valor total', 'valor', 'custo', 'total']);
+    // Com raw:true, litros e km também vêm como números - usar diretamente
+    const parseNum = (v) => {
+      if (!v && v !== 0) return 0;
+      if (typeof v === 'number') return v;
+      return parseFloat(String(v).replace(/\./g, '').replace(',', '.')) || 0;
+    };
 
     console.log('Mapeamento de colunas:', { colData, colHora, colPlaca, colUsina, colFrentista, colMotorista, colCombust, colLitros, colKm, colValor });
 
@@ -97,8 +105,8 @@ Deno.serve(async (req) => {
         const kmRaw     = colKm >= 0    ? cells[colKm]     : cells[9];
         const costRaw   = colValor >= 0  ? cells[colValor]  : cells[10];
 
-        const liters = litersRaw ? parseFloat(String(litersRaw).replace(',', '.')) : 0;
-        const km     = kmRaw ? parseFloat(String(kmRaw).replace(/\./g, '').replace(',', '.')) : 0;
+        const liters = parseNum(litersRaw);
+        const km     = parseNum(kmRaw);
         const cost   = parseCost(costRaw);
 
         console.log(`Linha ${rowNumber}: costRaw="${costRaw}" -> cost=${cost}`);
