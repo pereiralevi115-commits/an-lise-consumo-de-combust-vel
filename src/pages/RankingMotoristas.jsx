@@ -123,12 +123,13 @@ export default function RankingMotoristas() {
     filtered.forEach(d => {
       if (!d.driver) return;
       const driverName = motoristasMap[String(d.driver)] || frentistasMap[String(d.driver)] || d.driver;
-      if (!byDriver[driverName]) {
-        byDriver[driverName] = { driver: d.driver, driverName, totalLiters: 0, totalKm: 0, totalCost: 0 };
+      const driverKey = driverName.toUpperCase();
+      if (!byDriver[driverKey]) {
+        byDriver[driverKey] = { driver: d.driver, driverName: driverName.toUpperCase(), totalLiters: 0, totalKm: 0, totalCost: 0 };
       }
-      byDriver[driverName].totalLiters += d.totalLiters;
-      byDriver[driverName].totalKm += d.kmDelta;
-      byDriver[driverName].totalCost += d.cost;
+      byDriver[driverKey].totalLiters += d.totalLiters;
+      byDriver[driverKey].totalKm += d.kmDelta;
+      byDriver[driverKey].totalCost += d.cost;
     });
 
     return Object.values(byDriver)
