@@ -31,31 +31,11 @@ export default function Upload() {
     setIsDeletingExterno(true);
     setDeleteResult(null);
     try {
-      // Busca todos sem korth_id do mês/ano selecionado
-      const allRecords = await base44.entities.FuelRecord.list('-date', 100000);
-      const toDelete = allRecords.filter(r => {
-        if (r.korth_id) return false;
-        if (!r.date) return false;
-        const d = new Date(r.date);
-        return d.getUTCFullYear() === ano && d.getUTCMonth() + 1 === mes;
-      });
-
-      if (toDelete.length === 0) {
-        setDeleteResult({ success: false, message: 'Nenhum registro externo encontrado para este período.' });
-        return;
-      }
-
-      // Deleta em lotes
-      const batchSize = 20;
-      for (let i = 0; i < toDelete.length; i += batchSize) {
-        const batch = toDelete.slice(i, i + batchSize);
-        await Promise.all(batch.map(r => base44.entities.FuelRecord.delete(r.id)));
-      }
-
-      setDeleteResult({ success: true, message: `${toDelete.length} registros externos excluídos com sucesso!` });
+      const response = await base44.functions.invoke('deleteExternos', { mes, ano });
+      setDeleteResult({ success: true, message: response.data.message });
       queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
     } catch (error) {
-      setDeleteResult({ success: false, message: error.message || 'Erro ao excluir registros' });
+      setDeleteResult({ success: false, message: error.response?.data?.error || error.message || 'Erro ao excluir registros' });
     } finally {
       setIsDeletingExterno(false);
     }
