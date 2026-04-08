@@ -389,9 +389,9 @@ export default function Dados() {
                           <span
                             className="cursor-pointer underline decoration-dotted hover:text-yellow-300"
                             title="Clique para editar"
-                            onClick={() => setEditingDriver({ id: record.id, value: motoristasMap[String(record.driver)] || frentistasMap[String(record.driver)] || record.driver || '' })}
+                            onClick={() => setEditingDriver({ id: record.id, value: (motoristasMap[String(record.driver)] || frentistasMap[String(record.driver)] || record.driver || '').toUpperCase() })}
                           >
-                            {motoristasMap[String(record.driver)] || frentistasMap[String(record.driver)] || record.driver || '-'}
+                            {(motoristasMap[String(record.driver)] || frentistasMap[String(record.driver)] || record.driver || '-').toUpperCase()}
                           </span>
                         )}
                       </TableCell>
