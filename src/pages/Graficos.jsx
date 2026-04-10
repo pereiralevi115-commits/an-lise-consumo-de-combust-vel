@@ -518,12 +518,13 @@ export default function Graficos() {
   // By driver - agregado de analysisData
   const byDriverData = {};
   filtered.forEach(d => {
-    if (!byDriverData[d.driver]) {
-      byDriverData[d.driver] = { liters: 0, km: 0, cost: 0 };
+    const driverKey = (d.driver || '-').toUpperCase();
+    if (!byDriverData[driverKey]) {
+      byDriverData[driverKey] = { liters: 0, km: 0, cost: 0 };
     }
-    byDriverData[d.driver].liters += d.totalLiters || 0;
-    byDriverData[d.driver].km += d.kmDelta || 0;
-    byDriverData[d.driver].cost += d.cost || 0;
+    byDriverData[driverKey].liters += d.totalLiters || 0;
+    byDriverData[driverKey].km += d.kmDelta || 0;
+    byDriverData[driverKey].cost += d.cost || 0;
   });
   const driverKmArray = Object.entries(byDriverData)
     .map(([driver, data]) => ({
