@@ -34,8 +34,12 @@ Deno.serve(async (req) => {
     // Delete one by one with delay to avoid rate limit
     let deleted = 0;
     for (const r of toDelete) {
-      await base44.asServiceRole.entities.FuelRecord.delete(r.id);
-      deleted++;
+      try {
+        await base44.asServiceRole.entities.FuelRecord.delete(r.id);
+        deleted++;
+      } catch (e) {
+        // registro já não existe, ignora
+      }
       await new Promise(resolve => setTimeout(resolve, 350));
     }
 
