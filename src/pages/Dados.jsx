@@ -21,6 +21,7 @@ export default function Dados() {
   const [editingKm, setEditingKm] = useState(null); // { id, value }
   const [editingPlate, setEditingPlate] = useState(null); // { id, value }
   const [editingDriver, setEditingDriver] = useState(null); // { id, value }
+  const [editingTime, setEditingTime] = useState(null); // { id, value }
   const queryClient = useQueryClient();
 
   const { data: records = [], isLoading } = useQuery({
@@ -182,6 +183,13 @@ export default function Dados() {
     setEditingDriver(null);
   };
 
+  const saveTime = async (id, value) => {
+    const time = String(value).trim();
+    await base44.entities.FuelRecord.update(id, { time });
+    queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+    setEditingTime(null);
+  };
+
   const deleteRecord = async (record) => {
     if (!window.confirm(`Excluir o abastecimento externo de ${record.date ? format(parseISO(record.date), 'dd/MM/yyyy') : '?'} — placa ${record.vehicle_plate || '?'}?`)) return;
     await base44.entities.FuelRecord.delete(record.id);
@@ -336,7 +344,33 @@ export default function Dados() {
                           )}
                         </span>
                       </TableCell>
-                      <TableCell className="text-white">{record.time}</TableCell>
+                      <TableCell className="text-white">
+                        {editingTime?.id === record.id ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="time"
+                              className="w-28 bg-slate-700 text-white border border-yellow-400 rounded px-2 py-0.5 text-sm"
+                              value={editingTime.value}
+                              onChange={e => setEditingTime({ id: record.id, value: e.target.value })}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') saveTime(record.id, editingTime.value);
+                                if (e.key === 'Escape') setEditingTime(null);
+                              }}
+                              autoFocus
+                            />
+                            <button onClick={() => saveTime(record.id, editingTime.value)} className="text-green-400 hover:text-green-300"><Check className="w-4 h-4" /></button>
+                            <button onClick={() => setEditingTime(null)} className="text-red-400 hover:text-red-300"><X className="w-4 h-4" /></button>
+                          </div>
+                        ) : (
+                          <span
+                            className="cursor-pointer underline decoration-dotted hover:text-yellow-300"
+                            title="Clique para editar"
+                            onClick={() => setEditingTime({ id: record.id, value: record.time || '' })}
+                          >
+                            {record.time || '-'}
+                          </span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-white font-mono">
                         {editingPlate?.id === record.id ? (
                           <div className="flex items-center gap-1">
