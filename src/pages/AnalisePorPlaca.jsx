@@ -262,8 +262,8 @@ export default function AnalisePorPlaca() {
   };
 
   const SortIcon = ({ field }) => {
-    if (sortBy !== field) return <span className="text-slate-600 ml-1">↕</span>;
-    return <span className="text-yellow-400 ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>;
+    if (sortBy !== field) return <span className="text-slate-400 ml-1">↕</span>;
+    return <span className="text-[#FDB913] ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>;
   };
 
   const exportPDF = () => {
@@ -380,14 +380,15 @@ export default function AnalisePorPlaca() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-6">Análise por Placa</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight mb-1">Análise por Placa</h1>
+        <p className="text-slate-500 mb-6">Eficiência e consumo agrupados por placa e mês</p>
 
         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-7 gap-3 mb-6">
           <select 
             value={filters.month} 
             onChange={(e) => setFilters({...filters, month: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2 text-sm"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm"
           >
             <option value="">Mês</option>
             {months.map(m => <option key={m} value={m}>{monthNames[m]}</option>)}
@@ -396,7 +397,7 @@ export default function AnalisePorPlaca() {
           <select 
             value={filters.year} 
             onChange={(e) => setFilters({...filters, year: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2 text-sm"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm"
           >
             <option value="">Ano</option>
             {years.map(y => <option key={y} value={y}>{y}</option>)}
@@ -405,7 +406,7 @@ export default function AnalisePorPlaca() {
           <select 
             value={filters.plate} 
             onChange={(e) => setFilters({...filters, plate: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2 text-sm"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm"
           >
             <option value="">Placa</option>
             {plates.map(p => <option key={p} value={p}>{p}</option>)}
@@ -414,7 +415,7 @@ export default function AnalisePorPlaca() {
           <select 
             value={filters.unit} 
             onChange={(e) => setFilters({...filters, unit: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2 text-sm"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm"
           >
             <option value="">Usina</option>
             {units.map(u => <option key={u} value={u}>{pontosMap[String(u)] || u}</option>)}
@@ -423,7 +424,7 @@ export default function AnalisePorPlaca() {
           <select 
             value={filters.equipment} 
             onChange={(e) => setFilters({...filters, equipment: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2 text-sm"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm"
           >
             <option value="">Equipamento</option>
             {equipments.map(e => <option key={e} value={e}>{e}</option>)}
@@ -432,7 +433,7 @@ export default function AnalisePorPlaca() {
           <select 
             value={filters.driver} 
             onChange={(e) => setFilters({...filters, driver: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2 text-sm"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm"
           >
             <option value="">Motorista</option>
             {drivers.map(d => <option key={d} value={d}>{motoristasMap[String(d)] || frentistasMap[String(d)] || d}</option>)}
@@ -440,7 +441,7 @@ export default function AnalisePorPlaca() {
         </div>
 
         <div className="flex items-center justify-between mb-6">
-          <p className="text-slate-400">Total de {filtered.length} registros</p>
+          <p className="text-slate-500">Total de {filtered.length} registros</p>
           <button
             onClick={exportPDF}
             className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-semibold px-4 py-2 rounded-lg transition text-sm"
@@ -452,24 +453,24 @@ export default function AnalisePorPlaca() {
       </div>
 
       {/* Table */}
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-white border-slate-200 shadow-lg">
         <CardContent className="p-0">
           <div className="overflow-x-auto w-full">
             <Table className="min-w-[1400px]">
               <TableHeader>
-                <TableRow className="border-slate-700 hover:bg-slate-700/50">
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('month')}>Mês<SortIcon field="month" /></TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('equipment')}>Equipamentos<SortIcon field="equipment" /></TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('fuelType')}>Combustível<SortIcon field="fuelType" /></TableHead>
-                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('totalLiters')}>Litros<SortIcon field="totalLiters" /></TableHead>
-                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('kmDelta')}>KM (Máx - Mín)<SortIcon field="kmDelta" /></TableHead>
-                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('m3')}>M³<SortIcon field="m3" /></TableHead>
-                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('cost')}>Valor (R$)<SortIcon field="cost" /></TableHead>
-                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('efficiency')}>Eficiência (KM/L)<SortIcon field="efficiency" /></TableHead>
-                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('efficiencyCost')}>Eficiência (R$/KM)<SortIcon field="efficiencyCost" /></TableHead>
+                <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('month')}>Mês<SortIcon field="month" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('equipment')}>Equipamentos<SortIcon field="equipment" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('fuelType')}>Combustível<SortIcon field="fuelType" /></TableHead>
+                  <TableHead className="text-slate-600 text-right cursor-pointer select-none" onClick={() => toggleSort('totalLiters')}>Litros<SortIcon field="totalLiters" /></TableHead>
+                  <TableHead className="text-slate-600 text-right cursor-pointer select-none" onClick={() => toggleSort('kmDelta')}>KM (Máx - Mín)<SortIcon field="kmDelta" /></TableHead>
+                  <TableHead className="text-slate-600 text-right cursor-pointer select-none" onClick={() => toggleSort('m3')}>M³<SortIcon field="m3" /></TableHead>
+                  <TableHead className="text-slate-600 text-right cursor-pointer select-none" onClick={() => toggleSort('cost')}>Valor (R$)<SortIcon field="cost" /></TableHead>
+                  <TableHead className="text-slate-600 text-right cursor-pointer select-none" onClick={() => toggleSort('efficiency')}>Eficiência (KM/L)<SortIcon field="efficiency" /></TableHead>
+                  <TableHead className="text-slate-600 text-right cursor-pointer select-none" onClick={() => toggleSort('efficiencyCost')}>Eficiência (R$/KM)<SortIcon field="efficiencyCost" /></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -483,10 +484,10 @@ export default function AnalisePorPlaca() {
                   filtered.map((item, idx) => {
                     const isM3Only = item.totalLiters === 0 && item.kmDelta === 0 && item.cost === 0 && item.driver === '-';
                     const isEditing = editingRow && editingRow.plate === item.plate && editingRow.monthKey === item.monthKey;
-                    return <TableRow key={idx} className={`border-slate-700 ${isM3Only ? 'bg-green-900/30 hover:bg-green-900/50' : 'hover:bg-slate-700/30'}`}>
-                      <TableCell className="text-white">{item.month}</TableCell>
-                      <TableCell className="text-white font-mono font-bold">{item.plate}</TableCell>
-                      <TableCell className="text-slate-300 text-sm">
+                    return <TableRow key={idx} className={`border-slate-200 ${isM3Only ? 'bg-green-50 hover:bg-green-100' : 'hover:bg-slate-50'}`}>
+                      <TableCell className="text-slate-800">{item.month}</TableCell>
+                      <TableCell className="text-slate-800 font-mono font-bold">{item.plate}</TableCell>
+                      <TableCell className="text-slate-600 text-sm">
                         {isM3Only && isEditing ? (
                           <input
                             className="bg-slate-700 text-white rounded px-2 py-1 text-xs w-28 border border-green-500 outline-none"
@@ -495,8 +496,8 @@ export default function AnalisePorPlaca() {
                             placeholder="Usina..."
                           />
                         ) : item.unit}
-                      </TableCell>
-                      <TableCell className="text-slate-300 text-sm">
+                        </TableCell>
+                        <TableCell className="text-slate-600 text-sm">
                         {isM3Only && isEditing ? (
                           <input
                             className="bg-slate-700 text-white rounded px-2 py-1 text-xs w-36 border border-green-500 outline-none"
@@ -506,14 +507,14 @@ export default function AnalisePorPlaca() {
                           />
                         ) : item.equipment}
                       </TableCell>
-                      <TableCell className="text-slate-300 text-sm">{item.driver}</TableCell>
-                      <TableCell className="text-slate-300 text-sm">{item.fuelType}</TableCell>
-                      <TableCell className="text-white text-right">{item.totalLiters.toFixed(2)} L</TableCell>
-                      <TableCell className="text-white text-right">{item.kmDelta.toLocaleString('pt-BR', {maximumFractionDigits: 0})} km</TableCell>
-                      <TableCell className="text-white text-right">{item.m3.toFixed(2)} m³</TableCell>
-                      <TableCell className="text-white text-right">R$ {item.cost.toFixed(2)}</TableCell>
-                      <TableCell className="text-yellow-400 text-right font-bold">{item.efficiency} km/L</TableCell>
-                      <TableCell className="text-yellow-400 text-right font-bold">
+                      <TableCell className="text-slate-600 text-sm">{item.driver}</TableCell>
+                      <TableCell className="text-slate-600 text-sm">{item.fuelType}</TableCell>
+                      <TableCell className="text-slate-800 text-right">{item.totalLiters.toFixed(2)} L</TableCell>
+                      <TableCell className="text-slate-800 text-right">{item.kmDelta.toLocaleString('pt-BR', {maximumFractionDigits: 0})} km</TableCell>
+                      <TableCell className="text-slate-800 text-right">{item.m3.toFixed(2)} m³</TableCell>
+                      <TableCell className="text-slate-800 text-right">R$ {item.cost.toFixed(2)}</TableCell>
+                      <TableCell className="text-amber-600 text-right font-bold">{item.efficiency} km/L</TableCell>
+                      <TableCell className="text-amber-600 text-right font-bold">
                         {isM3Only ? (
                           isEditing ? (
                             <div className="flex gap-1 justify-end">

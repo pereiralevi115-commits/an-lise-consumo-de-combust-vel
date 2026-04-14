@@ -555,17 +555,20 @@ export default function Graficos() {
     .sort((a, b) => b.costPerKm - a.costPerKm)
     .slice(0, 15);
 
-  if (isLoading) return <div className="text-white text-center py-12">Carregando dados...</div>;
+  if (isLoading) return <div className="text-slate-600 text-center py-12">Carregando dados...</div>;
 
   return (
     <div className="space-y-6">
       <div>
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-white">Gráficos de Combustível</h1>
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight">Gráficos de Combustível</h1>
+            <p className="text-slate-500 mt-1">Análise de consumo por período, usina, equipamento e motorista</p>
+          </div>
           <select 
             value={filters.year} 
             onChange={(e) => setFilters({...filters, year: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm"
           >
             <option value="">Todos anos</option>
             {years.map(y => <option key={y} value={y}>{y}</option>)}
@@ -577,7 +580,7 @@ export default function Graficos() {
           <select 
             value={filters.month} 
             onChange={(e) => setFilters({...filters, month: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm"
           >
             <option value="">Todos meses</option>
             {months.map(m => <option key={m} value={m}>{monthNames[m]}</option>)}
@@ -586,7 +589,7 @@ export default function Graficos() {
           <select 
             value={filters.unit} 
             onChange={(e) => setFilters({...filters, unit: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm"
           >
             <option value="">Todas usinas</option>
             {units.map(u => <option key={u} value={u}>{u}</option>)}
@@ -595,7 +598,7 @@ export default function Graficos() {
           <select 
             value={filters.equipment} 
             onChange={(e) => setFilters({...filters, equipment: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm"
           >
             <option value="">Todos equipamentos</option>
             {equipments.map(e => <option key={e} value={e}>{e}</option>)}
@@ -604,7 +607,7 @@ export default function Graficos() {
           <select 
             value={filters.plate} 
             onChange={(e) => setFilters({...filters, plate: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm"
           >
             <option value="">Todas placas</option>
             {plates.map(p => <option key={p} value={p}>{p}</option>)}
@@ -613,88 +616,88 @@ export default function Graficos() {
           <select 
              value={filters.driver} 
              onChange={(e) => setFilters({...filters, driver: e.target.value})}
-             className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+             className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm"
            >
              <option value="">Todos motoristas</option>
              {drivers.map(d => <option key={d} value={d}>{d}</option>)}
            </select>
         </div>
 
-        <p className="text-slate-400 mb-6">Total de {filtered.length} registros</p>
+        <p className="text-slate-500 mb-6">Total de {filtered.length} registros</p>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-4 gap-6">
-        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-          <p className="text-slate-400 text-sm mb-2">Total Litros</p>
-          <p className="text-2xl font-bold text-white">{(totalLiters).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl border-0 shadow-lg p-6">
+          <p className="text-amber-900 text-sm font-medium mb-2">Total Litros</p>
+          <p className="text-3xl font-bold text-amber-900">{(totalLiters).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
         </div>
-        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-          <p className="text-slate-400 text-sm mb-2">Total Km</p>
-          <p className="text-2xl font-bold text-white">{(totalKm).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+        <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-0 shadow-lg p-6">
+          <p className="text-slate-600 text-sm font-medium mb-2">Total Km</p>
+          <p className="text-3xl font-bold text-slate-800">{(totalKm).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
         </div>
-        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-          <p className="text-slate-400 text-sm mb-2">Custo Total</p>
-          <p className="text-2xl font-bold text-white">R$ {(totalCost).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+        <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-0 shadow-lg p-6">
+          <p className="text-slate-600 text-sm font-medium mb-2">Custo Total</p>
+          <p className="text-3xl font-bold text-slate-800">R$ {(totalCost).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
         </div>
-        <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-          <p className="text-slate-400 text-sm mb-2">Total M³</p>
-          <p className="text-2xl font-bold text-white">{(totalM3).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+        <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-0 shadow-lg p-6">
+          <p className="text-slate-600 text-sm font-medium mb-2">Total M³</p>
+          <p className="text-3xl font-bold text-slate-800">{(totalM3).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
         </div>
       </div>
 
       {/* Chart 1: Monthly - Litros, Km, Custos */}
-      <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6">
-        <h3 className="text-white font-bold mb-6 text-center">LITROS ABASTECIDOS - QUILOMETROS PERCORRIDOS - CUSTOS DOS ABASTECIMENTOS (MÊS)</h3>
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-lg">
+        <h3 className="text-slate-800 font-bold mb-6 text-center">LITROS ABASTECIDOS - QUILOMETROS PERCORRIDOS - CUSTOS DOS ABASTECIMENTOS (MÊS)</h3>
         <ResponsiveContainer width="100%" height={420}>
             <BarChart data={chartData} margin={{ top: 30, right: 30, left: 70, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
-            <XAxis dataKey="name" stroke="#94a3b8" label={false} />
-            <YAxis stroke="#94a3b8" hide={true} />
+            <CartesianGrid strokeDasharray="2 4" stroke="#e2e8f0" vertical={false} />
+            <XAxis dataKey="name" stroke="#64748b" label={false} />
+            <YAxis stroke="#64748b" hide={true} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="liters" fill={YELLOW} name="Litros" radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="liters" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nL' : value} fontSize={11} fontWeight="700" fill="#ffffff" />
+              <LabelList dataKey="liters" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nL' : value} fontSize={11} fontWeight="700" fill="#1e293b" />
             </Bar>
             <Bar dataKey="km" fill={BLUE} name="Km" radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="km" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nKm' : value} fontSize={11} fontWeight="700" fill="#ffffff" />
+              <LabelList dataKey="km" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nKm' : value} fontSize={11} fontWeight="700" fill="#1e293b" />
             </Bar>
             <Bar dataKey="cost" fill={GRAY} name="Custo (R$)" radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="cost" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nR$' : value} fontSize={11} fontWeight="700" fill="#ffffff" />
+              <LabelList dataKey="cost" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nR$' : value} fontSize={11} fontWeight="700" fill="#1e293b" />
             </Bar>
             </BarChart>
             </ResponsiveContainer>
             </div>
 
             {/* Chart 2: By Unit - Litros, Km, Custos */}
-            <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6">
-             <h3 className="text-white font-bold mb-6 text-center">LITROS ABASTECIDOS - QUILOMETROS PERCORRIDOS - CUSTOS DOS ABASTECIMENTOS (USINAS)</h3>
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-lg">
+             <h3 className="text-slate-800 font-bold mb-6 text-center">LITROS ABASTECIDOS - QUILOMETROS PERCORRIDOS - CUSTOS DOS ABASTECIMENTOS (USINAS)</h3>
              <ResponsiveContainer width="100%" height={420}>
              <BarChart data={byUnitData} margin={{ top: 30, right: 30, left: 30, bottom: 20 }}>
-            <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
-            <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" label={false} />
-            <YAxis stroke="#94a3b8" label={false} hide={true} />
+            <CartesianGrid strokeDasharray="2 4" stroke="#e2e8f0" vertical={false} />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#64748b" label={false} />
+            <YAxis stroke="#64748b" label={false} hide={true} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="liters" fill={YELLOW} name="Litros" radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="liters" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nL' : value} fontSize={11} fontWeight="700" fill="#ffffff" />
+              <LabelList dataKey="liters" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nL' : value} fontSize={11} fontWeight="700" fill="#1e293b" />
             </Bar>
             <Bar dataKey="km" fill={BLUE} name="Km" radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="km" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nKm' : value} fontSize={11} fontWeight="700" fill="#ffffff" />
+              <LabelList dataKey="km" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nKm' : value} fontSize={11} fontWeight="700" fill="#1e293b" />
             </Bar>
             <Bar dataKey="cost" fill={GRAY} name="Custo (R$)" radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="cost" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nR$' : value} fontSize={11} fontWeight="700" fill="#ffffff" />
+              <LabelList dataKey="cost" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + '\nR$' : value} fontSize={11} fontWeight="700" fill="#1e293b" />
             </Bar>
             </BarChart>
             </ResponsiveContainer>
             </div>
 
       {/* Chart 3: Km/L by Equipment Type */}
-      <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6 mt-8">
-        <h3 className="text-white font-bold mb-6 text-center">MÉDIAS POR TIPO DE EQUIPAMENTO (KM/LT)</h3>
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-lg mt-8">
+        <h3 className="text-slate-800 font-bold mb-6 text-center">MÉDIAS POR TIPO DE EQUIPAMENTO (KM/LT)</h3>
         <ResponsiveContainer width="100%" height={420}>
           <BarChart data={unitEquipmentArray} margin={{ top: 40, right: 30, left: 30, bottom: 100 }}>
-            <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
-            <XAxis dataKey="name" angle={-45} textAnchor="end" height={200} stroke="#94a3b8" />
-            <YAxis stroke="#94a3b8" hide={true} />
+            <CartesianGrid strokeDasharray="2 4" stroke="#e2e8f0" vertical={false} />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={200} stroke="#64748b" />
+            <YAxis stroke="#64748b" hide={true} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[4, 4, 0, 0]} label={<EquipmentKmLtLabel />} />
           </BarChart>
@@ -702,13 +705,13 @@ export default function Graficos() {
       </div>
 
       {/* Charts 4 & 5: Km per Vehicle and Driver */}
-      <div className="grid grid-cols-2 gap-6 -mx-6">
-        <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
-          <h3 className="text-white font-bold mb-6 text-center">KM PERCORRIDO POR VEÍCULO</h3>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-lg">
+          <h3 className="text-slate-800 font-bold mb-6 text-center">KM PERCORRIDO POR VEÍCULO</h3>
           <ResponsiveContainer width="100%" height={420}>
             <BarChart data={vehicleKmArray} layout="vertical" margin={{ top: 10, right: 100, left: 100, bottom: 10 }}>
-             <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
-             <XAxis type="number" stroke="#94a3b8" />
+             <CartesianGrid strokeDasharray="2 4" stroke="#e2e8f0" vertical={true} />
+             <XAxis type="number" stroke="#64748b" />
              <YAxis type="category" hide={true} />
              <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]} label={<HorizontalBarLabel />}>
@@ -718,12 +721,12 @@ export default function Graficos() {
               </ResponsiveContainer>
               </div>
 
-              <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
-              <h3 className="text-white font-bold mb-6 text-center">KM PERCORRIDO POR MOTORISTA</h3>
+              <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-lg">
+              <h3 className="text-slate-800 font-bold mb-6 text-center">KM PERCORRIDO POR MOTORISTA</h3>
               <ResponsiveContainer width="100%" height={420}>
               <BarChart data={driverKmArray} layout="vertical" margin={{ top: 10, right: 100, left: 100, bottom: 10 }}>
-              <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
-              <XAxis type="number" stroke="#94a3b8" />
+              <CartesianGrid strokeDasharray="2 4" stroke="#e2e8f0" vertical={true} />
+              <XAxis type="number" stroke="#64748b" />
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="km" fill={YELLOW} radius={[0, 4, 4, 0]} label={<HorizontalBarLabel />}>
@@ -735,13 +738,13 @@ export default function Graficos() {
       </div>
 
       {/* Charts 6 & 7: Km/L per Vehicle and Driver */}
-      <div className="grid grid-cols-2 gap-6 -mx-6">
-        <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
-          <h3 className="text-white font-bold mb-6 text-center">KM/LITRO POR VEÍCULO</h3>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-lg">
+          <h3 className="text-slate-800 font-bold mb-6 text-center">KM/LITRO POR VEÍCULO</h3>
           <ResponsiveContainer width="100%" height={420}>
             <BarChart data={vehicleKmLiterArray} layout="vertical" margin={{ top: 10, right: 100, left: 100, bottom: 10 }}>
-              <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
-              <XAxis type="number" stroke="#94a3b8" />
+              <CartesianGrid strokeDasharray="2 4" stroke="#e2e8f0" vertical={true} />
+              <XAxis type="number" stroke="#64748b" />
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]} label={<VehicleKmLiterLabel />}>
@@ -751,12 +754,12 @@ export default function Graficos() {
                 </ResponsiveContainer>
                 </div>
 
-                <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
-                <h3 className="text-white font-bold mb-6 text-center">KM/LITRO POR MOTORISTA</h3>
+                <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-lg">
+                <h3 className="text-slate-800 font-bold mb-6 text-center">KM/LITRO POR MOTORISTA</h3>
                 <ResponsiveContainer width="100%" height={420}>
                 <BarChart data={driverKmLiterArray} layout="vertical" margin={{ top: 10, right: 100, left: 100, bottom: 10 }}>
-                 <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
-                 <XAxis type="number" stroke="#94a3b8" />
+                 <CartesianGrid strokeDasharray="2 4" stroke="#e2e8f0" vertical={true} />
+                 <XAxis type="number" stroke="#64748b" />
                  <YAxis type="category" hide={true} />
                  <Tooltip content={<CustomTooltip />} />
                  <Bar dataKey="kmPerLiter" fill={YELLOW} radius={[0, 4, 4, 0]} label={<VehicleKmLiterLabel />}>
@@ -768,13 +771,13 @@ export default function Graficos() {
       </div>
 
       {/* Charts 8 & 9: R$/Km per Vehicle and Driver */}
-      <div className="grid grid-cols-2 gap-6 -mx-6">
-        <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
-          <h3 className="text-white font-bold mb-6 text-center">R$/KM POR VEÍCULO</h3>
+      <div className="grid grid-cols-2 gap-6">
+        <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-lg">
+          <h3 className="text-slate-800 font-bold mb-6 text-center">R$/KM POR VEÍCULO</h3>
             <ResponsiveContainer width="100%" height={420}>
             <BarChart data={vehicleCostArray} layout="vertical" margin={{ top: 10, right: 100, left: 100, bottom: 10 }}>
-              <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
-              <XAxis type="number" stroke="#94a3b8" />
+              <CartesianGrid strokeDasharray="2 4" stroke="#e2e8f0" vertical={true} />
+              <XAxis type="number" stroke="#64748b" />
               <YAxis type="category" hide={true} />
               <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]} label={<CostPerKmLabel />}>
@@ -784,12 +787,12 @@ export default function Graficos() {
                </ResponsiveContainer>
                </div>
 
-               <div className="bg-slate-800 p-8 rounded-xl border border-slate-700">
-               <h3 className="text-white font-bold mb-6 text-center">R$/KM POR MOTORISTA</h3>
+               <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-lg">
+               <h3 className="text-slate-800 font-bold mb-6 text-center">R$/KM POR MOTORISTA</h3>
                <ResponsiveContainer width="100%" height={420}>
                <BarChart data={driverCostArray} layout="vertical" margin={{ top: 10, right: 100, left: 100, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={true} />
-                <XAxis type="number" stroke="#94a3b8" />
+                <CartesianGrid strokeDasharray="2 4" stroke="#e2e8f0" vertical={true} />
+                <XAxis type="number" stroke="#64748b" />
                 <YAxis type="category" hide={true} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="costPerKm" fill={YELLOW} radius={[0, 4, 4, 0]} label={<CostPerKmLabel />}>
@@ -801,13 +804,13 @@ export default function Graficos() {
       </div>
 
       {/* Chart 10: Production by Equipment */}
-      <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6">
-        <h3 className="text-white font-bold mb-6 text-center">PRODUÇÃO POR TIPO DE EQUIPAMENTO (M³)</h3>
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-lg">
+        <h3 className="text-slate-800 font-bold mb-6 text-center">PRODUÇÃO POR TIPO DE EQUIPAMENTO (M³)</h3>
         <ResponsiveContainer width="100%" height={420}>
           <BarChart data={equipmentArray} margin={{ top: 30, right: 50, left: 70, bottom: 100 }}>
-            <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
-            <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
-            <YAxis stroke="#94a3b8" hide={true} />
+            <CartesianGrid strokeDasharray="2 4" stroke="#e2e8f0" vertical={false} />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#64748b" />
+            <YAxis stroke="#64748b" hide={true} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="m3" fill={YELLOW} radius={[4, 4, 0, 0]}>
               <LabelList dataKey="m3" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + ' M³' : value} fontSize={11} fill="#ffffff" fontWeight="600" />
@@ -817,13 +820,13 @@ export default function Graficos() {
       </div>
 
       {/* Chart 11: Equipment Averages */}
-      <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 -mx-6">
-        <h3 className="text-white font-bold mb-6 text-center">MÉDIAS POR EQUIPAMENTO (LT/M³ - R$/M³)</h3>
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-lg">
+        <h3 className="text-slate-800 font-bold mb-6 text-center">MÉDIAS POR EQUIPAMENTO (LT/M³ - R$/M³)</h3>
         <ResponsiveContainer width="100%" height={420}>
           <BarChart data={equipmentArray} margin={{ top: 30, right: 30, left: 70, bottom: 100 }}>
-            <CartesianGrid strokeDasharray="2 4" stroke="#475569" vertical={false} />
-            <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#94a3b8" />
-            <YAxis stroke="#94a3b8" hide={true} />
+            <CartesianGrid strokeDasharray="2 4" stroke="#e2e8f0" vertical={false} />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={150} stroke="#64748b" />
+            <YAxis stroke="#64748b" hide={true} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="litersPerM3" fill={YELLOW} name="LT/M³" radius={[4, 4, 0, 0]} label={<LitersPerM3Label />} />
             <Bar dataKey="costPerM3" fill={GRAY} name="R$/M³" radius={[4, 4, 0, 0]} label={<CostPerM3Label />} />

@@ -147,39 +147,39 @@ export default function Upload() {
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Upload de Dados</h1>
-        <p className="text-slate-400">Importe arquivos PDF com os dados de combustível</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight mb-1">Upload de Dados</h1>
+        <p className="text-slate-500">Importe dados de combustível via Korth Guardian ou Excel externo</p>
       </div>
 
       {/* Korth Guardian Integration */}
-      <Card className="bg-slate-800/60 border-blue-600">
+      <Card className="bg-white border-blue-200 shadow-lg">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <RefreshCw className="w-5 h-5 text-blue-400" />
+          <CardTitle className="text-slate-800 flex items-center gap-2">
+            <RefreshCw className="w-5 h-5 text-blue-500" />
             Importar do Korth Guardian
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-slate-400 text-sm">
+          <p className="text-slate-500 text-sm">
             Busca os abastecimentos diretamente da API do Korth Guardian. Se não informar datas, importa o dia anterior automaticamente.
           </p>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <Label className="text-slate-300 text-sm">Data Início</Label>
+              <Label className="text-slate-700 text-sm">Data Início</Label>
               <Input
                 type="date"
                 value={dataIni}
                 onChange={(e) => setDataIni(e.target.value)}
-                className="bg-slate-800 border-slate-600 text-white"
+                className="border-slate-200 text-slate-800"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-slate-300 text-sm">Data Fim</Label>
+              <Label className="text-slate-700 text-sm">Data Fim</Label>
               <Input
                 type="date"
                 value={dataFim}
                 onChange={(e) => setDataFim(e.target.value)}
-                className="bg-slate-800 border-slate-600 text-white"
+                className="border-slate-200 text-slate-800"
               />
             </div>
           </div>
@@ -206,15 +206,15 @@ export default function Upload() {
       </Card>
 
       {/* Upload Abastecimentos Externos */}
-      <Card className="bg-slate-800/60 border-yellow-600">
+      <Card className="bg-white border-amber-200 shadow-lg">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <Truck className="w-5 h-5 text-yellow-400" />
+          <CardTitle className="text-slate-800 flex items-center gap-2">
+            <Truck className="w-5 h-5 text-[#FDB913]" />
             Importar Abastecimentos Externos (Excel)
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-slate-400 text-sm mb-4">
+          <p className="text-slate-500 text-sm mb-4">
             Colunas esperadas: DATA | HORA | PLACA | USINA | EQUIPAMENTOS | FRENTISTA | MOTORISTA | COMBUSTIVEL | LITROS | Hodômetro | Valor total
           </p>
           <label className="block">
@@ -225,7 +225,7 @@ export default function Upload() {
               disabled={isProcessingExterno}
               className="hidden"
             />
-            <div className="border-2 border-dashed border-yellow-600 rounded-lg p-10 cursor-pointer hover:border-yellow-500 hover:bg-yellow-900/10 transition text-center">
+            <div className="border-2 border-dashed border-amber-300 rounded-lg p-10 cursor-pointer hover:border-[#FDB913] hover:bg-amber-50 transition text-center">
               {isProcessingExterno ? (
                 <div className="flex flex-col items-center gap-3">
                   <Loader2 className="w-10 h-10 text-yellow-400 animate-spin" />
@@ -233,9 +233,9 @@ export default function Upload() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-3">
-                  <Truck className="w-10 h-10 text-yellow-400" />
-                  <p className="text-white font-medium">Clique para selecionar o Excel de externos</p>
-                  <p className="text-slate-400 text-sm">Arquivos .xlsx ou .xls</p>
+                  <Truck className="w-10 h-10 text-[#FDB913]" />
+                  <p className="text-slate-800 font-medium">Clique para selecionar o Excel de externos</p>
+                  <p className="text-slate-500 text-sm">Arquivos .xlsx ou .xls</p>
                 </div>
               )}
             </div>
@@ -252,25 +252,25 @@ export default function Upload() {
       </Card>
 
       {/* Excluir Externos */}
-      <Card className="bg-slate-800/60 border-red-700">
+      <Card className="bg-white border-red-200 shadow-lg">
         <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <Trash2 className="w-5 h-5 text-red-400" />
+          <CardTitle className="text-slate-800 flex items-center gap-2">
+            <Trash2 className="w-5 h-5 text-red-500" />
             Excluir Abastecimentos Externos por Mês
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-slate-400 text-sm">
+          <p className="text-slate-500 text-sm">
             Remove todos os registros importados via Excel externo (sem korth_id) do mês selecionado.
           </p>
           <div className="flex gap-3 items-end">
             <div className="space-y-1 flex-1">
-              <Label className="text-slate-300 text-sm">Mês / Ano</Label>
+              <Label className="text-slate-700 text-sm">Mês / Ano</Label>
               <Input
                 type="month"
                 value={deleteMes}
                 onChange={(e) => setDeleteMes(e.target.value)}
-                className="bg-slate-800 border-slate-600 text-white"
+                className="border-slate-200 text-slate-800"
               />
             </div>
             <Button

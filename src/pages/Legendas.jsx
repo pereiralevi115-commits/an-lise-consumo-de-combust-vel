@@ -49,17 +49,17 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
 
   const totalItems = allItems.reduce((acc, e) => acc + e.items.length, 0);
 
-  const borderColors = { yellow: 'border-yellow-700', blue: 'border-blue-700', green: 'border-green-700' };
-  const iconColors = { yellow: 'text-yellow-400', blue: 'text-blue-400', green: 'text-green-400' };
-  const btnColors = { yellow: 'bg-yellow-600 hover:bg-yellow-700', blue: 'bg-blue-600 hover:bg-blue-700', green: 'bg-green-600 hover:bg-green-700' };
+  const borderColors = { yellow: 'border-amber-200', blue: 'border-blue-200', green: 'border-green-200' };
+  const iconColors = { yellow: 'text-[#FDB913]', blue: 'text-blue-500', green: 'text-green-600' };
+  const btnColors = { yellow: 'bg-[#FDB913] hover:bg-amber-400 text-slate-900', blue: 'bg-blue-600 hover:bg-blue-700 text-white', green: 'bg-green-600 hover:bg-green-700 text-white' };
 
   return (
-    <Card className={`bg-slate-800 border ${borderColors[color]}`}>
+    <Card className={`bg-white border shadow-lg ${borderColors[color]}`}>
       <CardHeader className="pb-3">
-        <CardTitle className="text-white flex items-center gap-2">
+        <CardTitle className="text-slate-800 flex items-center gap-2">
           <Icon className={`w-5 h-5 ${iconColors[color]}`} />
           {title}
-          <span className="ml-auto text-sm font-normal text-slate-400">{totalItems} cadastrados</span>
+          <span className="ml-auto text-sm font-normal text-slate-500">{totalItems} cadastrados</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -69,7 +69,7 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
             <select
               value={novo.entity}
               onChange={(e) => setNovo({ ...novo, entity: e.target.value })}
-              className="bg-slate-700 border border-slate-600 text-white rounded px-2 py-2 text-sm"
+              className="bg-white border border-slate-200 text-slate-800 rounded-lg px-2 py-2 text-sm"
             >
               {entities.map(e => (
                 <option key={e.name} value={e.name}>{e.label}</option>
@@ -80,19 +80,19 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
             placeholder={labelCodigo}
             value={novo.codigo}
             onChange={(e) => setNovo({ ...novo, codigo: e.target.value })}
-            className="bg-slate-700 border-slate-600 text-white w-28"
+            className="border-slate-200 text-slate-800 w-28"
           />
 
           <Input
             placeholder={labelNome}
             value={novo.nome}
             onChange={(e) => setNovo({ ...novo, nome: e.target.value })}
-            className="bg-slate-700 border-slate-600 text-white flex-1 min-w-[120px]"
+            className="border-slate-200 text-slate-800 flex-1 min-w-[120px]"
           />
           <Button
             onClick={handleAdd}
             disabled={createMutation.isPending || !novo.codigo || !novo.nome}
-            className={`${btnColors[color]} text-white`}
+            className={`${btnColors[color]}`}
           >
             <Plus className="w-4 h-4" />
           </Button>
@@ -102,27 +102,27 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
         {allItems.map(({ entity, items }) => (
           <div key={entity.name}>
             {entities.length > 1 && (
-              <p className="text-slate-500 text-xs uppercase tracking-wide mb-1">{entity.label} ({items.length})</p>
+              <p className="text-slate-400 text-xs uppercase tracking-wide mb-1">{entity.label} ({items.length})</p>
             )}
             <div className="space-y-1 max-h-56 overflow-y-auto">
               {items.length === 0 ? (
-                <p className="text-slate-500 text-sm text-center py-2">Nenhum cadastro ainda</p>
+                <p className="text-slate-400 text-sm text-center py-2">Nenhum cadastro ainda</p>
               ) : (
                 items.map((item) => (
                    <div key={item.id}>
                      {editing?.id === item.id && editing?.entityName === entity.name ? (
-                       <div className="flex items-center gap-1 bg-slate-700 rounded px-2 py-1.5">
+                       <div className="flex items-center gap-1 bg-slate-100 rounded px-2 py-1.5">
                          <input
                            type="text"
                            value={editing.codigo}
                            onChange={(e) => setEditing({ ...editing, codigo: e.target.value })}
-                           className="bg-slate-600 text-white rounded px-2 py-1 text-sm w-20 font-mono"
+                           className="bg-white text-slate-800 border border-slate-200 rounded px-2 py-1 text-sm w-20 font-mono"
                          />
                          <input
                            type="text"
                            value={editing.nome}
                            onChange={(e) => setEditing({ ...editing, nome: e.target.value })}
-                           className="bg-slate-600 text-white rounded px-2 py-1 text-sm flex-1"
+                           className="bg-white text-slate-800 border border-slate-200 rounded px-2 py-1 text-sm flex-1"
                          />
                          <Button
                            variant="ghost"
@@ -142,9 +142,9 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
                          </Button>
                        </div>
                      ) : (
-                       <div className="flex items-center justify-between bg-slate-700/50 rounded px-3 py-1.5 gap-2">
-                         <span className="text-slate-400 font-mono text-xs w-24 shrink-0 truncate">{item.codigo}</span>
-                         <span className="text-white flex-1 text-sm truncate">{item.nome}</span>
+                       <div className="flex items-center justify-between bg-slate-50 border border-slate-100 rounded px-3 py-1.5 gap-2">
+                         <span className="text-slate-500 font-mono text-xs w-24 shrink-0 truncate">{item.codigo}</span>
+                         <span className="text-slate-800 flex-1 text-sm truncate">{item.nome}</span>
                          <Button
                            variant="ghost"
                            size="icon"
@@ -226,12 +226,12 @@ function PlacaEquipamentoSection() {
   };
 
   return (
-    <Card className="bg-slate-800 border border-purple-700 md:col-span-3">
+    <Card className="bg-white border border-purple-200 shadow-lg md:col-span-3">
       <CardHeader className="pb-3">
-        <CardTitle className="text-white flex items-center gap-2">
-          <Truck className="w-5 h-5 text-purple-400" />
+        <CardTitle className="text-slate-800 flex items-center gap-2">
+          <Truck className="w-5 h-5 text-purple-500" />
           Placa / Equipamento
-          <span className="ml-auto text-sm font-normal text-slate-400">{items.length} cadastrados</span>
+          <span className="ml-auto text-sm font-normal text-slate-500">{items.length} cadastrados</span>
           <Button
             variant="ghost"
             size="sm"
@@ -250,13 +250,13 @@ function PlacaEquipamentoSection() {
             placeholder="Placa"
             value={nova.placa}
             onChange={(e) => setNova({ ...nova, placa: e.target.value })}
-            className="bg-slate-700 border-slate-600 text-white w-32"
+            className="border-slate-200 text-slate-800 w-32"
           />
           <Input
             placeholder="Tipo de equipamento"
             value={nova.tipo}
             onChange={(e) => setNova({ ...nova, tipo: e.target.value })}
-            className="bg-slate-700 border-slate-600 text-white flex-1 min-w-[200px]"
+            className="border-slate-200 text-slate-800 flex-1 min-w-[200px]"
           />
           <Button
             onClick={handleAdd}
@@ -269,14 +269,14 @@ function PlacaEquipamentoSection() {
 
         {/* Importação em lote */}
         {showBulk && (
-          <div className="space-y-2 bg-slate-700/40 rounded-lg p-3">
-            <p className="text-slate-400 text-xs">Cole os dados no formato: PLACA [TAB] TIPO (uma por linha)</p>
+          <div className="space-y-2 bg-slate-50 border border-slate-200 rounded-lg p-3">
+            <p className="text-slate-500 text-xs">Cole os dados no formato: PLACA [TAB] TIPO (uma por linha)</p>
             <textarea
               value={bulkText}
               onChange={(e) => setBulkText(e.target.value)}
               rows={8}
               placeholder={"APS9D92\tBOMBA LANÇA\nAYC4D06\tCAMINHÃO BETONEIRA"}
-              className="w-full bg-slate-800 border border-slate-600 text-white rounded px-3 py-2 text-sm font-mono"
+              className="w-full bg-white border border-slate-200 text-slate-800 rounded px-3 py-2 text-sm font-mono"
             />
             <Button
               onClick={handleBulkImport}
@@ -291,10 +291,10 @@ function PlacaEquipamentoSection() {
         {/* Lista */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 max-h-72 overflow-y-auto">
           {items.map((item) => (
-            <div key={item.id} className="flex items-center justify-between bg-slate-700/50 rounded px-2 py-1.5 gap-1">
+            <div key={item.id} className="flex items-center justify-between bg-slate-50 border border-slate-100 rounded px-2 py-1.5 gap-1">
               <div className="min-w-0">
-                <p className="text-white font-mono text-xs truncate">{item.placa}</p>
-                <p className="text-slate-400 text-xs truncate">{item.tipo}</p>
+                <p className="text-slate-800 font-mono text-xs truncate">{item.placa}</p>
+                <p className="text-slate-500 text-xs truncate">{item.tipo}</p>
               </div>
               <Button
                 variant="ghost"
@@ -316,8 +316,8 @@ export default function Legendas() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-1">Legendas</h1>
-        <p className="text-slate-400">Cadastre os códigos e nomes para exibição na tela de Dados</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight mb-1">Legendas</h1>
+        <p className="text-slate-500">Cadastre os códigos e nomes para exibição na tela de Dados</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">

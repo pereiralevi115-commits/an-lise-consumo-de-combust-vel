@@ -36,8 +36,8 @@ export default function MetrosCubicos() {
   };
 
   const SortIcon = ({ field }) => {
-    if (sortBy !== field) return <span className="text-slate-600 ml-1">↕</span>;
-    return <span className="text-yellow-400 ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>;
+    if (sortBy !== field) return <span className="text-slate-400 ml-1">↕</span>;
+    return <span className="text-[#FDB913] ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>;
   };
 
   const sortedRecords = [...records].sort((a, b) => {
@@ -122,23 +122,26 @@ export default function MetrosCubicos() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-white">M³ por Placa</h1>
+      <div>
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight mb-1">M³ por Placa</h1>
+        <p className="text-slate-500">Gerencie registros de metros cúbicos por veículo</p>
+      </div>
 
       {/* Upload Card */}
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-white border-slate-200 shadow-lg">
         <CardHeader className="pb-3">
-          <CardTitle className="text-white flex items-center gap-2">
-            <Upload className="w-5 h-5 text-yellow-400" />
+          <CardTitle className="text-slate-800 flex items-center gap-2">
+            <Upload className="w-5 h-5 text-[#FDB913]" />
             Importar arquivo Excel
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-slate-400 text-sm">
-            O arquivo deve conter as colunas na ordem: <span className="text-white font-semibold">MÊS | PLACA | EQUIPAMENTO | M³</span>
+          <p className="text-slate-500 text-sm">
+            O arquivo deve conter as colunas na ordem: <span className="text-slate-800 font-semibold">MÊS | PLACA | EQUIPAMENTO | M³</span>
           </p>
 
           <label className={`flex items-center gap-3 cursor-pointer w-fit px-5 py-2.5 rounded-lg font-medium text-sm transition
-            ${uploading ? 'bg-slate-600 text-slate-400 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-400 text-slate-900'}`}>
+            ${uploading ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-[#FDB913] hover:bg-amber-400 text-slate-900'}`}>
             <Upload className="w-4 h-4" />
             {uploading ? 'Importando...' : 'Selecionar arquivo (.xlsx)'}
             <input
@@ -162,22 +165,22 @@ export default function MetrosCubicos() {
       </Card>
 
       {/* Delete by month */}
-      <Card className="bg-gradient-to-r from-red-900/20 to-red-800/20 border-red-700">
+      <Card className="bg-white border-red-200 shadow-lg">
         <CardHeader className="pb-3">
-          <CardTitle className="text-white flex items-center gap-2">
-            <Trash2 className="w-5 h-5 text-red-400" />
+          <CardTitle className="text-slate-800 flex items-center gap-2">
+            <Trash2 className="w-5 h-5 text-red-500" />
             Excluir Registros por Mês
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex gap-3 items-end">
             <div className="space-y-1 flex-1 max-w-xs">
-              <Label className="text-slate-300 text-sm">Mês / Ano</Label>
+              <Label className="text-slate-700 text-sm">Mês / Ano</Label>
               <Input
                 type="month"
                 value={deleteMes}
                 onChange={(e) => setDeleteMes(e.target.value)}
-                className="bg-slate-800 border-slate-600 text-white"
+                className="border-slate-200 text-slate-800"
               />
             </div>
             <Button
@@ -200,9 +203,9 @@ export default function MetrosCubicos() {
       </Card>
 
       {/* Table */}
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-white border-slate-200 shadow-lg">
         <CardHeader className="pb-2">
-          <CardTitle className="text-white text-base">
+          <CardTitle className="text-slate-800 text-base">
             Registros ({records.length})
           </CardTitle>
         </CardHeader>
@@ -210,12 +213,12 @@ export default function MetrosCubicos() {
           <div className="overflow-x-auto w-full">
             <Table>
               <TableHeader>
-                <TableRow className="border-slate-700 hover:bg-slate-700/50">
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('mes')}>Mês<SortIcon field="mes" /></TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('placa')}>Placa<SortIcon field="placa" /></TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('equipamento')}>Equipamento<SortIcon field="equipamento" /></TableHead>
-                  <TableHead className="text-slate-300 text-right cursor-pointer select-none" onClick={() => toggleSort('m3')}>M³<SortIcon field="m3" /></TableHead>
-                  <TableHead className="text-slate-300 text-right w-16"></TableHead>
+                <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('mes')}>Mês<SortIcon field="mes" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('placa')}>Placa<SortIcon field="placa" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('equipamento')}>Equipamento<SortIcon field="equipamento" /></TableHead>
+                  <TableHead className="text-slate-600 text-right cursor-pointer select-none" onClick={() => toggleSort('m3')}>M³<SortIcon field="m3" /></TableHead>
+                  <TableHead className="text-slate-600 text-right w-16"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -227,11 +230,11 @@ export default function MetrosCubicos() {
                   </TableRow>
                 ) : (
                   sortedRecords.map((r) => (
-                    <TableRow key={r.id} className="border-slate-700 hover:bg-slate-700/30">
-                      <TableCell className="text-white">{formatMes(r.mes)}</TableCell>
-                      <TableCell className="text-white font-mono">{r.placa}</TableCell>
-                      <TableCell className="text-slate-300">{placaEquipamentosMap[String(r.placa).toUpperCase()] || r.equipamento || '-'}</TableCell>
-                      <TableCell className="text-white text-right">
+                    <TableRow key={r.id} className="border-slate-200 hover:bg-slate-50">
+                      <TableCell className="text-slate-800">{formatMes(r.mes)}</TableCell>
+                      <TableCell className="text-slate-800 font-mono">{r.placa}</TableCell>
+                      <TableCell className="text-slate-600">{placaEquipamentosMap[String(r.placa).toUpperCase()] || r.equipamento || '-'}</TableCell>
+                      <TableCell className="text-slate-800 text-right">
                         {r.metros_cubicos?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </TableCell>
                       <TableCell className="text-right">

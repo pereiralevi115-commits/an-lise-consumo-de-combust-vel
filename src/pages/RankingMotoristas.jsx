@@ -143,73 +143,76 @@ export default function RankingMotoristas() {
   }, [analysisData, filters, motoristasMap, frentistasMap, placaEquipamentosMap]);
 
   const medalColor = (i) => {
-    if (i === 0) return 'text-yellow-400';
-    if (i === 1) return 'text-slate-300';
+    if (i === 0) return 'text-[#FDB913]';
+    if (i === 1) return 'text-slate-400';
     if (i === 2) return 'text-amber-600';
-    return 'text-slate-400';
+    return 'text-slate-500';
   };
 
   const barColor = (i) => {
-    if (i === 0) return 'bg-yellow-400';
-    if (i === 1) return 'bg-slate-300';
+    if (i === 0) return 'bg-[#FDB913]';
+    if (i === 1) return 'bg-slate-400';
     if (i === 2) return 'bg-amber-600';
     return 'bg-blue-500';
   };
 
   const maxKml = ranking.length > 0 ? ranking[0].kmPerLiter : 1;
 
-  if (isLoading) return <div className="text-white text-center py-12">Carregando dados...</div>;
+  if (isLoading) return <div className="text-slate-600 text-center py-12">Carregando dados...</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Trophy className="w-8 h-8 text-yellow-400" />
-        <h1 className="text-3xl font-bold text-white">Ranking de Motoristas — KM/Litro</h1>
+        <Trophy className="w-8 h-8 text-[#FDB913]" />
+        <div>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight">Ranking de Motoristas</h1>
+          <p className="text-slate-500 mt-1">Classificação por KM/Litro</p>
+        </div>
       </div>
 
       {/* Filtros */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <select value={filters.year} onChange={e => setFilters({ ...filters, year: e.target.value })}
-          className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2 text-sm">
+          className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm">
           <option value="">Ano</option>
           {years.map(y => <option key={y} value={y}>{y}</option>)}
         </select>
 
         <select value={filters.month} onChange={e => setFilters({ ...filters, month: e.target.value })}
-          className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2 text-sm">
+          className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm">
           <option value="">Mês</option>
           {months.map(m => <option key={m} value={m}>{monthNames[m]}</option>)}
         </select>
 
         <select value={filters.unit} onChange={e => setFilters({ ...filters, unit: e.target.value })}
-          className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2 text-sm">
+          className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm">
           <option value="">Usina</option>
           {units.map(u => <option key={u} value={u}>{pontosMap[String(u)] || u}</option>)}
         </select>
 
         <select value={filters.equipment} onChange={e => setFilters({ ...filters, equipment: e.target.value })}
-          className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2 text-sm">
+          className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm">
           <option value="">Equipamento</option>
           {equipments.map(e => <option key={e} value={e}>{e}</option>)}
         </select>
 
         <select value={filters.plate} onChange={e => setFilters({ ...filters, plate: e.target.value })}
-          className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2 text-sm">
+          className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm">
           <option value="">Placa</option>
           {plates.map(p => <option key={p} value={p}>{p}</option>)}
         </select>
       </div>
 
-      <p className="text-slate-400 text-sm">{ranking.length} motorista(s) encontrado(s)</p>
+      <p className="text-slate-500 text-sm">{ranking.length} motorista(s) encontrado(s)</p>
 
       {ranking.length === 0 ? (
-        <Card className="bg-slate-800 border-slate-700">
-          <CardContent className="py-12 text-center text-slate-400">Nenhum dado encontrado para os filtros selecionados.</CardContent>
+        <Card className="bg-white border-slate-200 shadow-lg">
+          <CardContent className="py-12 text-center text-slate-500">Nenhum dado encontrado para os filtros selecionados.</CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
           {ranking.map((item, idx) => (
-            <Card key={item.driver} className={`border ${idx === 0 ? 'bg-yellow-900/20 border-yellow-600/50' : idx === 1 ? 'bg-slate-700/30 border-slate-500/50' : idx === 2 ? 'bg-amber-900/20 border-amber-700/50' : 'bg-slate-800 border-slate-700'}`}>
+            <Card key={item.driver} className={`border shadow-sm ${idx === 0 ? 'bg-amber-50 border-amber-200' : idx === 1 ? 'bg-slate-50 border-slate-200' : idx === 2 ? 'bg-orange-50 border-orange-200' : 'bg-white border-slate-200'}`}>
               <CardContent className="py-4 px-5">
                 <div className="flex items-center gap-4">
                   <div className={`text-2xl font-black w-10 text-center ${medalColor(idx)}`}>
@@ -217,16 +220,16 @@ export default function RankingMotoristas() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline justify-between gap-2 mb-1">
-                      <span className="text-white font-semibold truncate text-base">{getFirstAndLastName(item.driverName)}</span>
+                      <span className="text-slate-800 font-semibold truncate text-base">{getFirstAndLastName(item.driverName)}</span>
                       <span className={`text-lg font-black shrink-0 ${medalColor(idx)}`}>
-                        {item.kmPerLiter.toFixed(2)} <span className="text-sm font-normal text-slate-400">km/L</span>
+                        {item.kmPerLiter.toFixed(2)} <span className="text-sm font-normal text-slate-500">km/L</span>
                       </span>
                     </div>
-                    <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                    <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
                       <div className={`h-full rounded-full transition-all ${barColor(idx)}`}
                         style={{ width: `${(item.kmPerLiter / maxKml) * 100}%` }} />
                     </div>
-                    <div className="flex gap-4 mt-1.5 text-xs text-slate-400">
+                    <div className="flex gap-4 mt-1.5 text-xs text-slate-500">
                       <span>KM: {item.totalKm.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} km</span>
                       <span>Litros: {item.totalLiters.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} L</span>
                       <span>Custo: R$ {item.totalCost.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}</span>

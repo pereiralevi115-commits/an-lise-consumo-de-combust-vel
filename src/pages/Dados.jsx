@@ -152,8 +152,8 @@ export default function Dados() {
   };
 
   const SortIcon = ({ field }) => {
-    if (sortBy !== field) return <span className="text-slate-600 ml-1">↕</span>;
-    return <span className="text-yellow-400 ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>;
+    if (sortBy !== field) return <span className="text-slate-400 ml-1">↕</span>;
+    return <span className="text-[#FDB913] ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>;
   };
 
   const saveKm = async (id, value) => {
@@ -232,20 +232,21 @@ export default function Dados() {
   };
 
   if (isLoading) {
-    return <div className="text-white text-center py-12">Carregando dados...</div>;
+    return <div className="text-slate-600 text-center py-12">Carregando dados...</div>;
   }
 
   return (
     <div className="space-y-6 max-w-full">
       <div>
-         <h1 className="text-3xl font-bold text-white mb-6">Dados de Combustível</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight mb-1">Dados de Combustível</h1>
+        <p className="text-slate-500 mb-6">Registros detalhados de abastecimento</p>
 
          {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
           <select 
             value={filters.month} 
             onChange={(e) => setFilters({...filters, month: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm"
           >
             <option value="">Todos meses</option>
             {months.map(m => <option key={m} value={m}>{monthNames[m]}</option>)}
@@ -254,7 +255,7 @@ export default function Dados() {
           <select 
             value={filters.unit} 
             onChange={(e) => setFilters({...filters, unit: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm"
           >
             <option value="">Todas usinas</option>
             {units.map(u => <option key={u} value={u}>{pontosMap[String(u)] || u}</option>)}
@@ -263,7 +264,7 @@ export default function Dados() {
           <select 
             value={filters.equipment} 
             onChange={(e) => setFilters({...filters, equipment: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm"
           >
             <option value="">Todos equipamentos</option>
             {equipments.map(e => <option key={e} value={e}>{e}</option>)}
@@ -272,7 +273,7 @@ export default function Dados() {
           <select 
             value={filters.plate} 
             onChange={(e) => setFilters({...filters, plate: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm"
           >
             <option value="">Todas placas</option>
             {plates.map(p => <option key={p} value={p}>{p}</option>)}
@@ -281,7 +282,7 @@ export default function Dados() {
           <select 
             value={filters.driver} 
             onChange={(e) => setFilters({...filters, driver: e.target.value})}
-            className="bg-slate-800 text-white border border-slate-700 rounded px-3 py-2"
+            className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm"
           >
             <option value="">Todos motoristas</option>
             {drivers.map(d => <option key={d} value={d}>{d}</option>)}
@@ -291,7 +292,7 @@ export default function Dados() {
         </div>
 
         <div className="flex items-center gap-4">
-          <p className="text-slate-400">Total de {filtered.length} registros</p>
+          <p className="text-slate-500">Total de {filtered.length} registros</p>
           {kmInconsistencyIds.size > 0 && (
             <span
               className="flex items-center gap-2 text-red-400 text-sm cursor-pointer hover:text-red-300 select-none"
@@ -306,24 +307,24 @@ export default function Dados() {
         </div>
   
       {/* Table */}
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-white border-slate-200 shadow-lg">
         <CardContent className="p-0">
           <div className="overflow-x-auto w-full">
             <Table className="min-w-[1100px]">
               <TableHeader>
-                <TableRow className="border-slate-700 hover:bg-slate-700/50">
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('date')}>Data<SortIcon field="date" /></TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('time')}>Hora<SortIcon field="time" /></TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('equipment')}>Equipamentos<SortIcon field="equipment" /></TableHead>
-                  <TableHead className="text-slate-300">Frentista</TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
-                  <TableHead className="text-slate-300 cursor-pointer select-none" onClick={() => toggleSort('fuel')}>Combustível<SortIcon field="fuel" /></TableHead>
-                  <TableHead className="text-slate-300 text-right">Litros</TableHead>
-                  <TableHead className="text-slate-300 text-right">KM</TableHead>
-                  <TableHead className="text-slate-300 text-right">Valor (R$)</TableHead>
-                  <TableHead className="text-slate-300 text-center w-10"></TableHead>
+                <TableRow className="border-slate-200 hover:bg-slate-50 bg-slate-50">
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('date')}>Data<SortIcon field="date" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('time')}>Hora<SortIcon field="time" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('equipment')}>Equipamentos<SortIcon field="equipment" /></TableHead>
+                  <TableHead className="text-slate-600">Frentista</TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('fuel')}>Combustível<SortIcon field="fuel" /></TableHead>
+                  <TableHead className="text-slate-600 text-right">Litros</TableHead>
+                  <TableHead className="text-slate-600 text-right">KM</TableHead>
+                  <TableHead className="text-slate-600 text-right">Valor (R$)</TableHead>
+                  <TableHead className="text-slate-600 text-center w-10"></TableHead>
                   </TableRow>
               </TableHeader>
               <TableBody>
@@ -335,8 +336,8 @@ export default function Dados() {
                     </TableRow>
                   ) : (
                     filtered.map((record) => (
-                    <TableRow key={record.id} className={`border-slate-700 ${kmInconsistencyIds.has(record.id) ? 'bg-red-900/40 hover:bg-red-900/50' : !record.korth_id ? 'bg-green-900/30 hover:bg-green-900/40' : 'hover:bg-slate-700/30'}`}>
-                      <TableCell className="text-white">
+                    <TableRow key={record.id} className={`border-slate-200 ${kmInconsistencyIds.has(record.id) ? 'bg-red-50 hover:bg-red-100' : !record.korth_id ? 'bg-green-50 hover:bg-green-100' : 'hover:bg-slate-50'}`}>
+                      <TableCell className="text-slate-800">
                         <span className="flex items-center gap-1">
                           {record.date ? format(parseISO(record.date), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
                           {kmInconsistencyIds.has(record.id) && kmInconsistencyReasons[record.id] && (
@@ -344,12 +345,12 @@ export default function Dados() {
                           )}
                         </span>
                       </TableCell>
-                      <TableCell className="text-white">
-                        {editingTime?.id === record.id ? (
-                          <div className="flex items-center gap-1">
-                            <input
-                              type="time"
-                              className="w-28 bg-slate-700 text-white border border-yellow-400 rounded px-2 py-0.5 text-sm"
+                      <TableCell className="text-slate-800">
+                         {editingTime?.id === record.id ? (
+                           <div className="flex items-center gap-1">
+                             <input
+                               type="time"
+                               className="w-28 bg-white text-slate-800 border border-[#FDB913] rounded px-2 py-0.5 text-sm"
                               value={editingTime.value}
                               onChange={e => setEditingTime({ id: record.id, value: e.target.value })}
                               onKeyDown={e => {
@@ -363,7 +364,7 @@ export default function Dados() {
                           </div>
                         ) : (
                           <span
-                            className="cursor-pointer underline decoration-dotted hover:text-yellow-300"
+                            className="cursor-pointer underline decoration-dotted hover:text-[#FDB913] text-slate-800"
                             title="Clique para editar"
                             onClick={() => setEditingTime({ id: record.id, value: record.time || '' })}
                           >
@@ -371,12 +372,12 @@ export default function Dados() {
                           </span>
                         )}
                       </TableCell>
-                      <TableCell className="text-white font-mono">
-                        {editingPlate?.id === record.id ? (
-                          <div className="flex items-center gap-1">
-                            <input
-                              type="text"
-                              className="w-24 bg-slate-700 text-white border border-yellow-400 rounded px-2 py-0.5 text-sm font-mono uppercase"
+                      <TableCell className="text-slate-800 font-mono">
+                         {editingPlate?.id === record.id ? (
+                           <div className="flex items-center gap-1">
+                             <input
+                               type="text"
+                               className="w-24 bg-white text-slate-800 border border-[#FDB913] rounded px-2 py-0.5 text-sm font-mono uppercase"
                               value={editingPlate.value}
                               onChange={e => setEditingPlate({ id: record.id, value: e.target.value.toUpperCase() })}
                               onKeyDown={e => {
@@ -390,7 +391,7 @@ export default function Dados() {
                           </div>
                         ) : (
                           <span
-                            className="cursor-pointer underline decoration-dotted hover:text-yellow-300"
+                            className="cursor-pointer underline decoration-dotted hover:text-[#FDB913] text-slate-800"
                             title="Clique para editar"
                             onClick={() => setEditingPlate({ id: record.id, value: record.vehicle_plate || '' })}
                           >
@@ -399,15 +400,15 @@ export default function Dados() {
                         )}
                       </TableCell>
 
-                      <TableCell className="text-slate-300 text-xs">{pontosMap[String(record.unit)] || record.unit || '-'}</TableCell>
-                      <TableCell className="text-slate-300">{placaEquipamentosMap[String(record.vehicle_plate).toUpperCase()] || '-'}</TableCell>
-                      <TableCell className="text-slate-300">{frentistasMap[String(record.attendant)] || motoristasMap[String(record.attendant)] || record.attendant || '-'}</TableCell>
-                      <TableCell className="text-slate-300">
+                      <TableCell className="text-slate-600 text-xs">{pontosMap[String(record.unit)] || record.unit || '-'}</TableCell>
+                      <TableCell className="text-slate-600">{placaEquipamentosMap[String(record.vehicle_plate).toUpperCase()] || '-'}</TableCell>
+                      <TableCell className="text-slate-600">{frentistasMap[String(record.attendant)] || motoristasMap[String(record.attendant)] || record.attendant || '-'}</TableCell>
+                      <TableCell className="text-slate-600">
                         {editingDriver?.id === record.id ? (
                           <div className="flex items-center gap-1">
                             <input
                               type="text"
-                              className="w-36 bg-slate-700 text-white border border-yellow-400 rounded px-2 py-0.5 text-sm"
+                              className="w-36 bg-white text-slate-800 border border-[#FDB913] rounded px-2 py-0.5 text-sm"
                               value={editingDriver.value}
                               onChange={e => setEditingDriver({ id: record.id, value: e.target.value })}
                               onKeyDown={e => {
@@ -421,7 +422,7 @@ export default function Dados() {
                           </div>
                         ) : (
                           <span
-                            className="cursor-pointer underline decoration-dotted hover:text-yellow-300"
+                            className="cursor-pointer underline decoration-dotted hover:text-[#FDB913] text-slate-800"
                             title="Clique para editar"
                             onClick={() => setEditingDriver({ id: record.id, value: (motoristasMap[String(record.driver)] || frentistasMap[String(record.driver)] || record.driver || '').toUpperCase() })}
                           >
@@ -429,14 +430,14 @@ export default function Dados() {
                           </span>
                         )}
                       </TableCell>
-                      <TableCell className="text-slate-300">{combustiveisMap[String(record.fuel_type)] || record.fuel_type || '-'}</TableCell>
-                      <TableCell className="text-white text-right">{record.liters != null ? record.liters.toFixed(3) : '-'}</TableCell>
-                      <TableCell className="text-white text-right">
-                        {editingKm?.id === record.id ? (
-                          <div className="flex items-center gap-1 justify-end">
-                            <input
-                              type="number"
-                              className="w-24 bg-slate-700 text-white border border-yellow-400 rounded px-2 py-0.5 text-right text-sm"
+                      <TableCell className="text-slate-600">{combustiveisMap[String(record.fuel_type)] || record.fuel_type || '-'}</TableCell>
+                      <TableCell className="text-slate-800 text-right">{record.liters != null ? record.liters.toFixed(3) : '-'}</TableCell>
+                      <TableCell className="text-slate-800 text-right">
+                         {editingKm?.id === record.id ? (
+                           <div className="flex items-center gap-1 justify-end">
+                             <input
+                               type="number"
+                               className="w-24 bg-white text-slate-800 border border-[#FDB913] rounded px-2 py-0.5 text-right text-sm"
                               value={editingKm.value}
                               onChange={e => setEditingKm({ id: record.id, value: e.target.value })}
                               onKeyDown={e => {
@@ -450,7 +451,7 @@ export default function Dados() {
                           </div>
                         ) : (
                           <span
-                            className={`cursor-pointer underline decoration-dotted hover:text-yellow-300 ${kmInconsistencyIds.has(record.id) ? 'text-red-300' : 'text-white'}`}
+                            className={`cursor-pointer underline decoration-dotted hover:text-[#FDB913] ${kmInconsistencyIds.has(record.id) ? 'text-red-600' : 'text-slate-800'}`}
                             title="Clique para editar"
                             onClick={() => setEditingKm({ id: record.id, value: record.km_driven || '' })}
                           >
@@ -458,7 +459,7 @@ export default function Dados() {
                           </span>
                         )}
                       </TableCell>
-                      <TableCell className="text-white text-right">{(() => {
+                      <TableCell className="text-slate-800 text-right">{(() => {
                         if (!record.korth_id) {
                           return record.cost != null && record.cost > 0 ? `R$ ${record.cost.toFixed(2)}` : '-';
                         }
