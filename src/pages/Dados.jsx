@@ -46,7 +46,11 @@ export default function Dados() {
   const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
   const equipments = [...new Set(records.map(r => placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()]))].filter(Boolean).sort();
   const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
-  const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort();
+  const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort((a, b) => {
+    const nameA = motoristasMap[String(a)] || a;
+    const nameB = motoristasMap[String(b)] || b;
+    return nameA.localeCompare(nameB, 'pt-BR');
+  });
 
 
   // Detectar inconsistências de KM por placa — guarda razão para tooltip
