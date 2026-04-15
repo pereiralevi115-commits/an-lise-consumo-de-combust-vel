@@ -619,7 +619,7 @@ export default function Graficos() {
              className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm"
            >
              <option value="">Todos motoristas</option>
-             {drivers.map(d => <option key={d} value={d}>{d}</option>)}
+             {drivers.map(d => <option key={d} value={d}>{motoristasMap[String(d)] || d}</option>)}
            </select>
         </div>
 
