@@ -351,7 +351,7 @@ export default function Graficos() {
       <text
         x={x + width + 8}
         y={y + height / 2}
-        fill="#ffffff"
+        fill="#1e293b"
         textAnchor="start"
         dominantBaseline="middle"
         fontSize="11"
@@ -389,7 +389,7 @@ export default function Graficos() {
       <text
         x={x + width / 2}
         y={y - 8}
-        fill="#ffffff"
+        fill="#1e293b"
         textAnchor="middle"
         dominantBaseline="middle"
         fontSize="11"
@@ -408,7 +408,7 @@ export default function Graficos() {
       <text
         x={x + width / 2}
         y={y - 8}
-        fill="#ffffff"
+        fill="#1e293b"
         textAnchor="middle"
         dominantBaseline="middle"
         fontSize="11"
@@ -427,7 +427,7 @@ export default function Graficos() {
       <text
         x={x + width / 2}
         y={y - 8}
-        fill="#ffffff"
+        fill="#1e293b"
         textAnchor="middle"
         dominantBaseline="middle"
         fontSize="11"
@@ -446,7 +446,7 @@ export default function Graficos() {
       <text
         x={x + width + 8}
         y={y + height / 2}
-        fill="#ffffff"
+        fill="#1e293b"
         textAnchor="start"
         dominantBaseline="middle"
         fontSize="11"
@@ -465,7 +465,7 @@ export default function Graficos() {
       <text
         x={x + width + 8}
         y={y + height / 2}
-        fill="#ffffff"
+        fill="#1e293b"
         textAnchor="start"
         dominantBaseline="middle"
         fontSize="11"
@@ -813,7 +813,7 @@ export default function Graficos() {
             <YAxis stroke="#64748b" hide={true} />
             <Tooltip content={<CustomTooltip />} />
             <Bar dataKey="m3" fill={YELLOW} radius={[4, 4, 0, 0]}>
-              <LabelList dataKey="m3" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + ' M³' : value} fontSize={11} fill="#ffffff" fontWeight="600" />
+              <LabelList dataKey="m3" position="top" formatter={(value) => typeof value === 'number' ? value.toLocaleString('pt-BR', {maximumFractionDigits: 0}) + ' M³' : value} fontSize={11} fill="#1e293b" fontWeight="600" />
             </Bar>
           </BarChart>
         </ResponsiveContainer>
