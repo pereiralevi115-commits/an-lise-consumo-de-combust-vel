@@ -195,12 +195,15 @@ export default function Upload() {
             )}
           </Button>
           {korthResult && (
-            <Alert className={korthResult.success ? 'bg-blue-900/20 border-blue-600 text-blue-100' : 'bg-red-900/20 border-red-600 text-red-100'}>
-              <AlertDescription className="flex items-center gap-2">
-                {korthResult.success ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-                {korthResult.message}
-              </AlertDescription>
-            </Alert>
+            <div className={`flex items-start gap-3 rounded-xl px-4 py-4 border ${korthResult.success ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
+              <div className={`mt-0.5 flex-shrink-0 rounded-full p-1.5 ${korthResult.success ? 'bg-green-100' : 'bg-red-100'}`}>
+                {korthResult.success ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <AlertCircle className="w-4 h-4 text-red-600" />}
+              </div>
+              <div>
+                <p className="font-semibold text-sm">{korthResult.success ? 'Importação concluída!' : 'Erro na importação'}</p>
+                <p className="text-sm mt-0.5 opacity-80">{korthResult.message}</p>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -241,12 +244,15 @@ export default function Upload() {
             </div>
           </label>
           {externoResult && (
-            <Alert className={`mt-3 ${externoResult.success ? 'bg-yellow-900/20 border-yellow-600 text-yellow-100' : 'bg-red-900/20 border-red-600 text-red-100'}`}>
-              <AlertDescription className="flex items-center gap-2">
-                {externoResult.success ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-                {externoResult.message}
-              </AlertDescription>
-            </Alert>
+            <div className={`mt-3 flex items-start gap-3 rounded-xl px-4 py-4 border ${externoResult.success ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
+              <div className={`mt-0.5 flex-shrink-0 rounded-full p-1.5 ${externoResult.success ? 'bg-green-100' : 'bg-red-100'}`}>
+                {externoResult.success ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <AlertCircle className="w-4 h-4 text-red-600" />}
+              </div>
+              <div>
+                <p className="font-semibold text-sm">{externoResult.success ? 'Importação concluída!' : 'Erro na importação'}</p>
+                <p className="text-sm mt-0.5 opacity-80">{externoResult.message}</p>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -286,12 +292,15 @@ export default function Upload() {
             </Button>
           </div>
           {deleteResult && (
-            <Alert className={`mt-3 ${deleteResult.success ? 'bg-green-900/20 border-green-600 text-green-100' : 'bg-red-900/20 border-red-600 text-red-100'}`}>
-              <AlertDescription className="flex items-center gap-2">
-                {deleteResult.success ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
-                {deleteResult.message}
-              </AlertDescription>
-            </Alert>
+            <div className={`mt-3 flex items-start gap-3 rounded-xl px-4 py-4 border ${deleteResult.success ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
+              <div className={`mt-0.5 flex-shrink-0 rounded-full p-1.5 ${deleteResult.success ? 'bg-green-100' : 'bg-red-100'}`}>
+                {deleteResult.success ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <AlertCircle className="w-4 h-4 text-red-600" />}
+              </div>
+              <div>
+                <p className="font-semibold text-sm">{deleteResult.success ? 'Exclusão concluída!' : 'Erro na exclusão'}</p>
+                <p className="text-sm mt-0.5 opacity-80">{deleteResult.message}</p>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>
