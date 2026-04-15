@@ -225,7 +225,7 @@ export default function Graficos() {
   const units = [...new Set(analysisData.map(d => d.unit))].filter(Boolean).sort();
   const equipments = [...new Set(analysisData.map(d => d.equipment))].filter(Boolean).sort();
   const plates = [...new Set(analysisData.map(d => d.plate))].filter(Boolean).sort();
-  const drivers = [...new Set(analysisData.map(d => d.driver))].filter(Boolean).sort();
+  const drivers = [...new Set(analysisData.map(d => d.driver))].filter(Boolean).sort((a, b) => a.localeCompare(b, 'pt-BR'));
 
   // Apply filters to analysisData
   const filtered = analysisData.filter(d => {
