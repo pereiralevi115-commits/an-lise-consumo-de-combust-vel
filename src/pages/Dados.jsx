@@ -46,14 +46,11 @@ export default function Dados() {
   const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
   const equipments = [...new Set(records.map(r => placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()]))].filter(Boolean).sort();
   const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
-  const drivers = Object.entries(
-    records.reduce((acc, r) => {
-      if (!r.driver) return acc;
-      const name = motoristasMap[String(r.driver)] || r.driver;
-      if (!acc[name]) acc[name] = r.driver; // guarda o código do primeiro encontrado
-      return acc;
-    }, {})
-  ).sort((a, b) => a[0].localeCompare(b[0], 'pt-BR')); // [name, code]
+  const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort((a, b) => {
+    const nameA = motoristasMap[String(a)] || a;
+    const nameB = motoristasMap[String(b)] || b;
+    return nameA.localeCompare(nameB, 'pt-BR');
+  });
 
 
   // Detectar inconsistências de KM por placa — guarda razão para tooltip
@@ -292,7 +289,7 @@ export default function Dados() {
             className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm"
           >
             <option value="">Todos motoristas</option>
-            {drivers.map(([name, code]) => <option key={code} value={code}>{name}</option>)}
+            {drivers.map(d => <option key={d} value={d}>{motoristasMap[String(d)] || d}</option>)}
           </select>
 
 
