@@ -83,12 +83,6 @@ function mapearRegistro(item) {
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    let user = null;
-    try { user = await base44.auth.me(); } catch (_) {}
-
-    if (!user) {
-      return Response.json({ error: 'Não autorizado' }, { status: 401 });
-    }
 
     const body = await req.json().catch(() => ({}));
 
