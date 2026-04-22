@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, Plus, Users, Fuel, MapPin, Truck, Upload, Edit2, Check, X } from 'lucide-react';
 import ValorCalculado from '@/components/ValorCalculado';
+import ExclusaoMediaSection from '@/components/ExclusaoMediaSection';
 
 function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, color }) {
   const queryClient = useQueryClient();
@@ -353,6 +354,7 @@ export default function Legendas() {
           color="green"
         />
         <PlacaEquipamentoSection />
+        <ExclusaoMediaSection />
       </div>
     </div>
   );

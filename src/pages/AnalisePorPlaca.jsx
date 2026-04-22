@@ -63,6 +63,13 @@ export default function AnalisePorPlaca() {
     queryFn: () => base44.entities.PrecoCombustivel.list()
   });
 
+  const { data: exclusoes = [] } = useQuery({
+    queryKey: ['ExclusaoMedia'],
+    queryFn: () => base44.entities.ExclusaoMedia.list()
+  });
+
+  const exclusoesSet = new Set(exclusoes.map(e => `${String(e.placa).toUpperCase()}-${e.mes}`));
+
   const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
   const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
   const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
@@ -513,9 +520,15 @@ export default function AnalisePorPlaca() {
                       <TableCell className="text-slate-800 text-right">{item.kmDelta.toLocaleString('pt-BR', {maximumFractionDigits: 0})} km</TableCell>
                       <TableCell className="text-slate-800 text-right">{item.m3.toFixed(2)} m³</TableCell>
                       <TableCell className="text-slate-800 text-right">R$ {item.cost.toFixed(2)}</TableCell>
-                      <TableCell className="text-amber-600 text-right font-bold">{item.efficiency} km/L</TableCell>
                       <TableCell className="text-amber-600 text-right font-bold">
-                        {isM3Only ? (
+                        {exclusoesSet.has(`${String(item.plate).toUpperCase()}-${item.monthKey}`)
+                          ? <span className="text-red-400 text-xs font-normal italic">excluído</span>
+                          : `${item.efficiency} km/L`}
+                      </TableCell>
+                      <TableCell className="text-amber-600 text-right font-bold">
+                        {exclusoesSet.has(`${String(item.plate).toUpperCase()}-${item.monthKey}`) ? (
+                          <span className="text-red-400 text-xs font-normal italic">excluído</span>
+                        ) : isM3Only ? (
                           isEditing ? (
                             <div className="flex gap-1 justify-end">
                               <button onClick={() => saveEdit(item)} className="text-green-400 hover:text-green-300"><Check className="w-4 h-4" /></button>
