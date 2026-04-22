@@ -231,7 +231,10 @@ export default function Graficos() {
   const units = [...new Set(analysisData.map(d => d.unit))].filter(Boolean).sort();
   const equipments = [...new Set(analysisData.map(d => d.equipment))].filter(Boolean).sort();
   const plates = [...new Set(analysisData.map(d => d.plate))].filter(Boolean).sort();
-  const drivers = [...new Set(analysisData.map(d => d.driver))].filter(Boolean).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  const drivers = [...new Set(analysisData.map(d => d.driver))].filter(d => d && d !== '-').sort((a, b) => a.localeCompare(b, 'pt-BR')).reduce((acc, name) => {
+    if (!acc.seen.has(name.toUpperCase())) { acc.seen.add(name.toUpperCase()); acc.list.push(name); }
+    return acc;
+  }, { seen: new Set(), list: [] }).list;
 
   // Apply filters to analysisData
   const filtered = analysisData.filter(d => {

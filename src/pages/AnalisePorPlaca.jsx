@@ -84,7 +84,15 @@ export default function AnalisePorPlaca() {
   const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
   const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
   const equipments = [...new Set(placaEquipamentos.map(p => p.tipo))].filter(Boolean).sort();
-  const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort();
+  const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).reduce((acc, code) => {
+    const name = motoristasMap[String(code)] || frentistasMap[String(code)] || code;
+    if (!acc.seen.has(name.toUpperCase())) { acc.seen.add(name.toUpperCase()); acc.list.push(code); }
+    return acc;
+  }, { seen: new Set(), list: [] }).list.sort((a, b) => {
+    const nameA = motoristasMap[String(a)] || frentistasMap[String(a)] || a;
+    const nameB = motoristasMap[String(b)] || frentistasMap[String(b)] || b;
+    return nameA.localeCompare(nameB, 'pt-BR');
+  });
 
   // Agrupar por mês e placa
   const groupedData = {};
