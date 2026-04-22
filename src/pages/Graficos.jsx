@@ -110,6 +110,12 @@ export default function Graficos() {
           queryFn: () => base44.entities.PlacaEquipamento.list('placa', 10000)
         });
 
+        const { data: exclusoes = [] } = useQuery({
+          queryKey: ['ExclusaoMedia'],
+          queryFn: () => base44.entities.ExclusaoMedia.list()
+        });
+        const exclusoesSet = useMemo(() => new Set(exclusoes.map(e => `${String(e.placa).toUpperCase()}-${e.mes}`)), [exclusoes]);
+
         const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
         const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
         const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
@@ -244,7 +250,7 @@ export default function Graficos() {
     const eq = (d.equipment || '').toUpperCase();
     return eq.includes('BETONEIRA');
   }).reduce((sum, d) => sum + (d.m3 || 0), 0);
-  const totalKm = filtered.reduce((sum, d) => sum + (d.kmDelta || 0), 0);
+  const totalKm = filtered.reduce((sum, d) => exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`) ? sum : sum + (d.kmDelta || 0), 0);
 
   // Monthly data - agregado de analysisData
   const monthlyData = {};
@@ -253,7 +259,9 @@ export default function Graficos() {
       monthlyData[d.month] = { name: d.month, liters: 0, km: 0, cost: 0 };
     }
     monthlyData[d.month].liters += d.totalLiters || 0;
-    monthlyData[d.month].km += d.kmDelta || 0;
+    if (!exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`)) {
+      monthlyData[d.month].km += d.kmDelta || 0;
+    }
     monthlyData[d.month].cost += d.cost || 0;
   });
   const chartData = Object.values(monthlyData)
@@ -264,7 +272,7 @@ export default function Graficos() {
   const byUnitData = units.map(unit => {
     const unitData = filtered.filter(d => d.unit === unit);
     const liters = unitData.reduce((sum, d) => sum + (d.totalLiters || 0), 0);
-    const km = unitData.reduce((sum, d) => sum + (d.kmDelta || 0), 0);
+    const km = unitData.reduce((sum, d) => exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`) ? sum : sum + (d.kmDelta || 0), 0);
     const cost = unitData.reduce((sum, d) => sum + (d.cost || 0), 0);
     return {
       name: unit.replace('CONCRETAR ', ''),
@@ -290,7 +298,9 @@ export default function Graficos() {
     byEquipmentData[eqType].liters += d.totalLiters || 0;
     byEquipmentData[eqType].cost += d.cost || 0;
     byEquipmentData[eqType].m3 += d.m3 || 0;
-    byEquipmentData[eqType].km += d.kmDelta || 0;
+    if (!exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`)) {
+      byEquipmentData[eqType].km += d.kmDelta || 0;
+    }
   });
 
   const unitEquipmentArray = Object.entries(byEquipmentData)
@@ -476,14 +486,16 @@ export default function Graficos() {
     );
   };
 
-  // By vehicle - agregado de analysisData
+  // By vehicle - agregado de analysisData (exclui placas/meses marcados)
   const byVehicleData = {};
   filtered.forEach(d => {
     if (!byVehicleData[d.plate]) {
       byVehicleData[d.plate] = { liters: 0, km: 0, cost: 0 };
     }
     byVehicleData[d.plate].liters += d.totalLiters || 0;
-    byVehicleData[d.plate].km += d.kmDelta || 0;
+    if (!exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`)) {
+      byVehicleData[d.plate].km += d.kmDelta || 0;
+    }
     byVehicleData[d.plate].cost += d.cost || 0;
   });
   const vehicleKmArray = Object.entries(byVehicleData)
@@ -515,7 +527,7 @@ export default function Graficos() {
     .sort((a, b) => b.costPerKm - a.costPerKm)
     .slice(0, 15);
 
-  // By driver - agregado de analysisData
+  // By driver - agregado de analysisData (exclui placas/meses marcados)
   const byDriverData = {};
   filtered.forEach(d => {
     const driverKey = (d.driver || '-').toUpperCase();
@@ -523,7 +535,9 @@ export default function Graficos() {
       byDriverData[driverKey] = { liters: 0, km: 0, cost: 0 };
     }
     byDriverData[driverKey].liters += d.totalLiters || 0;
-    byDriverData[driverKey].km += d.kmDelta || 0;
+    if (!exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`)) {
+      byDriverData[driverKey].km += d.kmDelta || 0;
+    }
     byDriverData[driverKey].cost += d.cost || 0;
   });
   const driverKmArray = Object.entries(byDriverData)
