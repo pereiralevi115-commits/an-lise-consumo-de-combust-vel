@@ -46,9 +46,13 @@ export default function Dados() {
   const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
   const equipments = [...new Set(records.map(r => placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()]))].filter(Boolean).sort();
   const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
-  const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort((a, b) => {
-    const nameA = motoristasMap[String(a)] || a;
-    const nameB = motoristasMap[String(b)] || b;
+  const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).reduce((acc, code) => {
+    const name = motoristasMap[String(code)] || frentistasMap[String(code)] || code;
+    if (!acc.seen.has(name)) { acc.seen.add(name); acc.list.push(code); }
+    return acc;
+  }, { seen: new Set(), list: [] }).list.sort((a, b) => {
+    const nameA = motoristasMap[String(a)] || frentistasMap[String(a)] || a;
+    const nameB = motoristasMap[String(b)] || frentistasMap[String(b)] || b;
     return nameA.localeCompare(nameB, 'pt-BR');
   });
 
