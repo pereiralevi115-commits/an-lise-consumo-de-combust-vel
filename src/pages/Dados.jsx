@@ -132,7 +132,11 @@ export default function Dados() {
     if (filters.unit && r.unit !== filters.unit) return false;
     if (filters.equipment && placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()] !== filters.equipment) return false;
     if (filters.plate && r.vehicle_plate !== filters.plate) return false;
-    if (filters.driver && r.driver !== filters.driver) return false;
+    if (filters.driver) {
+      const selectedName = (motoristasMap[String(filters.driver)] || frentistasMap[String(filters.driver)] || filters.driver).toUpperCase();
+      const recordName = (motoristasMap[String(r.driver)] || frentistasMap[String(r.driver)] || r.driver || '').toUpperCase();
+      if (recordName !== selectedName) return false;
+    }
     if (filters.onlyInconsistent && !kmInconsistencyIds.has(r.id)) return false;
     return true;
   }).sort((a, b) => {
