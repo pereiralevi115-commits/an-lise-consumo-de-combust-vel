@@ -56,7 +56,7 @@ export default function Layout({ children, currentPageName }) {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => base44.auth.logout()}
+                onClick={() => base44.auth.logout('/')}
                 className="flex items-center gap-2 text-slate-600 hover:text-red-600 hover:border-red-300 ml-1"
               >
                 <LogOut className="w-4 h-4" />
