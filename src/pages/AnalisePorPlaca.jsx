@@ -215,7 +215,11 @@ export default function AnalisePorPlaca() {
     if (filters.plate && !item.plate.toUpperCase().includes(filters.plate.toUpperCase())) return false;
     if (filters.unit && !item.unit.includes(filters.unit)) return false;
     if (filters.equipment && item.equipment !== filters.equipment) return false;
-    if (filters.driver && !item.driver.toLowerCase().includes(filters.driver.toLowerCase())) return false;
+    if (filters.driver) {
+      const selectedName = (motoristasMap[String(filters.driver)] || frentistasMap[String(filters.driver)] || filters.driver).toUpperCase();
+      const itemName = (item.driver || '').toUpperCase();
+      if (!itemName.includes(selectedName) && itemName !== selectedName) return false;
+    }
     return true;
   }).sort((a, b) => {
     let valA, valB;
