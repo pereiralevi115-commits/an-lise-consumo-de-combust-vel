@@ -28,8 +28,6 @@ export default function RankingMotoristas() {
   const { data: pontos = [] } = useQuery({ queryKey: ['Ponto'], queryFn: () => base44.entities.Ponto.list() });
   const { data: placaEquipamentos = [] } = useQuery({ queryKey: ['PlacaEquipamento'], queryFn: () => base44.entities.PlacaEquipamento.list('placa', 10000) });
   const { data: precosCombustivel = [] } = useQuery({ queryKey: ['PrecoCombustivel'], queryFn: () => base44.entities.PrecoCombustivel.list() });
-  const { data: exclusoes = [] } = useQuery({ queryKey: ['ExclusaoMedia'], queryFn: () => base44.entities.ExclusaoMedia.list() });
-  const exclusoesSet = useMemo(() => new Set(exclusoes.map(e => `${String(e.placa).toUpperCase()}-${e.mes}`)), [exclusoes]);
 
   const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
   const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
@@ -130,9 +128,7 @@ export default function RankingMotoristas() {
         byDriver[driverKey] = { driver: d.driver, driverName: driverName.toUpperCase(), totalLiters: 0, totalKm: 0, totalCost: 0 };
       }
       byDriver[driverKey].totalLiters += d.totalLiters;
-      if (!exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`)) {
-        byDriver[driverKey].totalKm += d.kmDelta;
-      }
+      byDriver[driverKey].totalKm += d.kmDelta;
       byDriver[driverKey].totalCost += d.cost;
     });
 
