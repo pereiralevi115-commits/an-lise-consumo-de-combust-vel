@@ -486,15 +486,20 @@ export default function Graficos() {
   };
 
   // By vehicle - agregado de analysisData (KM excluído em meses marcados)
+  // Para R$/km: só conta custo e km de registros que têm KM (veículos com hodômetro)
   const byVehicleData = {};
   filtered.forEach(d => {
     if (!byVehicleData[d.plate]) {
-      byVehicleData[d.plate] = { liters: 0, km: 0, cost: 0 };
+      byVehicleData[d.plate] = { liters: 0, km: 0, cost: 0, kmCost: 0 };
     }
     byVehicleData[d.plate].liters += d.totalLiters || 0;
     byVehicleData[d.plate].cost += d.cost || 0;
-    if (!exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`)) {
+    const excluded = exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`);
+    if (!excluded) {
       byVehicleData[d.plate].km += d.kmDelta || 0;
+      if (d.kmDelta > 0) {
+        byVehicleData[d.plate].kmCost += d.cost || 0;
+      }
     }
   });
   const vehicleKmArray = Object.entries(byVehicleData)
@@ -521,23 +526,28 @@ export default function Graficos() {
     .map(([plate, data]) => ({
       placa: plate,
       km: data.km,
-      costPerKm: data.km > 0 ? parseFloat((data.cost / data.km).toFixed(2)) : 0,
+      costPerKm: data.km > 0 ? parseFloat((data.kmCost / data.km).toFixed(2)) : 0,
     }))
     .filter(d => d.km > 0 && d.costPerKm > 0 && isFinite(d.costPerKm))
     .sort((a, b) => b.costPerKm - a.costPerKm)
     .slice(0, 15);
 
   // By driver - agregado de analysisData (KM excluído em meses marcados)
+  // Para R$/km: só conta custo e km de registros que têm KM (veículos com hodômetro)
   const byDriverData = {};
   filtered.forEach(d => {
     const driverKey = (d.driver || '-').toUpperCase();
     if (!byDriverData[driverKey]) {
-      byDriverData[driverKey] = { liters: 0, km: 0, cost: 0 };
+      byDriverData[driverKey] = { liters: 0, km: 0, cost: 0, kmCost: 0 };
     }
     byDriverData[driverKey].liters += d.totalLiters || 0;
     byDriverData[driverKey].cost += d.cost || 0;
-    if (!exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`)) {
+    const excluded = exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`);
+    if (!excluded) {
       byDriverData[driverKey].km += d.kmDelta || 0;
+      if (d.kmDelta > 0) {
+        byDriverData[driverKey].kmCost += d.cost || 0;
+      }
     }
   });
   const driverKmArray = Object.entries(byDriverData)
@@ -564,7 +574,7 @@ export default function Graficos() {
     .map(([driver, data]) => ({
       driver: getFirstAndLastName(driver),
       km: data.km,
-      costPerKm: data.km > 0 ? parseFloat((data.cost / data.km).toFixed(2)) : 0,
+      costPerKm: data.km > 0 ? parseFloat((data.kmCost / data.km).toFixed(2)) : 0,
     }))
     .filter(d => d.km > 0 && d.costPerKm > 0 && isFinite(d.costPerKm))
     .sort((a, b) => b.costPerKm - a.costPerKm)
