@@ -110,6 +110,12 @@ export default function Graficos() {
           queryFn: () => base44.entities.PlacaEquipamento.list('placa', 10000)
         });
 
+        const { data: exclusoes = [] } = useQuery({
+          queryKey: ['ExclusaoMedia'],
+          queryFn: () => base44.entities.ExclusaoMedia.list()
+        });
+        const exclusoesSet = useMemo(() => new Set(exclusoes.map(e => `${String(e.placa).toUpperCase()}-${e.mes}`)), [exclusoes]);
+
         const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
         const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
         const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
@@ -476,15 +482,17 @@ export default function Graficos() {
     );
   };
 
-  // By vehicle - agregado de analysisData
+  // By vehicle - agregado de analysisData (KM excluído em meses marcados)
   const byVehicleData = {};
   filtered.forEach(d => {
     if (!byVehicleData[d.plate]) {
       byVehicleData[d.plate] = { liters: 0, km: 0, cost: 0 };
     }
     byVehicleData[d.plate].liters += d.totalLiters || 0;
-    byVehicleData[d.plate].km += d.kmDelta || 0;
     byVehicleData[d.plate].cost += d.cost || 0;
+    if (!exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`)) {
+      byVehicleData[d.plate].km += d.kmDelta || 0;
+    }
   });
   const vehicleKmArray = Object.entries(byVehicleData)
     .map(([plate, data]) => ({
@@ -515,7 +523,7 @@ export default function Graficos() {
     .sort((a, b) => b.costPerKm - a.costPerKm)
     .slice(0, 15);
 
-  // By driver - agregado de analysisData
+  // By driver - agregado de analysisData (KM excluído em meses marcados)
   const byDriverData = {};
   filtered.forEach(d => {
     const driverKey = (d.driver || '-').toUpperCase();
@@ -523,8 +531,10 @@ export default function Graficos() {
       byDriverData[driverKey] = { liters: 0, km: 0, cost: 0 };
     }
     byDriverData[driverKey].liters += d.totalLiters || 0;
-    byDriverData[driverKey].km += d.kmDelta || 0;
     byDriverData[driverKey].cost += d.cost || 0;
+    if (!exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`)) {
+      byDriverData[driverKey].km += d.kmDelta || 0;
+    }
   });
   const driverKmArray = Object.entries(byDriverData)
     .map(([driver, data]) => ({
