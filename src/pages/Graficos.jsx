@@ -511,18 +511,20 @@ export default function Graficos() {
   const vehicleKmLiterArray = Object.entries(byVehicleData)
     .map(([plate, data]) => ({
       placa: plate,
+      km: data.km,
       kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
     }))
-    .filter(d => d.kmPerLiter > 0)
+    .filter(d => d.km > 0 && d.kmPerLiter > 0)
     .sort((a, b) => b.kmPerLiter - a.kmPerLiter)
     .slice(0, 15);
 
   const vehicleCostArray = Object.entries(byVehicleData)
     .map(([plate, data]) => ({
       placa: plate,
+      km: data.km,
       costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0,
     }))
-    .filter(d => d.costPerKm > 0)
+    .filter(d => d.km > 0 && d.costPerKm > 0)
     .sort((a, b) => b.costPerKm - a.costPerKm)
     .slice(0, 15);
 
@@ -553,18 +555,20 @@ export default function Graficos() {
   const driverKmLiterArray = Object.entries(byDriverData)
     .map(([driver, data]) => ({
       driver: getFirstAndLastName(driver),
+      km: data.km,
       kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
     }))
-    .filter(d => d.kmPerLiter > 0)
+    .filter(d => d.km > 0 && d.kmPerLiter > 0)
     .sort((a, b) => b.kmPerLiter - a.kmPerLiter)
     .slice(0, 15);
 
   const driverCostArray = Object.entries(byDriverData)
     .map(([driver, data]) => ({
       driver: getFirstAndLastName(driver),
+      km: data.km,
       costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0,
     }))
-    .filter(d => d.costPerKm > 0)
+    .filter(d => d.km > 0 && d.costPerKm > 0)
     .sort((a, b) => b.costPerKm - a.costPerKm)
     .slice(0, 15);
 
