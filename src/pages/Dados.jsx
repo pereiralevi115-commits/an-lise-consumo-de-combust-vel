@@ -22,6 +22,7 @@ export default function Dados() {
   const [editingPlate, setEditingPlate] = useState(null); // { id, value }
   const [editingDriver, setEditingDriver] = useState(null); // { id, value }
   const [editingTime, setEditingTime] = useState(null); // { id, value }
+  const [editingLiters, setEditingLiters] = useState(null); // { id, value }
   const queryClient = useQueryClient();
 
   const { data: records = [], isLoading } = useQuery({
@@ -193,6 +194,15 @@ export default function Dados() {
       queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
     }
     setEditingDriver(null);
+  };
+
+  const saveLiters = async (id, value) => {
+    const liters = parseFloat(String(value).replace(',', '.'));
+    if (!isNaN(liters) && liters >= 0) {
+      await base44.entities.FuelRecord.update(id, { liters });
+      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+    }
+    setEditingLiters(null);
   };
 
   const saveTime = async (id, value) => {
@@ -443,7 +453,34 @@ export default function Dados() {
                         )}
                       </TableCell>
                       <TableCell className="text-slate-600">{combustiveisMap[String(record.fuel_type)] || record.fuel_type || '-'}</TableCell>
-                      <TableCell className="text-slate-800 text-right">{record.liters != null ? record.liters.toFixed(3) : '-'}</TableCell>
+                      <TableCell className="text-slate-800 text-right">
+                        {editingLiters?.id === record.id ? (
+                          <div className="flex items-center gap-1 justify-end">
+                            <input
+                              type="number"
+                              step="0.001"
+                              className="w-24 bg-white text-slate-800 border border-[#FDB913] rounded px-2 py-0.5 text-right text-sm"
+                              value={editingLiters.value}
+                              onChange={e => setEditingLiters({ id: record.id, value: e.target.value })}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') saveLiters(record.id, editingLiters.value);
+                                if (e.key === 'Escape') setEditingLiters(null);
+                              }}
+                              autoFocus
+                            />
+                            <button onClick={() => saveLiters(record.id, editingLiters.value)} className="text-green-400 hover:text-green-300"><Check className="w-4 h-4" /></button>
+                            <button onClick={() => setEditingLiters(null)} className="text-red-400 hover:text-red-300"><X className="w-4 h-4" /></button>
+                          </div>
+                        ) : (
+                          <span
+                            className="cursor-pointer underline decoration-dotted hover:text-[#FDB913] text-slate-800"
+                            title="Clique para editar"
+                            onClick={() => setEditingLiters({ id: record.id, value: record.liters ?? '' })}
+                          >
+                            {record.liters != null ? record.liters.toFixed(3) : '-'}
+                          </span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-slate-800 text-right">
                          {editingKm?.id === record.id ? (
                            <div className="flex items-center gap-1 justify-end">
