@@ -99,22 +99,17 @@ Deno.serve(async (req) => {
     };
 
     // Valor monetário
-    const parseCost = (rawValue, rowIdx, colIdx) => {
+    const parseCost = (rawValue) => {
       if (!rawValue && rawValue !== 0) return 0;
-      if (typeof rawValue === 'string') {
-        const str = String(rawValue).replace(/R\$\s*/g, '').replace(/\./g, '').replace(',', '.').trim();
-        return parseFloat(str) || 0;
+      // Se já é número, usar direto (ex: 3826.34)
+      if (typeof rawValue === 'number') return rawValue;
+      // Se é string, limpar R$, pontos de milhar e trocar vírgula decimal
+      const str = String(rawValue).replace(/R\$\s*/g, '').trim();
+      // "1.234,56" -> remover ponto de milhar, trocar vírgula
+      if (str.includes(',')) {
+        return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
       }
-      if (typeof rawValue !== 'number') return 0;
-      // Usar texto da célula se disponível
-      const addr = getCellAddress(rowIdx, colIdx);
-      const cell = sheet[addr];
-      if (cell && cell.w) {
-        const str = String(cell.w).replace(/R\$\s*/g, '').replace(/\./g, '').replace(',', '.').trim();
-        const v = parseFloat(str);
-        if (!isNaN(v)) return v;
-      }
-      return rawValue;
+      return parseFloat(str) || 0;
     };
 
     const records = [];
@@ -136,7 +131,7 @@ Deno.serve(async (req) => {
 
         const liters = parseNumFromCell(litersRaw, rowNumber, colLitros >= 0 ? colLitros : 8);
         const km     = parseNumFromCell(kmRaw,     rowNumber, colKm >= 0    ? colKm     : 9);
-        const cost   = parseCost(costRaw,          rowNumber, colValor >= 0 ? colValor  : 10);
+        const cost   = parseCost(costRaw);
 
         console.log(`Linha ${rowNumber}: litrosRaw=${litersRaw} -> liters=${liters}, kmRaw=${kmRaw} -> km=${km}, costRaw=${costRaw} -> cost=${cost}`);
 
