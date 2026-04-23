@@ -18,38 +18,32 @@ Deno.serve(async (req) => {
     const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array', cellDates: true });
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
-    // raw: true retorna números como números reais, evitando problemas de formatação brasileira
-    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true });
+    // raw: false faz o XLSX aplicar a formatação da célula, resolvendo decimais implícitos do Excel brasileiro
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false });
 
     console.log(`Total de linhas na planilha: ${rows.length}`);
     if (rows.length > 1) console.log('Cabeçalho:', rows[0]);
     if (rows.length > 2) console.log('Primeira linha de dados:', rows[1]);
 
-    // Converter data para YYYY-MM-DD
+    // Converter data para YYYY-MM-DD - com raw:false vem como string "23/04/2026" ou "2026-04-23"
     const parseDate = (value) => {
       if (!value) return null;
-      if (value instanceof Date) {
-        return `${value.getUTCFullYear()}-${String(value.getUTCMonth() + 1).padStart(2, '0')}-${String(value.getUTCDate()).padStart(2, '0')}`;
-      }
-      if (typeof value === 'number') {
-        const d = new Date((value - 25569) * 86400 * 1000);
-        return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
-      }
-      if (typeof value === 'string') {
-        const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-        if (match) return `${match[3]}-${match[2]}-${match[1]}`;
-        const d = new Date(value);
-        if (!isNaN(d)) return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
-      }
+      const str = String(value).trim();
+      // dd/mm/yyyy
+      const matchBR = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (matchBR) return `${matchBR[3]}-${matchBR[2]}-${matchBR[1]}`;
+      // yyyy-mm-dd
+      if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+      // mm/dd/yyyy (fallback)
+      const matchUS = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (matchUS) return `${matchUS[3]}-${matchUS[1]}-${matchUS[2]}`;
       return null;
     };
 
-    // Limpar valor monetário
+    // Limpar valor monetário - com raw:false vem como string "R$ 318,72" ou "318,72"
     const parseCost = (value) => {
       if (!value && value !== 0) return 0;
-      // Com raw:true, valores numéricos já vêm como número
       if (typeof value === 'number') return value;
-      // Fallback para strings: "R$ 40.469,00" -> 40469.00
       const str = String(value).replace(/R\$\s*/g, '').replace(/\./g, '').replace(',', '.').trim();
       return parseFloat(str) || 0;
     };
@@ -74,10 +68,11 @@ Deno.serve(async (req) => {
     const colLitros    = col(['litros', 'litro', 'quantidade']);
     const colKm        = col(['hodometro', 'km', 'quilometro']);
     const colValor     = col(['valor total', 'valor', 'custo', 'total']);
-    // Com raw:true, litros e km também vêm como números - usar diretamente
+    // Com raw:false os valores vêm como string formatada (ex: "469,4") - tratar separadores pt-BR
     const parseNum = (v) => {
       if (!v && v !== 0) return 0;
       if (typeof v === 'number') return v;
+      // Remove separador de milhar (.) e troca vírgula decimal por ponto
       return parseFloat(String(v).replace(/\./g, '').replace(',', '.')) || 0;
     };
 
