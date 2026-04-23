@@ -22,8 +22,9 @@ Deno.serve(async (req) => {
     const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false });
 
     console.log(`Total de linhas na planilha: ${rows.length}`);
-    if (rows.length > 1) console.log('Cabeçalho:', rows[0]);
-    if (rows.length > 2) console.log('Primeira linha de dados:', rows[1]);
+    if (rows.length > 0) console.log('Cabeçalho:', JSON.stringify(rows[0]));
+    if (rows.length > 1) console.log('Linha 1:', JSON.stringify(rows[1]));
+    if (rows.length > 2) console.log('Linha 2:', JSON.stringify(rows[2]));
 
     // Converter data para YYYY-MM-DD - com raw:false vem como string "23/04/2026" ou "2026-04-23"
     const parseDate = (value) => {
