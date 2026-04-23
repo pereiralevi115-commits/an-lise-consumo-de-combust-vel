@@ -61,11 +61,12 @@ Deno.serve(async (req) => {
         return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
       }
       if (typeof value === 'string') {
-        const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-        if (match) return `${match[3]}-${match[2]}-${match[1]}`;
-        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
-        const d = new Date(value);
-        if (!isNaN(d)) return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+        // "2026-04-01 00:00:00" ou "2026-04-01T00:00:00"
+        const matchISO = value.match(/^(\d{4}-\d{2}-\d{2})/);
+        if (matchISO) return matchISO[1];
+        // "01/04/2026"
+        const matchBR = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (matchBR) return `${matchBR[3]}-${matchBR[2]}-${matchBR[1]}`;
       }
       return null;
     };
@@ -80,27 +81,21 @@ Deno.serve(async (req) => {
 
     const parseNumFromCell = (rawValue, rowIdx, colIdx) => {
       if (!rawValue && rawValue !== 0) return 0;
+      if (typeof rawValue === 'number') return rawValue;
       if (typeof rawValue === 'string') {
-        // String: tratar formato pt-BR "469,4" ou "469.4"
-        return parseFloat(String(rawValue).replace(/\./g, '').replace(',', '.')) || 0;
-      }
-      if (typeof rawValue !== 'number') return 0;
-
-      // Verificar o formato da célula no sheet
-      const addr = getCellAddress(rowIdx, colIdx);
-      const cell = sheet[addr];
-      if (cell && cell.z) {
-        // Se o formato contém vírgula como decimal (padrão pt-BR: #.##0,0 ou #.##0,00)
-        // a vírgula no formato indica casas decimais — o valor raw já é o correto (número real)
-        // MAS se o Excel salvou como inteiro sem decimal implícito, precisamos checar
-        console.log(`Célula ${addr}: raw=${rawValue}, formato="${cell.z}", texto="${cell.w}"`);
-        // Usar o texto formatado (cell.w) que o Excel calculou
-        if (cell.w) {
-          const txtNum = parseFloat(String(cell.w).replace(/\./g, '').replace(',', '.'));
-          if (!isNaN(txtNum)) return txtNum;
+        // "555.35" (ponto decimal inglês) ou "555,35" (vírgula decimal pt-BR)
+        // Se tem ponto E vírgula: "1.234,56" -> remover ponto, trocar vírgula
+        if (rawValue.includes(',') && rawValue.includes('.')) {
+          return parseFloat(rawValue.replace(/\./g, '').replace(',', '.')) || 0;
         }
+        // Se tem só vírgula: "555,35" -> trocar por ponto
+        if (rawValue.includes(',')) {
+          return parseFloat(rawValue.replace(',', '.')) || 0;
+        }
+        // Se tem só ponto ou nada especial: "555.35"
+        return parseFloat(rawValue) || 0;
       }
-      return rawValue;
+      return 0;
     };
 
     // Valor monetário
