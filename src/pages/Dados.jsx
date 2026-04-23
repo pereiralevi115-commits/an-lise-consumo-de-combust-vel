@@ -23,6 +23,7 @@ export default function Dados() {
   const [editingDriver, setEditingDriver] = useState(null); // { id, value }
   const [editingTime, setEditingTime] = useState(null); // { id, value }
   const [editingLiters, setEditingLiters] = useState(null); // { id, value }
+  const [editingUnit, setEditingUnit] = useState(null); // { id, value }
   const queryClient = useQueryClient();
 
   const { data: records = [], isLoading } = useQuery({
@@ -203,6 +204,15 @@ export default function Dados() {
       queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
     }
     setEditingLiters(null);
+  };
+
+  const saveUnit = async (id, value) => {
+    const unit = String(value).trim();
+    if (unit) {
+      await base44.entities.FuelRecord.update(id, { unit });
+      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+    }
+    setEditingUnit(null);
   };
 
   const saveTime = async (id, value) => {
@@ -422,7 +432,33 @@ export default function Dados() {
                         )}
                       </TableCell>
 
-                      <TableCell className="text-slate-600 text-xs">{pontosMap[String(record.unit)] || record.unit || '-'}</TableCell>
+                      <TableCell className="text-slate-600 text-xs">
+                        {editingUnit?.id === record.id ? (
+                          <div className="flex items-center gap-1">
+                            <select
+                              className="bg-white text-slate-800 border border-[#FDB913] rounded px-2 py-0.5 text-xs"
+                              value={editingUnit.value}
+                              onChange={e => setEditingUnit({ id: record.id, value: e.target.value })}
+                              autoFocus
+                            >
+                              <option value="">-- selecione --</option>
+                              {pontos.map(p => (
+                                <option key={p.codigo} value={p.codigo}>{p.nome}</option>
+                              ))}
+                            </select>
+                            <button onClick={() => saveUnit(record.id, editingUnit.value)} className="text-green-400 hover:text-green-300"><Check className="w-4 h-4" /></button>
+                            <button onClick={() => setEditingUnit(null)} className="text-red-400 hover:text-red-300"><X className="w-4 h-4" /></button>
+                          </div>
+                        ) : (
+                          <span
+                            className="cursor-pointer underline decoration-dotted hover:text-[#FDB913] text-slate-600"
+                            title="Clique para editar usina"
+                            onClick={() => setEditingUnit({ id: record.id, value: record.unit || '' })}
+                          >
+                            {pontosMap[String(record.unit)] || record.unit || '-'}
+                          </span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-slate-600">{placaEquipamentosMap[String(record.vehicle_plate).toUpperCase()] || '-'}</TableCell>
                       <TableCell className="text-slate-600">{frentistasMap[String(record.attendant)] || motoristasMap[String(record.attendant)] || record.attendant || '-'}</TableCell>
                       <TableCell className="text-slate-600">
