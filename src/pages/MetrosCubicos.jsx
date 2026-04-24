@@ -103,7 +103,8 @@ export default function MetrosCubicos() {
       const updates = Array.from(selected).map(id => {
         const record = records.find(r => r.id === id);
         const updateData = { ...record };
-        if (editField === 'equipamento') updateData.equipamento = editValue;
+        if (editField === 'mes') updateData.mes = editValue;
+        else if (editField === 'equipamento') updateData.equipamento = editValue;
         else if (editField === 'metros_cubicos') updateData.metros_cubicos = parseFloat(editValue.replace(',', '.'));
         return base44.entities.CubicMetros.update(id, updateData).catch(() => {});
       });
@@ -264,20 +265,30 @@ export default function MetrosCubicos() {
                   className="w-full bg-white text-slate-800 border border-blue-300 rounded px-3 py-2 text-sm"
                 >
                   <option value="">-- selecione --</option>
+                  <option value="mes">Mês</option>
                   <option value="equipamento">Equipamento</option>
                   <option value="metros_cubicos">M³</option>
                 </select>
               </div>
               <div className="space-y-1">
                 <Label className="text-slate-700 text-sm">Novo valor</Label>
-                <Input
-                  type={editField === 'metros_cubicos' ? 'number' : 'text'}
-                  step={editField === 'metros_cubicos' ? '0.01' : undefined}
-                  value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
-                  placeholder="Digite o novo valor"
-                  className="border-blue-300 text-slate-800"
-                />
+                {editField === 'mes' ? (
+                  <Input
+                    type="month"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    className="border-blue-300 text-slate-800"
+                  />
+                ) : (
+                  <Input
+                    type={editField === 'metros_cubicos' ? 'number' : 'text'}
+                    step={editField === 'metros_cubicos' ? '0.01' : undefined}
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    placeholder="Digite o novo valor"
+                    className="border-blue-300 text-slate-800"
+                  />
+                )}
               </div>
               <div className="flex gap-2 items-end">
                 <Button
