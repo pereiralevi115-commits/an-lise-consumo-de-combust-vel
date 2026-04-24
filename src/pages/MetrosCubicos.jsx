@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload, Trash2, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Upload, Trash2, CheckCircle, AlertCircle, Loader2, Info } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -27,7 +27,21 @@ export default function MetrosCubicos() {
 
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['CubicMetros'],
-    queryFn: () => base44.entities.CubicMetros.list('-mes', 10000)
+    queryFn: async () => {
+      const allRecords = [];
+      let offset = 0;
+      const limit = 1000;
+      let hasMore = true;
+      while (hasMore) {
+        const batch = await base44.entities.CubicMetros.list('-mes', limit, offset);
+        if (batch.length === 0) hasMore = false;
+        else {
+          allRecords.push(...batch);
+          offset += limit;
+        }
+      }
+      return allRecords;
+    }
   });
 
   const { data: placaEquipamentos = [] } = useQuery({
@@ -327,6 +341,16 @@ export default function MetrosCubicos() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Info */}
+      {records.length > 10000 && (
+        <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-blue-800">
+            <strong>Carregando todos os registros:</strong> Encontrados {records.length.toLocaleString('pt-BR')} registros de M³. A tabela está exibindo todos eles.
+          </div>
+        </div>
       )}
 
       {/* Filters */}
