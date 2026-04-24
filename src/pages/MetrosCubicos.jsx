@@ -80,7 +80,10 @@ export default function MetrosCubicos() {
     if (!deleteMes) return;
     const [ano, mes] = deleteMes.split('-').map(Number);
     const mesStr = `${ano}-${String(mes).padStart(2, '0')}`;
-    if (!window.confirm(`Excluir todos os registros de M³ de ${mesStr}?`)) return;
+    const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+      'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const mesExibicao = `${monthNames[mes - 1]} / ${ano}`;
+    if (!window.confirm(`Excluir todos os registros de M³ de ${mesExibicao}?`)) return;
     setIsDeletingMes(true);
     setDeleteStatus(null);
     try {
