@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Trash2, Plus, Users, Fuel, MapPin, Truck, Upload, Edit2, Check, X } from 'lucide-react';
 import ValorCalculado from '@/components/ValorCalculado';
 import ExclusaoMediaSection from '@/components/ExclusaoMediaSection';
+import TotalM3Card from '@/components/TotalM3Card';
 
 function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, color }) {
   const queryClient = useQueryClient();
@@ -323,6 +324,7 @@ export default function Legendas() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <ValorCalculado />
+        <TotalM3Card />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
