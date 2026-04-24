@@ -249,9 +249,17 @@ export default function Graficos() {
 
   const totalLiters = filtered.reduce((sum, d) => sum + (d.totalLiters || 0), 0);
   const totalCost = filtered.reduce((sum, d) => sum + (d.cost || 0), 0);
-  const totalM3 = filtered.filter(d => {
+  const totalM3Betoneira = filtered.filter(d => {
     const eq = (d.equipment || '').toUpperCase();
     return eq.includes('CAMINHÃO BETONEIRA') || eq.includes('BETONEIRA');
+  }).reduce((sum, d) => sum + (d.m3 || 0), 0);
+  const totalM3BombaLanca = filtered.filter(d => {
+    const eq = (d.equipment || '').toUpperCase();
+    return eq.includes('BOMBA LANÇA') || eq.includes('BOMBAL LANÇA');
+  }).reduce((sum, d) => sum + (d.m3 || 0), 0);
+  const totalM3BombaEstacionaria = filtered.filter(d => {
+    const eq = (d.equipment || '').toUpperCase();
+    return eq.includes('BOMBA ESTACIONÁRIA') || eq.includes('BOMBA ESTACIONARIA');
   }).reduce((sum, d) => sum + (d.m3 || 0), 0);
   const totalKm = filtered.reduce((sum, d) => sum + (d.kmDelta || 0), 0);
 
@@ -656,7 +664,7 @@ export default function Graficos() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl border-0 shadow-lg p-6">
           <p className="text-amber-900 text-sm font-medium mb-2">Total Litros</p>
           <p className="text-3xl font-bold text-amber-900">{(totalLiters).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
@@ -669,9 +677,17 @@ export default function Graficos() {
           <p className="text-slate-600 text-sm font-medium mb-2">Custo Total</p>
           <p className="text-3xl font-bold text-slate-800">R$ {(totalCost).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
         </div>
-        <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl border-0 shadow-lg p-6">
-          <p className="text-slate-600 text-sm font-medium mb-2">Total M³</p>
-          <p className="text-3xl font-bold text-slate-800">{(totalM3).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border-0 shadow-lg p-6">
+          <p className="text-blue-900 text-sm font-medium mb-2">Total M³ Betoneira</p>
+          <p className="text-3xl font-bold text-blue-900">{(totalM3Betoneira).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+        </div>
+        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl border-0 shadow-lg p-6">
+          <p className="text-green-900 text-sm font-medium mb-2">Total M³ Bomba Lança</p>
+          <p className="text-3xl font-bold text-green-900">{(totalM3BombaLanca).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+        </div>
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border-0 shadow-lg p-6">
+          <p className="text-purple-900 text-sm font-medium mb-2">Total M³ Bomba Est.</p>
+          <p className="text-3xl font-bold text-purple-900">{(totalM3BombaEstacionaria).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
         </div>
       </div>
 
