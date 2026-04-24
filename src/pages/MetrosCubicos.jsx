@@ -174,6 +174,25 @@ export default function MetrosCubicos() {
             <Trash2 className="w-5 h-5 text-red-500" />
             Excluir Registros por Mês
           </CardTitle>
+          <Button
+            onClick={async () => {
+              if (!window.confirm('Excluir TODOS os registros de Março?')) return;
+              setIsDeletingMes(true);
+              try {
+                const res = await base44.functions.invoke('deleteMarcoMetrosCubicos', {});
+                setDeleteStatus({ type: 'success', message: res.data.message });
+                queryClient.invalidateQueries({ queryKey: ['CubicMetros'] });
+              } catch (err) {
+                setDeleteStatus({ type: 'error', message: err?.response?.data?.error || err.message });
+              } finally {
+                setIsDeletingMes(false);
+              }
+            }}
+            disabled={isDeletingMes}
+            className="mt-2 w-full bg-red-700 hover:bg-red-600 text-white"
+          >
+            {isDeletingMes ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Excluindo todos de Março...</> : <>Excluir Todos os Registros de Março</>}
+          </Button>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex gap-3 items-end">
