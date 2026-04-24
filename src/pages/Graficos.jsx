@@ -201,27 +201,30 @@ export default function Graficos() {
       const custoCalculado = korthCost + (item._externalCost || 0);
 
       return {
-        month: item.month,
-        monthKey: item.monthKey,
-        year: item.year,
-        plate: item.plate,
-        unit: pontosMap[String(item.unit)] || item.unit || '-',
-        equipment: item.equipment || '-',
-        vehicle_type: item.vehicle_type,
-        driver: motoristasMap[String(item.driver)] || item.driver || '-',
-        totalLiters: item.totalLiters,
-        kmDelta: item.kmDelta,
-        m3: (() => {
-          const m3Data = cubicMetros.find(cm =>
-            String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() &&
-            cm.mes === item.monthKey
-          );
-          return m3Data ? Number(m3Data.metros_cubicos) : item.fuelRecordM3;
-        })(),
-        fuelRecordM3: item.fuelRecordM3,
-        cost: custoCalculado,
-        efficiency: item.totalLiters > 0 ? (item.kmDelta / item.totalLiters).toFixed(2) : 0
-      };
+         month: item.month,
+         monthKey: item.monthKey,
+         year: item.year,
+         plate: item.plate,
+         unit: pontosMap[String(item.unit)] || item.unit || '-',
+         equipment: item.equipment || '-',
+         vehicle_type: item.vehicle_type,
+         driver: motoristasMap[String(item.driver)] || item.driver || '-',
+         totalLiters: item.totalLiters,
+         kmDelta: item.kmDelta,
+         m3: (() => {
+           const m3DataList = cubicMetros.filter(cm =>
+             String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() &&
+             cm.mes === item.monthKey
+           );
+           if (m3DataList.length > 0) {
+             return m3DataList.reduce((sum, cm) => sum + Number(cm.metros_cubicos), 0);
+           }
+           return item.fuelRecordM3;
+         })(),
+         fuelRecordM3: item.fuelRecordM3,
+         cost: custoCalculado,
+         efficiency: item.totalLiters > 0 ? (item.kmDelta / item.totalLiters).toFixed(2) : 0
+       };
     });
   }, [records, cubicMetros, placaEquipamentosMap, motoristasMap, pontosMap, monthNames, precosCombustivel]);
   
