@@ -37,6 +37,10 @@ export default function MetrosCubicos() {
 
   const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
 
+  const uniqueMeses = [...new Set(records.map(r => r.mes))].filter(Boolean).sort((a, b) => b.localeCompare(a));
+  const uniquePlacas = [...new Set(records.map(r => String(r.placa).toUpperCase()))].filter(Boolean).sort();
+  const uniqueEquipamentos = [...new Set(records.map(r => placaEquipamentosMap[String(r.placa).toUpperCase()] || r.equipamento))].filter(Boolean).sort();
+
   const toggleSort = (field) => {
     if (sortBy === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setSortBy(field); setSortDir('asc'); }
@@ -334,33 +338,42 @@ export default function MetrosCubicos() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1">
               <Label className="text-slate-700 text-sm">Mês</Label>
-              <Input
-                type="text"
-                placeholder="Ex: 2026-03"
+              <select
                 value={filterMes}
                 onChange={(e) => setFilterMes(e.target.value)}
-                className="border-slate-200 text-slate-800"
-              />
+                className="w-full bg-white text-slate-800 border border-slate-200 rounded px-3 py-2 text-sm"
+              >
+                <option value="">Todos os meses</option>
+                {uniqueMeses.map(mes => (
+                  <option key={mes} value={mes}>{mes}</option>
+                ))}
+              </select>
             </div>
             <div className="space-y-1">
               <Label className="text-slate-700 text-sm">Placa</Label>
-              <Input
-                type="text"
-                placeholder="Pesquise por placa"
+              <select
                 value={filterPlaca}
                 onChange={(e) => setFilterPlaca(e.target.value)}
-                className="border-slate-200 text-slate-800 uppercase"
-              />
+                className="w-full bg-white text-slate-800 border border-slate-200 rounded px-3 py-2 text-sm"
+              >
+                <option value="">Todas as placas</option>
+                {uniquePlacas.map(placa => (
+                  <option key={placa} value={placa}>{placa}</option>
+                ))}
+              </select>
             </div>
             <div className="space-y-1">
               <Label className="text-slate-700 text-sm">Equipamento</Label>
-              <Input
-                type="text"
-                placeholder="Pesquise por equipamento"
+              <select
                 value={filterEquipamento}
                 onChange={(e) => setFilterEquipamento(e.target.value)}
-                className="border-slate-200 text-slate-800"
-              />
+                className="w-full bg-white text-slate-800 border border-slate-200 rounded px-3 py-2 text-sm"
+              >
+                <option value="">Todos os equipamentos</option>
+                {uniqueEquipamentos.map(eq => (
+                  <option key={eq} value={eq}>{eq}</option>
+                ))}
+              </select>
             </div>
           </div>
           {(filterMes || filterPlaca || filterEquipamento) && (
