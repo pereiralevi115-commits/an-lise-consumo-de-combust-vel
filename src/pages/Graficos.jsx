@@ -298,7 +298,11 @@ export default function Graficos() {
     }
     byEquipmentData[eqType].liters += d.totalLiters || 0;
     byEquipmentData[eqType].cost += d.cost || 0;
-    byEquipmentData[eqType].m3 += d.m3 || 0;
+    // M³ só conta para CAMINHÃO BETONEIRA
+    const eq = (eqType || '').toUpperCase();
+    if (eq.includes('CAMINHÃO BETONEIRA') || eq.includes('BETONEIRA')) {
+      byEquipmentData[eqType].m3 += d.m3 || 0;
+    }
     byEquipmentData[eqType].km += d.kmDelta || 0;
   });
 
@@ -311,17 +315,12 @@ export default function Graficos() {
     .sort((a, b) => a.kmPerLiter - b.kmPerLiter);
 
   const equipmentArray = Object.entries(byEquipmentData)
-      .map(([type, data]) => {
-        // Filtrar M³ apenas de CAMINHÃO BETONEIRA
-        const isBetoneiraEquipment = type.toUpperCase().includes('CAMINHÃO BETONEIRA') || type.toUpperCase().includes('BETONEIRA');
-        const filteredM3 = isBetoneiraEquipment ? data.m3 : 0;
-        return {
-          name: type,
-          m3: filteredM3,
-          litersPerM3: filteredM3 > 0 ? (data.liters / filteredM3).toFixed(2) : 0,
-          costPerM3: filteredM3 > 0 ? (data.cost / filteredM3).toFixed(2) : 0
-        };
-      })
+      .map(([type, data]) => ({
+        name: type,
+        m3: data.m3,
+        litersPerM3: data.m3 > 0 ? (data.liters / data.m3).toFixed(2) : 0,
+        costPerM3: data.m3 > 0 ? (data.cost / data.m3).toFixed(2) : 0
+      }))
       .filter(d => d.m3 > 0)
       .sort((a, b) => b.m3 - a.m3);
 
