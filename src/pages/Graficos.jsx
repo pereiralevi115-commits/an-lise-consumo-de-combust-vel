@@ -312,11 +312,7 @@ export default function Graficos() {
     }
     byEquipmentData[eqType].liters += d.totalLiters || 0;
     byEquipmentData[eqType].cost += d.cost || 0;
-    // M³ só conta para CAMINHÃO BETONEIRA
-    const eq = (eqType || '').toUpperCase();
-    if (eq.includes('CAMINHÃO BETONEIRA') || eq.includes('BETONEIRA')) {
-      byEquipmentData[eqType].m3 += d.m3 || 0;
-    }
+    byEquipmentData[eqType].m3 += d.m3 || 0;
     byEquipmentData[eqType].km += d.kmDelta || 0;
   });
 
