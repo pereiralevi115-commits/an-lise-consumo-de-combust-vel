@@ -682,6 +682,10 @@ export default function Graficos() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl border-0 shadow-lg p-6">
+          <p className="text-red-900 text-sm font-medium mb-2">Total M³ Geral</p>
+          <p className="text-3xl font-bold text-red-900">{(totalM3Betoneira + totalM3BombaLanca + totalM3BombaEstacionaria).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
+        </div>
         <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border-0 shadow-lg p-6">
           <p className="text-blue-900 text-sm font-medium mb-2">Total M³ Betoneira</p>
           <p className="text-3xl font-bold text-blue-900">{(totalM3Betoneira).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>
