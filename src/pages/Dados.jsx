@@ -17,7 +17,7 @@ export default function Dados() {
     onlyInconsistent: false
   });
   const [sortBy, setSortBy] = useState('date');
-  const [sortDir, setSortDir] = useState('desc');
+  const [sortDir, setSortDir] = useState('asc');
   const [editingKm, setEditingKm] = useState(null); // { id, value }
   const [editingPlate, setEditingPlate] = useState(null); // { id, value }
   const [editingDriver, setEditingDriver] = useState(null); // { id, value }
@@ -154,8 +154,11 @@ export default function Dados() {
     const cmp = valA < valB ? -1 : valA > valB ? 1 : 0;
     const primarySort = sortDir === 'asc' ? cmp : -cmp;
     if (primarySort !== 0) return primarySort;
-    // Sempre data decrescente como critério secundário
-    return (b.date || '') < (a.date || '') ? -1 : (b.date || '') > (a.date || '') ? 1 : 0;
+    // Critério secundário: data crescente, depois hora crescente
+    const dateA = a.date || '';
+    const dateB = b.date || '';
+    if (dateA !== dateB) return dateA < dateB ? -1 : 1;
+    return (a.time || '') < (b.time || '') ? -1 : (a.time || '') > (b.time || '') ? 1 : 0;
   });
 
 
