@@ -236,36 +236,39 @@ export default function Graficos() {
     return acc;
   }, { seen: new Set(), list: [] }).list;
 
-  // Apply filters to analysisData
-  const filtered = analysisData.filter(d => {
+  // Apply filters to analysisData (WITHOUT exclusions for M³)
+  const filteredM3 = analysisData.filter(d => {
     if (filters.year && d.year !== parseInt(filters.year)) return false;
     if (filters.month && monthNames[parseInt(filters.month)] !== d.month) return false;
     if (filters.unit && d.unit !== filters.unit) return false;
     if (filters.equipment && d.equipment !== filters.equipment) return false;
     if (filters.plate && d.plate !== filters.plate) return false;
     if (filters.driver && d.driver !== filters.driver) return false;
-    // Exclude records marked in ExclusaoMedia
-    const excluded = exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`);
-    if (excluded) return false;
     return true;
+  });
+
+  // Apply filters WITH exclusions for combustível/KM data
+  const filtered = filteredM3.filter(d => {
+    const excluded = exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`);
+    return !excluded;
   });
 
   const totalLiters = filtered.reduce((sum, d) => sum + (d.totalLiters || 0), 0);
   const totalCost = filtered.reduce((sum, d) => sum + (d.cost || 0), 0);
   const totalKm = filtered.reduce((sum, d) => sum + (d.kmDelta || 0), 0);
 
-  // M³ totals usando apenas filtered data (respeitando filtros)
-  const totalM3Betoneira = filtered.filter(d => {
+  // M³ totals usando filteredM3 (respeitando filtros MAS SEM exclusões)
+  const totalM3Betoneira = filteredM3.filter(d => {
     const eq = (d.equipment || '').toUpperCase();
     return eq.includes('CAMINHÃO BETONEIRA') || eq.includes('BETONEIRA');
   }).reduce((sum, d) => sum + (d.m3 || 0), 0);
   
-  const totalM3BombaLanca = filtered.filter(d => {
+  const totalM3BombaLanca = filteredM3.filter(d => {
     const eq = (d.equipment || '').toUpperCase();
     return eq.includes('BOMBA LANÇA') || eq.includes('BOMBAL LANÇA');
   }).reduce((sum, d) => sum + (d.m3 || 0), 0);
   
-  const totalM3BombaEstacionaria = filtered.filter(d => {
+  const totalM3BombaEstacionaria = filteredM3.filter(d => {
     const eq = (d.equipment || '').toUpperCase();
     return eq.includes('BOMBA ESTACIONÁRIA') || eq.includes('BOMBA ESTACIONARIA');
   }).reduce((sum, d) => sum + (d.m3 || 0), 0);
