@@ -142,23 +142,36 @@ export default function Dados() {
     if (filters.onlyInconsistent && !kmInconsistencyIds.has(r.id)) return false;
     return true;
   }).sort((a, b) => {
+    // Ordenação base: sempre data crescente, depois hora crescente
+    const dateA = a.date || '';
+    const dateB = b.date || '';
+    const timeA = a.time || '';
+    const timeB = b.time || '';
+
+    // Se está ordenando por data ou hora, aplica direção escolhida
+    if (sortBy === 'date') {
+      if (dateA !== dateB) return sortDir === 'asc' ? (dateA < dateB ? -1 : 1) : (dateA > dateB ? -1 : 1);
+      return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
+    }
+    if (sortBy === 'time') {
+      if (timeA !== timeB) return sortDir === 'asc' ? (timeA < timeB ? -1 : 1) : (timeA > timeB ? -1 : 1);
+      return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
+    }
+
+    // Para outros campos: ordena pelo campo, depois data crescente, depois hora crescente
     let valA, valB;
-    if (sortBy === 'date') { valA = a.date || ''; valB = b.date || ''; }
-    else if (sortBy === 'plate') { valA = a.vehicle_plate || ''; valB = b.vehicle_plate || ''; }
+    if (sortBy === 'plate') { valA = a.vehicle_plate || ''; valB = b.vehicle_plate || ''; }
     else if (sortBy === 'unit') { valA = pontosMap[String(a.unit)] || a.unit || ''; valB = pontosMap[String(b.unit)] || b.unit || ''; }
     else if (sortBy === 'equipment') { valA = placaEquipamentosMap[String(a.vehicle_plate).toUpperCase()] || ''; valB = placaEquipamentosMap[String(b.vehicle_plate).toUpperCase()] || ''; }
     else if (sortBy === 'driver') { valA = motoristasMap[String(a.driver)] || a.driver || ''; valB = motoristasMap[String(b.driver)] || b.driver || ''; }
     else if (sortBy === 'fuel') { valA = combustiveisMap[String(a.fuel_type)] || a.fuel_type || ''; valB = combustiveisMap[String(b.fuel_type)] || b.fuel_type || ''; }
-    else if (sortBy === 'time') { valA = a.time || ''; valB = b.time || ''; }
+    else { valA = ''; valB = ''; }
 
     const cmp = valA < valB ? -1 : valA > valB ? 1 : 0;
     const primarySort = sortDir === 'asc' ? cmp : -cmp;
     if (primarySort !== 0) return primarySort;
-    // Critério secundário: data crescente, depois hora crescente
-    const dateA = a.date || '';
-    const dateB = b.date || '';
     if (dateA !== dateB) return dateA < dateB ? -1 : 1;
-    return (a.time || '') < (b.time || '') ? -1 : (a.time || '') > (b.time || '') ? 1 : 0;
+    return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
   });
 
 
