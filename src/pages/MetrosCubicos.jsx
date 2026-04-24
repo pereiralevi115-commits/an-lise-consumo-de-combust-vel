@@ -16,6 +16,10 @@ export default function MetrosCubicos() {
   const [deleteStatus, setDeleteStatus] = useState(null);
   const [sortBy, setSortBy] = useState('mes');
   const [sortDir, setSortDir] = useState('asc');
+  const [selected, setSelected] = useState(new Set());
+  const [editField, setEditField] = useState(null); // 'equipamento' ou 'metros_cubicos'
+  const [editValue, setEditValue] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: records = [], isLoading } = useQuery({
@@ -74,6 +78,43 @@ export default function MetrosCubicos() {
       await base44.entities.CubicMetros.delete(id);
     } catch (_) {}
     queryClient.invalidateQueries({ queryKey: ['CubicMetros'] });
+  };
+
+  const toggleSelect = (id) => {
+    const newSelected = new Set(selected);
+    newSelected.has(id) ? newSelected.delete(id) : newSelected.add(id);
+    setSelected(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selected.size === sortedRecords.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(sortedRecords.map(r => r.id)));
+    }
+  };
+
+  const handleBulkEdit = async () => {
+    if (selected.size === 0 || !editField || editValue === '') return;
+    if (!window.confirm(`Atualizar ${selected.size} registro(s)?`)) return;
+    
+    setIsEditing(true);
+    try {
+      const updates = Array.from(selected).map(id => {
+        const record = records.find(r => r.id === id);
+        const updateData = { ...record };
+        if (editField === 'equipamento') updateData.equipamento = editValue;
+        else if (editField === 'metros_cubicos') updateData.metros_cubicos = parseFloat(editValue.replace(',', '.'));
+        return base44.entities.CubicMetros.update(id, updateData).catch(() => {});
+      });
+      await Promise.all(updates);
+      setSelected(new Set());
+      setEditField(null);
+      setEditValue('');
+      queryClient.invalidateQueries({ queryKey: ['CubicMetros'] });
+    } finally {
+      setIsEditing(false);
+    }
   };
 
   const handleDeleteMes = async () => {
@@ -205,6 +246,60 @@ export default function MetrosCubicos() {
         </CardContent>
       </Card>
 
+      {/* Bulk Edit Card */}
+      {selected.size > 0 && (
+        <Card className="bg-blue-50 border-blue-200 shadow-lg">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-blue-800 text-base">
+              {selected.size} registro(s) selecionado(s)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <Label className="text-slate-700 text-sm">Campo a editar</Label>
+                <select
+                  value={editField || ''}
+                  onChange={(e) => { setEditField(e.target.value); setEditValue(''); }}
+                  className="w-full bg-white text-slate-800 border border-blue-300 rounded px-3 py-2 text-sm"
+                >
+                  <option value="">-- selecione --</option>
+                  <option value="equipamento">Equipamento</option>
+                  <option value="metros_cubicos">M³</option>
+                </select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-slate-700 text-sm">Novo valor</Label>
+                <Input
+                  type={editField === 'metros_cubicos' ? 'number' : 'text'}
+                  step={editField === 'metros_cubicos' ? '0.01' : undefined}
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  placeholder="Digite o novo valor"
+                  className="border-blue-300 text-slate-800"
+                />
+              </div>
+              <div className="flex gap-2 items-end">
+                <Button
+                  onClick={handleBulkEdit}
+                  disabled={isEditing || !editField || !editValue}
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white"
+                >
+                  {isEditing ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Atualizando...</> : 'Atualizar'}
+                </Button>
+                <Button
+                  onClick={() => setSelected(new Set())}
+                  variant="outline"
+                  className="text-slate-600"
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Table */}
       <Card className="bg-white border-slate-200 shadow-lg">
         <CardHeader className="pb-2">
@@ -217,6 +312,14 @@ export default function MetrosCubicos() {
             <Table>
               <TableHeader>
                 <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
+                  <TableHead className="w-10 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selected.size === sortedRecords.length && sortedRecords.length > 0}
+                      onChange={toggleSelectAll}
+                      className="cursor-pointer"
+                    />
+                  </TableHead>
                   <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('mes')}>Mês<SortIcon field="mes" /></TableHead>
                   <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('placa')}>Placa<SortIcon field="placa" /></TableHead>
                   <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('equipamento')}>Equipamento<SortIcon field="equipamento" /></TableHead>
@@ -233,7 +336,15 @@ export default function MetrosCubicos() {
                   </TableRow>
                 ) : (
                   sortedRecords.map((r) => (
-                    <TableRow key={r.id} className="border-slate-200 hover:bg-slate-50">
+                    <TableRow key={r.id} className={`border-slate-200 hover:bg-slate-50 ${selected.has(r.id) ? 'bg-blue-100' : ''}`}>
+                      <TableCell className="text-center w-10">
+                        <input
+                          type="checkbox"
+                          checked={selected.has(r.id)}
+                          onChange={() => toggleSelect(r.id)}
+                          className="cursor-pointer"
+                        />
+                      </TableCell>
                       <TableCell className="text-slate-800">{formatMes(r.mes)}</TableCell>
                       <TableCell className="text-slate-800 font-mono">{r.placa}</TableCell>
                       <TableCell className="text-slate-600">{placaEquipamentosMap[String(r.placa).toUpperCase()] || r.equipamento || '-'}</TableCell>
