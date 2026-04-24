@@ -20,6 +20,9 @@ export default function MetrosCubicos() {
   const [editField, setEditField] = useState(null); // 'equipamento' ou 'metros_cubicos'
   const [editValue, setEditValue] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [filterMes, setFilterMes] = useState('');
+  const [filterPlaca, setFilterPlaca] = useState('');
+  const [filterEquipamento, setFilterEquipamento] = useState('');
   const queryClient = useQueryClient();
 
   const { data: records = [], isLoading } = useQuery({
@@ -44,7 +47,18 @@ export default function MetrosCubicos() {
     return <span className="text-[#FDB913] ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>;
   };
 
-  const sortedRecords = [...records].sort((a, b) => {
+  const filteredRecords = records.filter(r => {
+    const mes = r.mes || '';
+    const placa = String(r.placa || '').toUpperCase();
+    const equipamento = (placaEquipamentosMap[placa] || r.equipamento || '').toUpperCase();
+    
+    if (filterMes && !mes.includes(filterMes)) return false;
+    if (filterPlaca && !placa.includes(filterPlaca.toUpperCase())) return false;
+    if (filterEquipamento && !equipamento.includes(filterEquipamento.toUpperCase())) return false;
+    return true;
+  });
+
+  const sortedRecords = [...filteredRecords].sort((a, b) => {
     let valA, valB;
     if (sortBy === 'mes') { valA = a.mes; valB = b.mes; }
     else if (sortBy === 'placa') { valA = a.placa; valB = b.placa; }
@@ -311,11 +325,65 @@ export default function MetrosCubicos() {
         </Card>
       )}
 
+      {/* Filters */}
+      <Card className="bg-white border-slate-200 shadow-lg">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-slate-800 text-base">Filtros</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <Label className="text-slate-700 text-sm">Mês</Label>
+              <Input
+                type="text"
+                placeholder="Ex: 2026-03"
+                value={filterMes}
+                onChange={(e) => setFilterMes(e.target.value)}
+                className="border-slate-200 text-slate-800"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-slate-700 text-sm">Placa</Label>
+              <Input
+                type="text"
+                placeholder="Pesquise por placa"
+                value={filterPlaca}
+                onChange={(e) => setFilterPlaca(e.target.value)}
+                className="border-slate-200 text-slate-800 uppercase"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-slate-700 text-sm">Equipamento</Label>
+              <Input
+                type="text"
+                placeholder="Pesquise por equipamento"
+                value={filterEquipamento}
+                onChange={(e) => setFilterEquipamento(e.target.value)}
+                className="border-slate-200 text-slate-800"
+              />
+            </div>
+          </div>
+          {(filterMes || filterPlaca || filterEquipamento) && (
+            <Button
+              onClick={() => {
+                setFilterMes('');
+                setFilterPlaca('');
+                setFilterEquipamento('');
+              }}
+              variant="outline"
+              className="mt-3 text-slate-600"
+            >
+              Limpar Filtros
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Table */}
       <Card className="bg-white border-slate-200 shadow-lg">
         <CardHeader className="pb-2">
           <CardTitle className="text-slate-800 text-base">
-            Registros ({records.length})
+            Registros ({sortedRecords.length} de {records.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
