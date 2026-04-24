@@ -236,8 +236,8 @@ export default function Graficos() {
     return acc;
   }, { seen: new Set(), list: [] }).list;
 
-  // Apply filters to analysisData (WITHOUT exclusions for M³)
-  const filteredM3 = analysisData.filter(d => {
+  // Apply filters to analysisData
+  const filtered = analysisData.filter(d => {
     if (filters.year && d.year !== parseInt(filters.year)) return false;
     if (filters.month && monthNames[parseInt(filters.month)] !== d.month) return false;
     if (filters.unit && d.unit !== filters.unit) return false;
@@ -247,28 +247,22 @@ export default function Graficos() {
     return true;
   });
 
-  // Apply filters WITH exclusions for combustível/KM data
-  const filtered = filteredM3.filter(d => {
-    const excluded = exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`);
-    return !excluded;
-  });
-
   const totalLiters = filtered.reduce((sum, d) => sum + (d.totalLiters || 0), 0);
   const totalCost = filtered.reduce((sum, d) => sum + (d.cost || 0), 0);
   const totalKm = filtered.reduce((sum, d) => sum + (d.kmDelta || 0), 0);
 
-  // M³ totals usando filteredM3 (respeitando filtros MAS SEM exclusões)
-  const totalM3Betoneira = filteredM3.filter(d => {
+  // M³ totals usando apenas filtered data (respeitando filtros)
+  const totalM3Betoneira = filtered.filter(d => {
     const eq = (d.equipment || '').toUpperCase();
     return eq.includes('CAMINHÃO BETONEIRA') || eq.includes('BETONEIRA');
   }).reduce((sum, d) => sum + (d.m3 || 0), 0);
   
-  const totalM3BombaLanca = filteredM3.filter(d => {
+  const totalM3BombaLanca = filtered.filter(d => {
     const eq = (d.equipment || '').toUpperCase();
     return eq.includes('BOMBA LANÇA') || eq.includes('BOMBAL LANÇA');
   }).reduce((sum, d) => sum + (d.m3 || 0), 0);
   
-  const totalM3BombaEstacionaria = filteredM3.filter(d => {
+  const totalM3BombaEstacionaria = filtered.filter(d => {
     const eq = (d.equipment || '').toUpperCase();
     return eq.includes('BOMBA ESTACIONÁRIA') || eq.includes('BOMBA ESTACIONARIA');
   }).reduce((sum, d) => sum + (d.m3 || 0), 0);
@@ -308,7 +302,6 @@ export default function Graficos() {
 
   // By equipment - agrupa por placaEquipamentosMap (equipment), calcula km por placa e soma total
   const byEquipmentData = {};
-  const byEquipmentDataM3 = {};
   // Para KM/Lt correto: precisamos do KM total por placa dentro de cada tipo de equipamento
   // Agrupamos por equipment (tipo correto do mapa), somando liters e km de cada placa
   filtered.forEach(d => {
@@ -319,19 +312,12 @@ export default function Graficos() {
     }
     byEquipmentData[eqType].liters += d.totalLiters || 0;
     byEquipmentData[eqType].cost += d.cost || 0;
-    byEquipmentData[eqType].km += d.kmDelta || 0;
-  });
-
-  // Para M³, usar filteredM3 (sem exclusões)
-  filteredM3.forEach(d => {
-    const eqType = d.equipment && d.equipment !== '-' ? d.equipment : null;
-    if (!eqType) return;
-    if (!byEquipmentDataM3[eqType]) {
-      byEquipmentDataM3[eqType] = { liters: 0, cost: 0, m3: 0 };
+    // M³ só conta para CAMINHÃO BETONEIRA
+    const eq = (eqType || '').toUpperCase();
+    if (eq.includes('CAMINHÃO BETONEIRA') || eq.includes('BETONEIRA')) {
+      byEquipmentData[eqType].m3 += d.m3 || 0;
     }
-    byEquipmentDataM3[eqType].m3 += d.m3 || 0;
-    byEquipmentDataM3[eqType].liters += d.totalLiters || 0;
-    byEquipmentDataM3[eqType].cost += d.cost || 0;
+    byEquipmentData[eqType].km += d.kmDelta || 0;
   });
 
   const unitEquipmentArray = Object.entries(byEquipmentData)
@@ -342,7 +328,7 @@ export default function Graficos() {
     .filter(d => d.kmPerLiter > 0)
     .sort((a, b) => a.kmPerLiter - b.kmPerLiter);
 
-  const equipmentArray = Object.entries(byEquipmentDataM3)
+  const equipmentArray = Object.entries(byEquipmentData)
       .map(([type, data]) => ({
         name: type,
         m3: data.m3,
