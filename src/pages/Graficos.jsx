@@ -262,6 +262,7 @@ export default function Graficos() {
     return eq.includes('BOMBA ESTACIONÁRIA') || eq.includes('BOMBA ESTACIONARIA');
   }).reduce((sum, d) => sum + (d.m3 || 0), 0);
   const totalKm = filtered.reduce((sum, d) => sum + (d.kmDelta || 0), 0);
+  const totalM3 = totalM3Betoneira + totalM3BombaLanca + totalM3BombaEstacionaria;
 
   // Monthly data - agregado de analysisData
   const monthlyData = {};
