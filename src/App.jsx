@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import DebugM3 from '@/pages/DebugM3';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -40,11 +41,16 @@ const AuthenticatedApp = () => {
   }
 
   // Render the main app
-  return (
+    return (
     <Routes>
       <Route path="/" element={
         <LayoutWrapper currentPageName={mainPageKey}>
           <MainPage />
+        </LayoutWrapper>
+      } />
+      <Route path="/DebugM3" element={
+        <LayoutWrapper currentPageName="DebugM3">
+          <DebugM3 />
         </LayoutWrapper>
       } />
       {Object.entries(Pages).map(([path, Page]) => (
