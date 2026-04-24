@@ -17,7 +17,7 @@ export default function Dados() {
     onlyInconsistent: false
   });
   const [sortBy, setSortBy] = useState('date');
-  const [sortDir, setSortDir] = useState('asc');
+  const [sortDir, setSortDir] = useState('desc');
   const [editingKm, setEditingKm] = useState(null); // { id, value }
   const [editingPlate, setEditingPlate] = useState(null); // { id, value }
   const [editingDriver, setEditingDriver] = useState(null); // { id, value }
@@ -151,11 +151,11 @@ export default function Dados() {
     // Se está ordenando por data ou hora, aplica direção escolhida
     if (sortBy === 'date') {
       if (dateA !== dateB) return sortDir === 'asc' ? (dateA < dateB ? -1 : 1) : (dateA > dateB ? -1 : 1);
-      return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
+      return sortDir === 'asc' ? (timeA < timeB ? -1 : timeA > timeB ? 1 : 0) : (timeA > timeB ? -1 : timeA < timeB ? 1 : 0);
     }
     if (sortBy === 'time') {
       if (timeA !== timeB) return sortDir === 'asc' ? (timeA < timeB ? -1 : 1) : (timeA > timeB ? -1 : 1);
-      return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
+      return sortDir === 'asc' ? (dateA < dateB ? -1 : dateA > dateB ? 1 : 0) : (dateA > dateB ? -1 : dateA < dateB ? 1 : 0);
     }
 
     // Para outros campos: ordena pelo campo, depois data crescente, depois hora crescente
@@ -170,8 +170,8 @@ export default function Dados() {
     const cmp = valA < valB ? -1 : valA > valB ? 1 : 0;
     const primarySort = sortDir === 'asc' ? cmp : -cmp;
     if (primarySort !== 0) return primarySort;
-    if (dateA !== dateB) return dateA < dateB ? -1 : 1;
-    return timeA < timeB ? -1 : timeA > timeB ? 1 : 0;
+    if (dateA !== dateB) return dateA > dateB ? -1 : 1;
+    return timeA > timeB ? -1 : timeA < timeB ? 1 : 0;
   });
 
 
