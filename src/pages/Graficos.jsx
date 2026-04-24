@@ -308,6 +308,7 @@ export default function Graficos() {
 
   // By equipment - agrupa por placaEquipamentosMap (equipment), calcula km por placa e soma total
   const byEquipmentData = {};
+  const byEquipmentDataM3 = {};
   // Para KM/Lt correto: precisamos do KM total por placa dentro de cada tipo de equipamento
   // Agrupamos por equipment (tipo correto do mapa), somando liters e km de cada placa
   filtered.forEach(d => {
@@ -318,12 +319,19 @@ export default function Graficos() {
     }
     byEquipmentData[eqType].liters += d.totalLiters || 0;
     byEquipmentData[eqType].cost += d.cost || 0;
-    // M³ só conta para CAMINHÃO BETONEIRA
-    const eq = (eqType || '').toUpperCase();
-    if (eq.includes('CAMINHÃO BETONEIRA') || eq.includes('BETONEIRA')) {
-      byEquipmentData[eqType].m3 += d.m3 || 0;
-    }
     byEquipmentData[eqType].km += d.kmDelta || 0;
+  });
+
+  // Para M³, usar filteredM3 (sem exclusões)
+  filteredM3.forEach(d => {
+    const eqType = d.equipment && d.equipment !== '-' ? d.equipment : null;
+    if (!eqType) return;
+    if (!byEquipmentDataM3[eqType]) {
+      byEquipmentDataM3[eqType] = { liters: 0, cost: 0, m3: 0 };
+    }
+    byEquipmentDataM3[eqType].m3 += d.m3 || 0;
+    byEquipmentDataM3[eqType].liters += d.totalLiters || 0;
+    byEquipmentDataM3[eqType].cost += d.cost || 0;
   });
 
   const unitEquipmentArray = Object.entries(byEquipmentData)
@@ -334,7 +342,7 @@ export default function Graficos() {
     .filter(d => d.kmPerLiter > 0)
     .sort((a, b) => a.kmPerLiter - b.kmPerLiter);
 
-  const equipmentArray = Object.entries(byEquipmentData)
+  const equipmentArray = Object.entries(byEquipmentDataM3)
       .map(([type, data]) => ({
         name: type,
         m3: data.m3,
