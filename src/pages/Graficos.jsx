@@ -249,19 +249,24 @@ export default function Graficos() {
 
   const totalLiters = filtered.reduce((sum, d) => sum + (d.totalLiters || 0), 0);
   const totalCost = filtered.reduce((sum, d) => sum + (d.cost || 0), 0);
+  const totalKm = filtered.reduce((sum, d) => sum + (d.kmDelta || 0), 0);
+
+  // M³ totals usando apenas filtered data (respeitando filtros)
   const totalM3Betoneira = filtered.filter(d => {
     const eq = (d.equipment || '').toUpperCase();
     return eq.includes('CAMINHÃO BETONEIRA') || eq.includes('BETONEIRA');
   }).reduce((sum, d) => sum + (d.m3 || 0), 0);
+  
   const totalM3BombaLanca = filtered.filter(d => {
     const eq = (d.equipment || '').toUpperCase();
     return eq.includes('BOMBA LANÇA') || eq.includes('BOMBAL LANÇA');
   }).reduce((sum, d) => sum + (d.m3 || 0), 0);
+  
   const totalM3BombaEstacionaria = filtered.filter(d => {
     const eq = (d.equipment || '').toUpperCase();
     return eq.includes('BOMBA ESTACIONÁRIA') || eq.includes('BOMBA ESTACIONARIA');
   }).reduce((sum, d) => sum + (d.m3 || 0), 0);
-  const totalKm = filtered.reduce((sum, d) => sum + (d.kmDelta || 0), 0);
+  
   const totalM3 = totalM3Betoneira + totalM3BombaLanca + totalM3BombaEstacionaria;
 
   // Monthly data - agregado de analysisData
