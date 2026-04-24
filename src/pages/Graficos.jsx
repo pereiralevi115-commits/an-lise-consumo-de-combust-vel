@@ -244,6 +244,9 @@ export default function Graficos() {
     if (filters.equipment && d.equipment !== filters.equipment) return false;
     if (filters.plate && d.plate !== filters.plate) return false;
     if (filters.driver && d.driver !== filters.driver) return false;
+    // Exclude records marked in ExclusaoMedia
+    const excluded = exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`);
+    if (excluded) return false;
     return true;
   });
 
