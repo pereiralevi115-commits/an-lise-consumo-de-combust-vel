@@ -1,12 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
-import { parseISO } from 'date-fns';
 import { Trophy, Medal } from 'lucide-react';
-
-const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+import { useAnaliseData, monthNames } from '@/hooks/useAnaliseData';
 
 const getFirstAndLastName = (fullName) => {
   if (!fullName) return '';
@@ -18,129 +13,50 @@ const getFirstAndLastName = (fullName) => {
 export default function RankingMotoristas() {
   const [filters, setFilters] = useState({ month: '', year: '', unit: '', equipment: '', plate: '' });
 
-  const { data: records = [], isLoading } = useQuery({
-    queryKey: ['fuelRecords'],
-    queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
-  });
+  const {
+    analiseByMotorista,
+    pontosMap,
+    placaEquipamentosMap,
+    months,
+    years,
+    plates,
+    units,
+    equipments,
+  } = useAnaliseData();
 
-  const { data: motoristas = [] } = useQuery({ queryKey: ['Motorista'], queryFn: () => base44.entities.Motorista.list() });
-  const { data: frentistas = [] } = useQuery({ queryKey: ['Frentista'], queryFn: () => base44.entities.Frentista.list() });
-  const { data: pontos = [] } = useQuery({ queryKey: ['Ponto'], queryFn: () => base44.entities.Ponto.list() });
-  const { data: placaEquipamentos = [] } = useQuery({ queryKey: ['PlacaEquipamento'], queryFn: () => base44.entities.PlacaEquipamento.list('placa', 10000) });
-  const { data: precosCombustivel = [] } = useQuery({ queryKey: ['PrecoCombustivel'], queryFn: () => base44.entities.PrecoCombustivel.list() });
-
-  const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
-  const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
-  const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
-  const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
-
-  // Calcular km percorrido por odômetro diff por placa (igual ao Graficos.jsx)
-  const kmPercorridoMap = useMemo(() => {
-    const byPlate = {};
-    records.forEach(r => {
-      if (!r.date || !r.vehicle_plate) return;
-      const plate = String(r.vehicle_plate).toUpperCase();
-      if (!byPlate[plate]) byPlate[plate] = [];
-      byPlate[plate].push(r);
-    });
-    Object.values(byPlate).forEach(arr => {
-      arr.sort((a, b) => {
-        const da = (a.date || '') + ' ' + (a.time || '');
-        const db = (b.date || '') + ' ' + (b.time || '');
-        return da < db ? -1 : da > db ? 1 : 0;
-      });
-    });
-    const map = {};
-    Object.values(byPlate).forEach(arr => {
-      let lastKm = null;
-      arr.forEach(r => {
-        const km = Number(r.km_driven);
-        if (km > 0) {
-          if (lastKm !== null && km > lastKm) {
-            map[r.id] = km - lastKm;
-          }
-          lastKm = km;
-        }
-      });
-    });
-    return map;
-  }, [records]);
-
-  // analysisData: agrupa por placa+mês igual ao Graficos.jsx
-  const analysisData = useMemo(() => {
-    const grouped = {};
-    records.forEach(r => {
-      if (!r.date || !r.vehicle_plate) return;
-      const d = parseISO(r.date);
-      const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      const plateKey = String(r.vehicle_plate).toUpperCase();
-      const key = `${monthKey}-${plateKey}`;
-      if (!grouped[key]) {
-        grouped[key] = {
-          monthKey, monthNum: d.getMonth(), year: d.getFullYear(),
-          plate: r.vehicle_plate, unit: r.unit, driver: r.driver,
-          totalLiters: 0, kmDelta: 0, _korthLiters: 0, _externalCost: 0
-        };
-      }
-      grouped[key].totalLiters += r.liters || 0;
-      grouped[key].kmDelta += kmPercorridoMap[r.id] || 0;
-      if (r.korth_id) {
-        grouped[key]._korthLiters += r.liters || 0;
-      } else {
-        grouped[key]._externalCost += r.cost || 0;
-      }
-    });
-    return Object.values(grouped).map(item => {
-      const precoReg = precosCombustivel.find(p =>
-        String(p.ponto) === String(item.unit) &&
-        Number(p.mes) === item.monthNum &&
-        Number(p.ano) === item.year
-      );
-      const cost = (precoReg ? item._korthLiters * precoReg.preco_litro : 0) + item._externalCost;
-      return { ...item, cost };
-    });
-  }, [records, kmPercorridoMap, precosCombustivel]);
-
-  // Opções de filtro
-  const years = [...new Set(analysisData.map(d => d.year))].sort((a, b) => b - a);
-  const months = [...new Set(analysisData.map(d => d.monthNum))].sort((a, b) => a - b);
-  const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
-  const equipments = [...new Set(placaEquipamentos.map(p => p.tipo))].filter(Boolean).sort();
-  const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
-
-  // Ranking: agrupa por motorista usando analysisData com kmDelta (igual ao gráfico)
+  // Agrupa por motorista a partir de analiseByMotorista (mesma fonte da aba Por Motorista)
   const ranking = useMemo(() => {
-    const filtered = analysisData.filter(d => {
-      if (filters.year && d.year !== parseInt(filters.year)) return false;
-      if (filters.month !== '' && d.monthNum !== parseInt(filters.month)) return false;
-      if (filters.unit && d.unit !== filters.unit) return false;
-      if (filters.plate && d.plate !== filters.plate) return false;
-      if (filters.equipment && placaEquipamentosMap[String(d.plate).toUpperCase()] !== filters.equipment) return false;
+    const filtered = analiseByMotorista.filter(d => {
+      if (d.oculto) return false;
+      if (filters.year && String(d.year) !== filters.year) return false;
+      if (filters.month !== '' && monthNames[parseInt(filters.month)] !== d.month) return false;
+      if (filters.unit && d.unitCode !== filters.unit) return false;
+      if (filters.plate && String(d.plate).toUpperCase() !== String(filters.plate).toUpperCase()) return false;
+      if (filters.equipment && d.equipment !== filters.equipment) return false;
       return true;
     });
 
     const byDriver = {};
     filtered.forEach(d => {
-      if (!d.driver) return;
-      const driverName = motoristasMap[String(d.driver)] || frentistasMap[String(d.driver)] || d.driver;
-      const driverKey = driverName.toUpperCase();
-      if (!byDriver[driverKey]) {
-        byDriver[driverKey] = { driver: d.driver, driverName: driverName.toUpperCase(), totalLiters: 0, totalKm: 0, totalCost: 0 };
+      if (!d.driver || d.driver === '-') return;
+      const key = d.driver.toUpperCase();
+      if (!byDriver[key]) {
+        byDriver[key] = { driverName: d.driver, totalLiters: 0, totalKm: 0, totalCost: 0 };
       }
-      byDriver[driverKey].totalLiters += d.totalLiters;
-      byDriver[driverKey].totalKm += d.kmDelta;
-      byDriver[driverKey].totalCost += d.cost;
+      byDriver[key].totalLiters += d.liters || 0;
+      byDriver[key].totalKm += d.kmPercorrido || 0;
+      byDriver[key].totalCost += d.cost || 0;
     });
 
     return Object.values(byDriver)
       .map(d => ({
         ...d,
         kmPerLiter: d.totalLiters > 0 && d.totalKm > 0 ? d.totalKm / d.totalLiters : 0,
-        costPerKm: d.totalKm > 0 ? d.totalCost / d.totalKm : 0
+        costPerKm: d.totalKm > 0 ? d.totalCost / d.totalKm : 0,
       }))
       .filter(d => d.kmPerLiter > 0)
       .sort((a, b) => b.kmPerLiter - a.kmPerLiter);
-  }, [analysisData, filters, motoristasMap, frentistasMap, placaEquipamentosMap]);
+  }, [analiseByMotorista, filters]);
 
   const medalColor = (i) => {
     if (i === 0) return 'text-[#FDB913]';
@@ -157,8 +73,6 @@ export default function RankingMotoristas() {
   };
 
   const maxKml = ranking.length > 0 ? ranking[0].kmPerLiter : 1;
-
-  if (isLoading) return <div className="text-slate-600 text-center py-12">Carregando dados...</div>;
 
   return (
     <div className="space-y-6">
@@ -212,7 +126,7 @@ export default function RankingMotoristas() {
       ) : (
         <div className="space-y-3">
           {ranking.map((item, idx) => (
-            <Card key={item.driver} className={`border shadow-sm ${idx === 0 ? 'bg-amber-50 border-amber-200' : idx === 1 ? 'bg-slate-50 border-slate-200' : idx === 2 ? 'bg-orange-50 border-orange-200' : 'bg-white border-slate-200'}`}>
+            <Card key={item.driverName} className={`border shadow-sm ${idx === 0 ? 'bg-amber-50 border-amber-200' : idx === 1 ? 'bg-slate-50 border-slate-200' : idx === 2 ? 'bg-orange-50 border-orange-200' : 'bg-white border-slate-200'}`}>
               <CardContent className="py-4 px-5">
                 <div className="flex items-center gap-4">
                   <div className={`text-2xl font-black w-10 text-center ${medalColor(idx)}`}>
