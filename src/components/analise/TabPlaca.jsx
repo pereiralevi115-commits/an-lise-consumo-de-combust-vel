@@ -15,7 +15,7 @@ const SortIcon = ({ field, sortBy, sortDir }) => {
 
 export default function TabPlaca({ data, cubicMetros, placaEquipamentos, exclusoesSet, pontosMap, motoristasMap, frentistasMap, months, years, plates, units, equipments, drivers }) {
   const [filters, setFilters] = useState({ month: '', year: '', plate: '', unit: '', equipment: '', driver: '' });
-  const [sortBy, setSortBy] = useState('month');
+  const [sortBy, setSortBy] = useState('plate');
   const [sortDir, setSortDir] = useState('asc');
   const [editingRow, setEditingRow] = useState(null);
   const [editValues, setEditValues] = useState({ unit: '', equipment: '' });
@@ -62,7 +62,11 @@ export default function TabPlaca({ data, cubicMetros, placaEquipamentos, excluso
   const filtered = consolidated.sort((a, b) => {
     let valA, valB;
     if (sortBy === 'month') { valA = monthNames.indexOf(a.month); valB = monthNames.indexOf(b.month); }
-    else if (sortBy === 'plate') { valA = a.plate; valB = b.plate; }
+    else if (sortBy === 'plate') {
+      const plateCmp = (a.plate || '').localeCompare(b.plate || '');
+      if (plateCmp !== 0) return sortDir === 'asc' ? plateCmp : -plateCmp;
+      return monthNames.indexOf(a.month) - monthNames.indexOf(b.month);
+    }
     else if (sortBy === 'unit') { valA = a.unit; valB = b.unit; }
     else if (sortBy === 'equipment') { valA = a.equipment; valB = b.equipment; }
     else if (sortBy === 'fuelType') { valA = a.fuelType; valB = b.fuelType; }
