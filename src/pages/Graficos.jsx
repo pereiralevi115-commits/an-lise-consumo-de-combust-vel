@@ -198,12 +198,30 @@ export default function Graficos() {
     .sort((a, b) => a.cost - b.cost);
 
   // By equipment - agrupa por placaEquipamentosMap (equipment), calcula km por placa e soma total
+  // Normaliza variações de nome de equipamento para evitar duplicatas no gráfico
+  const normalizeEquipment = (eq) => {
+    if (!eq) return eq;
+    return eq
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
+      .toUpperCase()
+      .trim();
+  };
+  const equipmentDisplayName = (eq) => {
+    if (!eq) return eq;
+    const norm = normalizeEquipment(eq);
+    if (norm === 'BOMBA ESTACIONARIA') return 'BOMBA ESTACIONÁRIA';
+    if (norm === 'BOMBA LANCA' || norm === 'BOMBAL LANCA') return 'BOMBA LANÇA';
+    if (norm.includes('BETONEIRA')) return 'CAMINHÃO BETONEIRA';
+    return eq;
+  };
+
   const byEquipmentData = {};
   // Para KM/Lt correto: precisamos do KM total por placa dentro de cada tipo de equipamento
   // Agrupamos por equipment (tipo correto do mapa), somando liters e km de cada placa
   filtered.forEach(d => {
-    const eqType = d.equipment && d.equipment !== '-' ? d.equipment : null;
-    if (!eqType) return;
+    const rawEq = d.equipment && d.equipment !== '-' ? d.equipment : null;
+    if (!rawEq) return;
+    const eqType = equipmentDisplayName(rawEq);
     if (!byEquipmentData[eqType]) {
       byEquipmentData[eqType] = { liters: 0, cost: 0, m3: 0, km: 0 };
     }
@@ -228,7 +246,7 @@ export default function Graficos() {
         litersPerM3: data.m3 > 0 ? (data.liters / data.m3).toFixed(2) : 0,
         costPerM3: data.m3 > 0 ? (data.cost / data.m3).toFixed(2) : 0
       }))
-      .filter(d => d.m3 > 0)
+      .filter(d => d.m3 > 0 && !normalizeEquipment(d.name).includes('BOMBA ESTACIONARIA'))
       .sort((a, b) => b.m3 - a.m3);
 
   const CustomBarLabel = (props) => {
