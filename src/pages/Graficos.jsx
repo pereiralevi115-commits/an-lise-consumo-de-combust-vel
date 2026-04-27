@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LabelList } from 'recharts';
 import { parseISO } from 'date-fns';
+import { useAnaliseData, monthNames as MONTH_NAMES } from '@/hooks/useAnaliseData';
 
 
 const YELLOW = '#FCD34D';
@@ -68,192 +69,53 @@ const CustomLabel = (props) => {
   );
 };
 
-const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-
 export default function Graficos() {
-        const [filters, setFilters] = useState({
-          year: '',
-          month: '',
-          unit: '',
-          equipment: '',
-          plate: '',
-          driver: ''
-        });
+  const [filters, setFilters] = useState({
+    year: '',
+    month: '',
+    unit: '',
+    equipment: '',
+    plate: '',
+    driver: ''
+  });
 
-        const { data: records = [], isLoading } = useQuery({
-          queryKey: ['fuelRecords'],
-          queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
-        });
+  // Use the shared hook — same data source as Analise page
+  const {
+    analiseByPlaca: analysisData,
+    cubicMetros,
+    exclusoesSet,
+    pontosMap,
+    motoristasMap,
+    placaEquipamentosMap,
+    months,
+    years,
+    plates,
+    equipments,
+  } = useAnaliseData();
 
-        const { data: precosCombustivel = [] } = useQuery({
-          queryKey: ['PrecoCombustivel'],
-          queryFn: () => base44.entities.PrecoCombustivel.list()
-        });
+  const { data: records = [], isLoading } = useQuery({
+    queryKey: ['fuelRecords'],
+    queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
+  });
 
-        const { data: cubicMetros = [] } = useQuery({
-          queryKey: ['cubicMetros'],
-          queryFn: () => base44.entities.CubicMetros.list()
-        });
-
-        const { data: motoristas = [] } = useQuery({
-          queryKey: ['Motorista'],
-          queryFn: () => base44.entities.Motorista.list()
-        });
-
-        const { data: pontos = [] } = useQuery({
-          queryKey: ['Ponto'],
-          queryFn: () => base44.entities.Ponto.list()
-        });
-
-        const { data: placaEquipamentos = [] } = useQuery({
-          queryKey: ['PlacaEquipamento'],
-          queryFn: () => base44.entities.PlacaEquipamento.list('placa', 10000)
-        });
-
-        const { data: exclusoes = [] } = useQuery({
-          queryKey: ['ExclusaoMedia'],
-          queryFn: () => base44.entities.ExclusaoMedia.list()
-        });
-        const exclusoesSet = useMemo(() => new Set(exclusoes.map(e => `${String(e.placa).toUpperCase()}-${e.mes}`)), [exclusoes]);
-
-        const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
-        const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
-        const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
-
-  // Compute analysisData with correct KM: hodômetro_atual - hodômetro_anterior por placa
-  const analysisData = useMemo(() => {
-    // Step 1: sort each plate's records chronologically and compute km percorrido per record
-    const byPlate = {};
-    records.forEach(r => {
-      if (!r.date || !r.vehicle_plate) return;
-      const plate = String(r.vehicle_plate).toUpperCase();
-      if (!byPlate[plate]) byPlate[plate] = [];
-      byPlate[plate].push(r);
-    });
-    Object.values(byPlate).forEach(arr => {
-      arr.sort((a, b) => {
-        const da = (a.date || '') + ' ' + (a.time || '');
-        const db = (b.date || '') + ' ' + (b.time || '');
-        return da < db ? -1 : da > db ? 1 : 0;
-      });
-    });
-    const kmPercorridoMap = {};
-    Object.values(byPlate).forEach(arr => {
-      let lastKm = null;
-      arr.forEach(r => {
-        const km = Number(r.km_driven);
-        if (km > 0) {
-          if (lastKm !== null && km > lastKm) {
-            kmPercorridoMap[r.id] = km - lastKm;
-          }
-          lastKm = km;
-        }
-      });
-    });
-
-    // Step 2: group by plate+month, summing km percorrido and liters
-    const groupedData = {};
-    records.forEach(r => {
-      if (!r.date || !r.vehicle_plate) return;
-      const month = parseISO(r.date).getMonth();
-      const year = parseISO(r.date).getFullYear();
-      const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-      const plateKey = r.vehicle_plate.toUpperCase();
-      const groupKey = `${monthKey}-${plateKey}`;
-
-      if (!groupedData[groupKey]) {
-        groupedData[groupKey] = {
-          month: monthNames[month],
-          year: year,
-          monthKey: monthKey,
-          plate: r.vehicle_plate,
-          unit: r.unit,
-          equipment: placaEquipamentosMap[plateKey] || r.vehicle_type || '',
-          vehicle_type: r.vehicle_type,
-          driver: r.driver,
-          driverCounts: {},
-          totalLiters: 0,
-          kmDelta: 0,
-          cost: 0,
-          fuelRecordM3: 0
-        };
-      }
-
-      if (r.driver) {
-        groupedData[groupKey].driverCounts[r.driver] = (groupedData[groupKey].driverCounts[r.driver] || 0) + 1;
-      }
-      groupedData[groupKey].totalLiters += r.liters || 0;
-      groupedData[groupKey]._unit = r.unit;
-      groupedData[groupKey]._month = month;
-      groupedData[groupKey]._year = year;
-      if (r.korth_id) {
-        groupedData[groupKey]._korthLiters = (groupedData[groupKey]._korthLiters || 0) + (r.liters || 0);
-      } else {
-        groupedData[groupKey]._externalCost = (groupedData[groupKey]._externalCost || 0) + (r.cost || 0);
-      }
-      groupedData[groupKey].fuelRecordM3 += r.cubic_meters || 0;
-      groupedData[groupKey].kmDelta += kmPercorridoMap[r.id] || 0;
-    });
-
-    return Object.values(groupedData).map(item => {
-      const precoReg = precosCombustivel.find(p =>
-        String(p.ponto) === String(item._unit) &&
-        Number(p.mes) === Number(item._month) &&
-        Number(p.ano) === Number(item._year)
-      );
-      const korthCost = precoReg ? (item._korthLiters || 0) * precoReg.preco_litro : 0;
-      const custoCalculado = korthCost + (item._externalCost || 0);
-
-      const mainDriverCode = Object.entries(item.driverCounts || {}).sort((a, b) => b[1] - a[1])[0]?.[0] || item.driver;
-      return {
-         month: item.month,
-         monthKey: item.monthKey,
-         year: item.year,
-         plate: item.plate,
-         unit: pontosMap[String(item.unit)] || item.unit || '-',
-         equipment: item.equipment || '-',
-         vehicle_type: item.vehicle_type,
-         driver: motoristasMap[String(mainDriverCode)] || mainDriverCode || '-',
-         totalLiters: item.totalLiters,
-         kmDelta: item.kmDelta,
-         m3: (() => {
-           const m3DataList = cubicMetros.filter(cm =>
-             String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() &&
-             cm.mes === item.monthKey
-           );
-           if (m3DataList.length > 0) {
-             return m3DataList.reduce((sum, cm) => sum + Number(cm.metros_cubicos), 0);
-           }
-           return item.fuelRecordM3;
-         })(),
-         fuelRecordM3: item.fuelRecordM3,
-         cost: custoCalculado,
-         efficiency: item.totalLiters > 0 ? (item.kmDelta / item.totalLiters).toFixed(2) : 0
-       };
-    });
-  }, [records, cubicMetros, placaEquipamentosMap, motoristasMap, pontosMap, monthNames, precosCombustivel]);
-  
-  // Get unique filter values
-  const years = [...new Set(analysisData.map(d => d.year))].sort((a, b) => b - a);
-  const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b);
-  const units = [...new Set(analysisData.map(d => d.unit))].filter(Boolean).sort();
-  const equipments = [...new Set(analysisData.map(d => d.equipment))].filter(Boolean).sort();
-  const plates = [...new Set(analysisData.map(d => d.plate))].filter(Boolean).sort();
-  const drivers = [...new Set(analysisData.map(d => d.driver))].filter(d => d && d !== '-').sort((a, b) => a.localeCompare(b, 'pt-BR')).reduce((acc, name) => {
+  const units = useMemo(() => [...new Set(analysisData.map(d => d.unit))].filter(Boolean).sort(), [analysisData]);
+  const drivers = useMemo(() => [...new Set(analysisData.map(d => d.driver))].filter(d => d && d !== '-').sort((a, b) => a.localeCompare(b, 'pt-BR')).reduce((acc, name) => {
     if (!acc.seen.has(name.toUpperCase())) { acc.seen.add(name.toUpperCase()); acc.list.push(name); }
     return acc;
-  }, { seen: new Set(), list: [] }).list;
+  }, { seen: new Set(), list: [] }).list, [analysisData]);
 
-  // Apply filters to analysisData
-  const filtered = analysisData.filter(d => {
-    if (filters.year && d.year !== parseInt(filters.year)) return false;
+  const monthNames = MONTH_NAMES;
+
+  // Apply filters
+  const filtered = useMemo(() => analysisData.filter(d => {
+    if (filters.year && String(d.year) !== filters.year) return false;
     if (filters.month && monthNames[parseInt(filters.month)] !== d.month) return false;
     if (filters.unit && d.unit !== filters.unit) return false;
     if (filters.equipment && d.equipment !== filters.equipment) return false;
     if (filters.plate && d.plate !== filters.plate) return false;
     if (filters.driver && d.driver !== filters.driver) return false;
     return true;
-  });
+  }), [analysisData, filters, monthNames]);
 
   const totalLiters = filtered.reduce((sum, d) => sum + (d.totalLiters || 0), 0);
   const totalCost = filtered.reduce((sum, d) => sum + (d.cost || 0), 0);
@@ -533,100 +395,61 @@ export default function Graficos() {
     );
   };
 
-  // By vehicle - agregado de analysisData (KM excluído em meses marcados)
-  // Para R$/km: só conta custo e km de registros que têm KM (veículos com hodômetro)
-  const byVehicleData = {};
-  filtered.forEach(d => {
-    if (!byVehicleData[d.plate]) {
-      byVehicleData[d.plate] = { liters: 0, km: 0, cost: 0, kmCost: 0 };
-    }
-    byVehicleData[d.plate].liters += d.totalLiters || 0;
-    byVehicleData[d.plate].cost += d.cost || 0;
-    const excluded = exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`);
-    if (!excluded) {
-      byVehicleData[d.plate].km += d.kmDelta || 0;
-      if (d.kmDelta > 0) {
-        byVehicleData[d.plate].kmCost += d.cost || 0;
+  // ---- 6 gráficos por veículo/motorista — dados vindos diretamente do hook (mesma fonte da tela Análise) ----
+  const byVehicleData = useMemo(() => {
+    const map = {};
+    filtered.forEach(d => {
+      if (!map[d.plate]) map[d.plate] = { liters: 0, km: 0, cost: 0, kmCost: 0 };
+      map[d.plate].liters += d.totalLiters || 0;
+      map[d.plate].cost += d.cost || 0;
+      const excluded = exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`);
+      if (!excluded) {
+        map[d.plate].km += d.kmDelta || 0;
+        if (d.kmDelta > 0) map[d.plate].kmCost += d.cost || 0;
       }
-    }
-  });
-  const vehicleKmArray = Object.entries(byVehicleData)
-    .map(([plate, data]) => ({
-      placa: plate,
-      km: data.km,
-      kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
-      costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0
-    }))
-    .filter(d => d.km > 0)
-    .sort((a, b) => b.km - a.km)
-    .slice(0, 15);
+    });
+    return map;
+  }, [filtered, exclusoesSet]);
 
-  const vehicleKmLiterArray = Object.entries(byVehicleData)
-    .map(([plate, data]) => ({
-      placa: plate,
-      kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
-    }))
-    .filter(d => d.kmPerLiter > 0)
-    .sort((a, b) => b.kmPerLiter - a.kmPerLiter)
-    .slice(0, 15);
+  const vehicleKmArray = useMemo(() => Object.entries(byVehicleData)
+    .map(([plate, data]) => ({ placa: plate, km: data.km }))
+    .filter(d => d.km > 0).sort((a, b) => b.km - a.km).slice(0, 15), [byVehicleData]);
 
-  const vehicleCostArray = Object.entries(byVehicleData)
-    .map(([plate, data]) => ({
-      placa: plate,
-      km: data.km,
-      costPerKm: data.km > 0 ? parseFloat((data.kmCost / data.km).toFixed(2)) : 0,
-    }))
-    .filter(d => d.km > 0 && d.costPerKm > 0 && isFinite(d.costPerKm))
-    .sort((a, b) => b.costPerKm - a.costPerKm)
-    .slice(0, 15);
+  const vehicleKmLiterArray = useMemo(() => Object.entries(byVehicleData)
+    .map(([plate, data]) => ({ placa: plate, kmPerLiter: data.liters > 0 ? parseFloat((data.km / data.liters).toFixed(2)) : 0 }))
+    .filter(d => d.kmPerLiter > 0).sort((a, b) => b.kmPerLiter - a.kmPerLiter).slice(0, 15), [byVehicleData]);
 
-  // By driver - agregado de analysisData (KM excluído em meses marcados)
-  // Para R$/km: só conta custo e km de registros que têm KM (veículos com hodômetro)
-  const byDriverData = {};
-  filtered.forEach(d => {
-    const driverKey = (d.driver || '-').toUpperCase();
-    if (!byDriverData[driverKey]) {
-      byDriverData[driverKey] = { liters: 0, km: 0, cost: 0, kmCost: 0 };
-    }
-    byDriverData[driverKey].liters += d.totalLiters || 0;
-    byDriverData[driverKey].cost += d.cost || 0;
-    const excluded = exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`);
-    if (!excluded) {
-      byDriverData[driverKey].km += d.kmDelta || 0;
-      if (d.kmDelta > 0) {
-        byDriverData[driverKey].kmCost += d.cost || 0;
+  const vehicleCostArray = useMemo(() => Object.entries(byVehicleData)
+    .map(([plate, data]) => ({ placa: plate, km: data.km, costPerKm: data.km > 0 ? parseFloat((data.kmCost / data.km).toFixed(2)) : 0 }))
+    .filter(d => d.km > 0 && d.costPerKm > 0 && isFinite(d.costPerKm)).sort((a, b) => b.costPerKm - a.costPerKm).slice(0, 15), [byVehicleData]);
+
+  const byDriverData = useMemo(() => {
+    const map = {};
+    filtered.forEach(d => {
+      const key = (d.driver || '-').toUpperCase();
+      if (!map[key]) map[key] = { name: d.driver, liters: 0, km: 0, cost: 0, kmCost: 0 };
+      map[key].liters += d.totalLiters || 0;
+      map[key].cost += d.cost || 0;
+      const excluded = exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`);
+      if (!excluded) {
+        map[key].km += d.kmDelta || 0;
+        if (d.kmDelta > 0) map[key].kmCost += d.cost || 0;
       }
-    }
-  });
-  const driverKmArray = Object.entries(byDriverData)
-    .map(([driver, data]) => ({
-      driver: getFirstAndLastName(driver),
-      km: data.km,
-      kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
-      costPerKm: data.km > 0 ? (data.cost / data.km).toFixed(2) : 0
-    }))
-    .filter(d => d.km > 0)
-    .sort((a, b) => b.km - a.km)
-    .slice(0, 15);
+    });
+    return map;
+  }, [filtered, exclusoesSet]);
 
-  const driverKmLiterArray = Object.entries(byDriverData)
-    .map(([driver, data]) => ({
-      driver: getFirstAndLastName(driver),
-      kmPerLiter: data.liters > 0 ? (data.km / data.liters).toFixed(2) : 0,
-    }))
-    .filter(d => d.kmPerLiter > 0)
-    .sort((a, b) => b.kmPerLiter - a.kmPerLiter)
-    .slice(0, 15);
+  const driverKmArray = useMemo(() => Object.values(byDriverData)
+    .map(data => ({ driver: getFirstAndLastName(data.name), km: data.km }))
+    .filter(d => d.km > 0).sort((a, b) => b.km - a.km).slice(0, 15), [byDriverData]);
 
-  const driverCostArray = Object.entries(byDriverData)
-    .map(([driver, data]) => ({
-      driver: getFirstAndLastName(driver),
-      km: data.km,
-      costPerKm: data.km > 0 ? parseFloat((data.kmCost / data.km).toFixed(2)) : 0,
-    }))
-    .filter(d => d.km > 0 && d.costPerKm > 0 && isFinite(d.costPerKm))
-    .sort((a, b) => b.costPerKm - a.costPerKm)
-    .slice(0, 15);
+  const driverKmLiterArray = useMemo(() => Object.values(byDriverData)
+    .map(data => ({ driver: getFirstAndLastName(data.name), kmPerLiter: data.liters > 0 ? parseFloat((data.km / data.liters).toFixed(2)) : 0 }))
+    .filter(d => d.kmPerLiter > 0).sort((a, b) => b.kmPerLiter - a.kmPerLiter).slice(0, 15), [byDriverData]);
+
+  const driverCostArray = useMemo(() => Object.values(byDriverData)
+    .map(data => ({ driver: getFirstAndLastName(data.name), km: data.km, costPerKm: data.km > 0 ? parseFloat((data.kmCost / data.km).toFixed(2)) : 0 }))
+    .filter(d => d.km > 0 && d.costPerKm > 0 && isFinite(d.costPerKm)).sort((a, b) => b.costPerKm - a.costPerKm).slice(0, 15), [byDriverData]);
 
   if (isLoading) return <div className="text-slate-600 text-center py-12">Carregando dados...</div>;
 
@@ -692,7 +515,7 @@ export default function Graficos() {
              className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm"
            >
              <option value="">Todos motoristas</option>
-             {drivers.map(d => <option key={d} value={d}>{motoristasMap[String(d)] || d}</option>)}
+             {drivers.map(d => <option key={d} value={d}>{d}</option>)}
            </select>
         </div>
 
