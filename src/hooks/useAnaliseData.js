@@ -174,9 +174,9 @@ export function useAnaliseData() {
     return [...fuelAnalysis, ...m3OnlyRows];
   }, [records, cubicMetros, placaEquipamentosMap, motoristasMap, frentistasMap, combustiveisMap, pontosMap, precosCombustivel]);
 
-  // ===== ANÁLISE POR MOTORISTA (motorista + placa + mês) =====
+  // ===== ANÁLISE POR MOTORISTA (registro unitário — um por abastecimento) =====
   const analiseByMotorista = useMemo(() => {
-    // For each fuel record, compute km percorrido (delta from previous for the plate)
+    // Calcula km percorrido por registro (delta entre abastecimentos consecutivos da mesma placa)
     const byPlate = {};
     records.forEach(r => {
       if (!r.date || !r.vehicle_plate) return;
@@ -203,79 +203,54 @@ export function useAnaliseData() {
       });
     });
 
-    // Group by driver + plate + month
-    const grouped = {};
-    records.forEach(r => {
-      if (!r.date || !r.vehicle_plate || !r.driver) return;
-      const month = parseISO(r.date).getMonth();
-      const year = parseISO(r.date).getFullYear();
-      const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
-      const plateKey = r.vehicle_plate.toUpperCase();
-      const driverCode = String(r.driver);
-      const groupKey = `${monthKey}-${plateKey}-${driverCode}`;
+    // Um registro por abastecimento
+    return records
+      .filter(r => r.date && r.vehicle_plate)
+      .map(r => {
+        const month = parseISO(r.date).getMonth();
+        const year = parseISO(r.date).getFullYear();
+        const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+        const plateKey = String(r.vehicle_plate).toUpperCase();
+        const driverCode = String(r.driver || '');
+        const liters = r.liters || 0;
+        const kmPercorrido = kmPercorridoMap[r.id] || 0;
 
-      if (!grouped[groupKey]) {
-        grouped[groupKey] = {
+        const precoReg = precosCombustivel.find(p =>
+          String(p.ponto) === String(r.unit) &&
+          Number(p.mes) === month &&
+          Number(p.ano) === year
+        );
+        const cost = r.korth_id
+          ? (precoReg ? liters * precoReg.preco_litro : 0)
+          : (r.cost || 0);
+
+        return {
+          id: r.id,
+          date: r.date,
+          time: r.time || '',
           month: monthNames[month],
           monthKey,
           year,
           plate: r.vehicle_plate,
+          driver: motoristasMap[driverCode] || frentistasMap[driverCode] || driverCode || '-',
           driverCode,
-          unit: r.unit,
-          fuelType: r.fuel_type,
-          totalLiters: 0,
-          kmDelta: 0,
-          _korthLiters: 0,
-          _externalCost: 0,
-          _unit: r.unit,
-          _month: month,
-          _year: year,
+          unit: pontosMap[String(r.unit)] || r.unit || '-',
+          unitCode: r.unit,
+          equipment: placaEquipamentosMap[plateKey] || r.vehicle_type || '-',
+          fuelType: combustiveisMap[String(r.fuel_type)] || r.fuel_type || '-',
+          liters,
+          kmPercorrido,
+          cost,
+          efficiency: liters > 0 && kmPercorrido > 0 ? parseFloat((kmPercorrido / liters).toFixed(2)) : 0,
+          efficiencyCost: cost > 0 && kmPercorrido > 0 ? parseFloat((cost / kmPercorrido).toFixed(2)) : 0,
         };
-      }
-
-      grouped[groupKey].totalLiters += r.liters || 0;
-      grouped[groupKey].kmDelta += kmPercorridoMap[r.id] || 0;
-      grouped[groupKey]._unit = r.unit;
-      grouped[groupKey]._month = month;
-      grouped[groupKey]._year = year;
-      if (r.korth_id) grouped[groupKey]._korthLiters += r.liters || 0;
-      else grouped[groupKey]._externalCost += r.cost || 0;
-    });
-
-    return Object.values(grouped).map(item => {
-      const precoReg = precosCombustivel.find(p =>
-        String(p.ponto) === String(item._unit) &&
-        Number(p.mes) === Number(item._month) &&
-        Number(p.ano) === Number(item._year)
-      );
-      const korthCost = precoReg ? item._korthLiters * precoReg.preco_litro : 0;
-      const cost = korthCost + item._externalCost;
-
-      const m3Data = cubicMetros.find(cm =>
-        String(cm.placa).toUpperCase() === String(item.plate).toUpperCase() &&
-        cm.mes === item.monthKey
-      );
-      const m3 = m3Data ? Number(m3Data.metros_cubicos) : 0;
-
-      return {
-        month: item.month,
-        monthKey: item.monthKey,
-        year: item.year,
-        plate: item.plate,
-        driver: motoristasMap[item.driverCode] || frentistasMap[item.driverCode] || item.driverCode || '-',
-        driverCode: item.driverCode,
-        unit: pontosMap[String(item.unit)] || item.unit || '-',
-        equipment: placaEquipamentosMap[String(item.plate).toUpperCase()] || '-',
-        fuelType: combustiveisMap[String(item.fuelType)] || item.fuelType || '-',
-        totalLiters: item.totalLiters,
-        kmDelta: item.kmDelta,
-        m3,
-        cost,
-        efficiency: item.totalLiters > 0 ? parseFloat((item.kmDelta / item.totalLiters).toFixed(2)) : 0,
-        efficiencyCost: cost > 0 && item.kmDelta > 0 ? parseFloat((cost / item.kmDelta).toFixed(2)) : 0,
-      };
-    });
-  }, [records, cubicMetros, placaEquipamentosMap, motoristasMap, frentistasMap, combustiveisMap, pontosMap, precosCombustivel]);
+      })
+      .sort((a, b) => {
+        const nameCmp = a.driver.localeCompare(b.driver, 'pt-BR');
+        if (nameCmp !== 0) return nameCmp;
+        return (a.date + a.time).localeCompare(b.date + b.time);
+      });
+  }, [records, placaEquipamentosMap, motoristasMap, frentistasMap, combustiveisMap, pontosMap, precosCombustivel]);
 
   // Filter options
   const months = useMemo(() => [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b), [records]);

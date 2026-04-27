@@ -18,8 +18,8 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
   const filtered = data.filter(item => {
     if (filters.month && monthNames[parseInt(filters.month)] !== item.month) return false;
     if (filters.year && String(item.monthKey).split('-')[0] !== filters.year) return false;
-    if (filters.plate && !item.plate.toUpperCase().includes(filters.plate.toUpperCase())) return false;
-    if (filters.unit && item.unit !== (pontosMap[String(filters.unit)] || filters.unit)) return false;
+    if (filters.plate && item.plate.toUpperCase() !== filters.plate.toUpperCase()) return false;
+    if (filters.unit && item.unitCode !== filters.unit) return false;
     if (filters.equipment && item.equipment !== filters.equipment) return false;
     if (filters.driver) {
       const selectedName = (motoristasMap[String(filters.driver)] || frentistasMap[String(filters.driver)] || filters.driver).toUpperCase();
@@ -29,9 +29,8 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
   }).sort((a, b) => {
     let valA, valB;
     if (sortBy === 'month') { valA = monthNames.indexOf(a.month); valB = monthNames.indexOf(b.month); }
-    else if (sortBy === 'totalLiters') { valA = a.totalLiters; valB = b.totalLiters; }
-    else if (sortBy === 'kmDelta') { valA = a.kmDelta; valB = b.kmDelta; }
-    else if (sortBy === 'm3') { valA = a.m3; valB = b.m3; }
+    else if (sortBy === 'liters') { valA = a.liters; valB = b.liters; }
+    else if (sortBy === 'kmPercorrido') { valA = a.kmPercorrido; valB = b.kmPercorrido; }
     else if (sortBy === 'cost') { valA = a.cost; valB = b.cost; }
     else if (sortBy === 'efficiency') { valA = a.efficiency; valB = b.efficiency; }
     else if (sortBy === 'efficiencyCost') { valA = a.efficiencyCost; valB = b.efficiencyCost; }
@@ -54,10 +53,10 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
     const cols = [
       { h: 'Motorista', w: 0.22, align: 'left' }, { h: 'Mês', w: 0.07, align: 'left' },
       { h: 'Placa', w: 0.07, align: 'left' }, { h: 'Equipamento', w: 0.14, align: 'left' },
-      { h: 'Usina', w: 0.12, align: 'left' }, { h: 'Litros', w: 0.08, align: 'right' },
-      { h: 'KM', w: 0.07, align: 'right' }, { h: 'M³', w: 0.06, align: 'right' },
+      { h: 'Usina', w: 0.12, align: 'left' }, { h: 'Combustível', w: 0.07, align: 'left' },
+      { h: 'Litros', w: 0.08, align: 'right' }, { h: 'KM', w: 0.07, align: 'right' },
       { h: 'Valor (R$)', w: 0.09, align: 'right' }, { h: 'KM/L', w: 0.06, align: 'right' },
-      { h: 'R$/KM', w: 0.08, align: 'right' },
+      { h: 'R$/KM', w: 0.09, align: 'right' },
     ];
     const colWidths = cols.map(c => c.w * usableW);
     const totalW = colWidths.reduce((a, b) => a + b, 0);
@@ -91,10 +90,11 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
     filtered.forEach((item, idx) => {
       if (y + 7 > pageH - 8) { doc.addPage(); y = 10; drawHeaders(y); y += 7; }
       const excluded = exclusoesSet.has(`${String(item.plate).toUpperCase()}-${item.monthKey}`);
-      drawRow([item.driver, item.month, item.plate, item.equipment, item.unit,
-        item.totalLiters.toFixed(2),
-        item.kmDelta > 0 ? item.kmDelta.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '0',
-        item.m3.toFixed(2), `R$ ${item.cost.toFixed(2)}`,
+      drawRow([
+        item.driver, item.month, item.plate, item.equipment, item.unit, item.fuelType,
+        item.liters.toFixed(2),
+        item.kmPercorrido > 0 ? item.kmPercorrido.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '0',
+        `R$ ${item.cost.toFixed(2)}`,
         excluded ? 'excluído' : item.efficiency > 0 ? item.efficiency.toFixed(2) : '0',
         excluded ? 'excluído' : item.efficiencyCost > 0 ? `R$ ${item.efficiencyCost.toFixed(2)}` : '-'
       ], y, idx % 2 === 0);
@@ -142,36 +142,35 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
       <Card className="bg-white border-slate-200 shadow-lg">
         <CardContent className="p-0">
           <div className="overflow-x-auto w-full">
-            <Table className="min-w-[1300px]">
+            <Table className="min-w-[1200px]">
               <TableHeader>
                 <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
                   {[['driver','Motorista'],['month','Mês'],['plate','Placa'],['equipment','Equipamento'],['unit','Usina'],['fuelType','Combustível']].map(([f,l]) => (
                     <TableHead key={f} className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort(f)}>{l}<SortIcon field={f} sortBy={sortBy} sortDir={sortDir} /></TableHead>
                   ))}
-                  {[['totalLiters','Litros'],['kmDelta','KM'],['m3','M³'],['cost','Valor (R$)'],['efficiency','KM/L'],['efficiencyCost','R$/KM']].map(([f,l]) => (
+                  {[['liters','Litros'],['kmPercorrido','KM'],['cost','Valor (R$)'],['efficiency','KM/L'],['efficiencyCost','R$/KM']].map(([f,l]) => (
                     <TableHead key={f} className="text-slate-600 text-right cursor-pointer select-none" onClick={() => toggleSort(f)}>{l}<SortIcon field={f} sortBy={sortBy} sortDir={sortDir} /></TableHead>
                   ))}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
-                  <TableRow><TableCell colSpan={12} className="text-center text-slate-400 py-8">Nenhum registro encontrado</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={11} className="text-center text-slate-400 py-8">Nenhum registro encontrado</TableCell></TableRow>
                 ) : filtered.map((item, idx) => {
                   const excluded = exclusoesSet.has(`${String(item.plate).toUpperCase()}-${item.monthKey}`);
                   return (
-                    <TableRow key={idx} className="border-slate-200 hover:bg-slate-50">
+                    <TableRow key={item.id || idx} className="border-slate-200 hover:bg-slate-50">
                       <TableCell className="text-slate-800 font-medium">{item.driver}</TableCell>
                       <TableCell className="text-slate-800">{item.month}</TableCell>
                       <TableCell className="text-slate-800 font-mono font-bold">{item.plate}</TableCell>
                       <TableCell className="text-slate-600 text-sm">{item.equipment}</TableCell>
                       <TableCell className="text-slate-600 text-sm">{item.unit}</TableCell>
                       <TableCell className="text-slate-600 text-sm">{item.fuelType}</TableCell>
-                      <TableCell className="text-slate-800 text-right">{item.totalLiters.toFixed(2)} L</TableCell>
-                      <TableCell className="text-slate-800 text-right">{item.kmDelta.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} km</TableCell>
-                      <TableCell className="text-slate-800 text-right">{item.m3.toFixed(2)} m³</TableCell>
+                      <TableCell className="text-slate-800 text-right">{item.liters.toFixed(2)} L</TableCell>
+                      <TableCell className="text-slate-800 text-right">{item.kmPercorrido > 0 ? item.kmPercorrido.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '0'} km</TableCell>
                       <TableCell className="text-slate-800 text-right">R$ {item.cost.toFixed(2)}</TableCell>
                       <TableCell className="text-amber-600 text-right font-bold">
-                        {excluded ? <span className="text-red-400 text-xs font-normal italic">excluído</span> : `${item.efficiency} km/L`}
+                        {excluded ? <span className="text-red-400 text-xs font-normal italic">excluído</span> : item.efficiency > 0 ? `${item.efficiency} km/L` : <span className="text-slate-400">0</span>}
                       </TableCell>
                       <TableCell className="text-amber-600 text-right font-bold">
                         {excluded ? <span className="text-red-400 text-xs font-normal italic">excluído</span> : item.efficiencyCost > 0 ? `R$ ${item.efficiencyCost}/km` : '-'}
