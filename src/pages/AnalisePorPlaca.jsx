@@ -4,7 +4,7 @@ import TabPlaca from '@/components/analise/TabPlaca';
 import TabMotorista from '@/components/analise/TabMotorista';
 
 export default function AnalisePorPlaca() {
-  const [activeTab, setActiveTab] = useState('placa');
+  const [activeTab, setActiveTab] = useState('motorista');
 
   const {
     analiseByPlaca,
@@ -36,16 +36,6 @@ export default function AnalisePorPlaca() {
       {/* Tabs */}
       <div className="flex gap-1 border-b border-slate-200">
         <button
-          onClick={() => setActiveTab('placa')}
-          className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${
-            activeTab === 'placa'
-              ? 'bg-white border border-b-white border-slate-200 text-slate-900 -mb-px'
-              : 'text-slate-500 hover:text-slate-700'
-          }`}
-        >
-          Por Placa
-        </button>
-        <button
           onClick={() => setActiveTab('motorista')}
           className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${
             activeTab === 'motorista'
@@ -55,19 +45,29 @@ export default function AnalisePorPlaca() {
         >
           Por Motorista
         </button>
+        <button
+          onClick={() => setActiveTab('placa')}
+          className={`px-5 py-2.5 text-sm font-medium rounded-t-lg transition-colors ${
+            activeTab === 'placa'
+              ? 'bg-white border border-b-white border-slate-200 text-slate-900 -mb-px'
+              : 'text-slate-500 hover:text-slate-700'
+          }`}
+        >
+          Por Placa
+        </button>
       </div>
 
       {/* Tab content */}
-      {activeTab === 'placa' ? (
+      {activeTab === 'motorista' ? (
+        <TabMotorista
+          data={analiseByMotorista}
+          {...sharedProps}
+        />
+      ) : (
         <TabPlaca
           data={analiseByPlaca}
           cubicMetros={cubicMetros}
           placaEquipamentos={placaEquipamentos}
-          {...sharedProps}
-        />
-      ) : (
-        <TabMotorista
-          data={analiseByMotorista}
           {...sharedProps}
         />
       )}
