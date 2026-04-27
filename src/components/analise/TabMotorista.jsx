@@ -49,7 +49,17 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
   const [sortBy, setSortBy] = useState('driver');
   const [sortDir, setSortDir] = useState('asc');
   const [loadingId, setLoadingId] = useState(null);
+  const [ocultandoTodas, setOcultandoTodas] = useState(false);
   const queryClient = useQueryClient();
+
+  const ocultarTodasInconsistencias = async () => {
+    const inconsistentes = data.filter(item => !item.oculto && detectInconsistencias(item).length > 0);
+    if (inconsistentes.length === 0) return;
+    setOcultandoTodas(true);
+    await Promise.all(inconsistentes.map(item => base44.entities.FuelRecord.update(item.id, { oculto: true })));
+    queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+    setOcultandoTodas(false);
+  };
 
   const toggleOculto = async (item) => {
     setLoadingId(item.id);
@@ -198,6 +208,16 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
             <AlertTriangle className="w-4 h-4" />
             {filters.soInconsistencias ? 'Ver todos' : 'Ver inconsistências'}
           </button>
+          {totalInconsistencias > 0 && (
+            <button
+              onClick={ocultarTodasInconsistencias}
+              disabled={ocultandoTodas}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100 transition disabled:opacity-50"
+            >
+              <EyeOff className="w-4 h-4" />
+              {ocultandoTodas ? 'Ocultando...' : `Ocultar ${totalInconsistencias} inconsistência${totalInconsistencias > 1 ? 's' : ''}`}
+            </button>
+          )}
           <button
             onClick={() => setFilters(f => ({ ...f, mostrarOcultos: !f.mostrarOcultos }))}
             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border transition ${filters.mostrarOcultos ? 'bg-slate-200 border-slate-400 text-slate-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
