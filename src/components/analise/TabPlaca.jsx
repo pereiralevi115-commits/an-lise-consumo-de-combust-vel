@@ -87,12 +87,12 @@ export default function TabPlaca({ data, cubicMetros, placaEquipamentos, excluso
     const margin = 8;
     const usableW = pageW - margin * 2;
     const cols = [
-      { h: 'Mês', w: 0.06, align: 'left' }, { h: 'Placa', w: 0.06, align: 'left' },
-      { h: 'Usina', w: 0.10, align: 'left' }, { h: 'Equipamento', w: 0.13, align: 'left' },
-      { h: 'Motorista', w: 0.20, align: 'left' }, { h: 'Combustível', w: 0.06, align: 'left' },
-      { h: 'Litros', w: 0.07, align: 'right' }, { h: 'KM', w: 0.06, align: 'right' },
-      { h: 'M³', w: 0.05, align: 'right' }, { h: 'Valor (R$)', w: 0.08, align: 'right' },
-      { h: 'KM/L', w: 0.05, align: 'right' }, { h: 'R$/KM', w: 0.08, align: 'right' },
+      { h: 'Mês', w: 0.07, align: 'left' }, { h: 'Placa', w: 0.07, align: 'left' },
+      { h: 'Usina', w: 0.12, align: 'left' }, { h: 'Equipamento', w: 0.16, align: 'left' },
+      { h: 'Combustível', w: 0.07, align: 'left' },
+      { h: 'Litros', w: 0.09, align: 'right' }, { h: 'KM', w: 0.08, align: 'right' },
+      { h: 'M³', w: 0.07, align: 'right' }, { h: 'Valor (R$)', w: 0.10, align: 'right' },
+      { h: 'KM/L', w: 0.07, align: 'right' }, { h: 'R$/KM', w: 0.10, align: 'right' },
     ];
     const colWidths = cols.map(c => c.w * usableW);
     const totalW = colWidths.reduce((a, b) => a + b, 0);
@@ -125,7 +125,7 @@ export default function TabPlaca({ data, cubicMetros, placaEquipamentos, excluso
     drawHeaders(y); y += 7;
     filtered.forEach((item, idx) => {
       if (y + 7 > pageH - 8) { doc.addPage(); y = 10; drawHeaders(y); y += 7; }
-      drawRow([item.month, item.plate, item.unit, item.equipment, item.driver, item.fuelType,
+      drawRow([item.month, item.plate, item.unit, item.equipment, item.fuelType,
         item.totalLiters.toFixed(2), item.kmDelta > 0 ? item.kmDelta.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '0',
         item.m3.toFixed(2), `R$ ${item.cost.toFixed(2)}`,
         item.efficiency > 0 ? item.efficiency.toFixed(2) : '0',
@@ -159,15 +159,7 @@ export default function TabPlaca({ data, cubicMetros, placaEquipamentos, excluso
           <option value="">Equipamento</option>
           {equipments.map(e => <option key={e} value={e}>{e}</option>)}
         </select>
-        <select value={filters.driver} onChange={e => setFilters({ ...filters, driver: e.target.value })} className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm">
-          <option value="">Motorista</option>
-          {drivers.map(d => <option key={d} value={d}>{motoristasMap[String(d)] || frentistasMap[String(d)] || d}</option>)}
-        </select>
       </div>
-
-      {filters.driver && (
-        <DebugDriverPanel driverCode={filters.driver} driverName={motoristasMap[String(filters.driver)] || filters.driver} />
-      )}
 
       <div className="flex items-center justify-between">
         <p className="text-slate-500 text-sm">Total de {filtered.length} registros</p>
@@ -182,7 +174,7 @@ export default function TabPlaca({ data, cubicMetros, placaEquipamentos, excluso
             <Table className="min-w-[1400px]">
               <TableHeader>
                 <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
-                  {[['month','Mês'],['plate','Placa'],['unit','Usina'],['equipment','Equipamentos'],['driver','Motorista'],['fuelType','Combustível']].map(([f,l]) => (
+                  {[['month','Mês'],['plate','Placa'],['unit','Usina'],['equipment','Equipamentos'],['fuelType','Combustível']].map(([f,l]) => (
                     <TableHead key={f} className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort(f)}>{l}<SortIcon field={f} sortBy={sortBy} sortDir={sortDir} /></TableHead>
                   ))}
                   {[['totalLiters','Litros'],['kmDelta','KM (Máx - Mín)'],['m3','M³'],['cost','Valor (R$)'],['efficiency','Eficiência (KM/L)'],['efficiencyCost','Eficiência (R$/KM)']].map(([f,l]) => (
@@ -194,21 +186,20 @@ export default function TabPlaca({ data, cubicMetros, placaEquipamentos, excluso
                 {filtered.length === 0 ? (
                   <TableRow><TableCell colSpan={12} className="text-center text-slate-400 py-8">Nenhum registro encontrado</TableCell></TableRow>
                 ) : filtered.map((item, idx) => {
-                  const isM3Only = item.totalLiters === 0 && item.kmDelta === 0 && item.cost === 0 && item.driver === '-';
-                  const isEditing = editingRow && editingRow.plate === item.plate && editingRow.monthKey === item.monthKey;
-                  const excluded = exclusoesSet.has(`${String(item.plate).toUpperCase()}-${item.monthKey}`);
-                  return (
-                    <TableRow key={idx} className={`border-slate-200 ${isM3Only ? 'bg-green-50 hover:bg-green-100' : 'hover:bg-slate-50'}`}>
-                      <TableCell className="text-slate-800">{item.month}</TableCell>
-                      <TableCell className="text-slate-800 font-mono font-bold">{item.plate}</TableCell>
-                      <TableCell className="text-slate-600 text-sm">
-                        {isM3Only && isEditing ? <input className="bg-slate-700 text-white rounded px-2 py-1 text-xs w-28 border border-green-500 outline-none" value={editValues.unit} onChange={e => setEditValues(v => ({ ...v, unit: e.target.value }))} placeholder="Usina..." /> : item.unit}
-                      </TableCell>
-                      <TableCell className="text-slate-600 text-sm">
-                        {isM3Only && isEditing ? <input className="bg-slate-700 text-white rounded px-2 py-1 text-xs w-36 border border-green-500 outline-none" value={editValues.equipment} onChange={e => setEditValues(v => ({ ...v, equipment: e.target.value }))} placeholder="Equipamento..." /> : item.equipment}
-                      </TableCell>
-                      <TableCell className="text-slate-600 text-sm">{item.driver}</TableCell>
-                      <TableCell className="text-slate-600 text-sm">{item.fuelType}</TableCell>
+                 const isM3Only = item.totalLiters === 0 && item.kmDelta === 0 && item.cost === 0;
+                 const isEditing = editingRow && editingRow.plate === item.plate && editingRow.monthKey === item.monthKey;
+                 const excluded = exclusoesSet.has(`${String(item.plate).toUpperCase()}-${item.monthKey}`);
+                 return (
+                   <TableRow key={idx} className={`border-slate-200 ${isM3Only ? 'bg-green-50 hover:bg-green-100' : 'hover:bg-slate-50'}`}>
+                     <TableCell className="text-slate-800">{item.month}</TableCell>
+                     <TableCell className="text-slate-800 font-mono font-bold">{item.plate}</TableCell>
+                     <TableCell className="text-slate-600 text-sm">
+                       {isM3Only && isEditing ? <input className="bg-slate-700 text-white rounded px-2 py-1 text-xs w-28 border border-green-500 outline-none" value={editValues.unit} onChange={e => setEditValues(v => ({ ...v, unit: e.target.value }))} placeholder="Usina..." /> : item.unit}
+                     </TableCell>
+                     <TableCell className="text-slate-600 text-sm">
+                       {isM3Only && isEditing ? <input className="bg-slate-700 text-white rounded px-2 py-1 text-xs w-36 border border-green-500 outline-none" value={editValues.equipment} onChange={e => setEditValues(v => ({ ...v, equipment: e.target.value }))} placeholder="Equipamento..." /> : item.equipment}
+                     </TableCell>
+                     <TableCell className="text-slate-600 text-sm">{item.fuelType}</TableCell>
                       <TableCell className="text-slate-800 text-right">{item.totalLiters.toFixed(2)} L</TableCell>
                       <TableCell className="text-slate-800 text-right">{item.kmDelta.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} km</TableCell>
                       <TableCell className="text-slate-800 text-right">{item.m3.toFixed(2)} m³</TableCell>
