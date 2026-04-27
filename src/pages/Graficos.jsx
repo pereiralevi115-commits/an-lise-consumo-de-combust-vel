@@ -82,6 +82,7 @@ export default function Graficos() {
   // Use the shared hook — same data source as Analise page
   const {
     analiseByPlaca: analysisData,
+    analiseByMotorista,
     cubicMetros,
     exclusoesSet,
     pontosMap,
@@ -395,60 +396,65 @@ export default function Graficos() {
     );
   };
 
-  // ---- 6 gráficos por veículo/motorista — dados vindos diretamente do hook (mesma fonte da tela Análise) ----
+  // ---- 6 gráficos por veículo/motorista — dados vindos de analiseByMotorista (mesma fonte da aba Por Motorista) ----
+  // Aplica os mesmos filtros (ano, mês, placa, usina, equipamento, motorista) sobre analiseByMotorista
+  const filteredMotorista = useMemo(() => analiseByMotorista.filter(d => {
+    if (d.oculto) return false;
+    if (filters.year && String(d.year) !== filters.year) return false;
+    if (filters.month && monthNames[parseInt(filters.month)] !== d.month) return false;
+    if (filters.unit && d.unitCode !== filters.unit) return false;
+    if (filters.equipment && d.equipment !== filters.equipment) return false;
+    if (filters.plate && d.plate.toUpperCase() !== filters.plate.toUpperCase()) return false;
+    if (filters.driver && d.driver !== filters.driver) return false;
+    return true;
+  }), [analiseByMotorista, filters, monthNames]);
+
   const byVehicleData = useMemo(() => {
     const map = {};
-    filtered.forEach(d => {
-      if (!map[d.plate]) map[d.plate] = { liters: 0, km: 0, cost: 0, kmCost: 0 };
-      map[d.plate].liters += d.totalLiters || 0;
-      map[d.plate].cost += d.cost || 0;
-      const excluded = exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`);
-      if (!excluded) {
-        map[d.plate].km += d.kmDelta || 0;
-        if (d.kmDelta > 0) map[d.plate].kmCost += d.cost || 0;
-      }
+    filteredMotorista.forEach(d => {
+      const key = String(d.plate).toUpperCase();
+      if (!map[key]) map[key] = { plate: d.plate, liters: 0, km: 0, cost: 0 };
+      map[key].liters += d.liters || 0;
+      map[key].km += d.kmPercorrido || 0;
+      map[key].cost += d.cost || 0;
     });
     return map;
-  }, [filtered, exclusoesSet]);
+  }, [filteredMotorista]);
 
-  const vehicleKmArray = useMemo(() => Object.entries(byVehicleData)
-    .map(([plate, data]) => ({ placa: plate, km: data.km }))
+  const vehicleKmArray = useMemo(() => Object.values(byVehicleData)
+    .map(d => ({ placa: d.plate, km: d.km }))
     .filter(d => d.km > 0).sort((a, b) => b.km - a.km).slice(0, 15), [byVehicleData]);
 
-  const vehicleKmLiterArray = useMemo(() => Object.entries(byVehicleData)
-    .map(([plate, data]) => ({ placa: plate, kmPerLiter: data.liters > 0 ? parseFloat((data.km / data.liters).toFixed(2)) : 0 }))
+  const vehicleKmLiterArray = useMemo(() => Object.values(byVehicleData)
+    .map(d => ({ placa: d.plate, kmPerLiter: d.liters > 0 && d.km > 0 ? parseFloat((d.km / d.liters).toFixed(2)) : 0 }))
     .filter(d => d.kmPerLiter > 0).sort((a, b) => b.kmPerLiter - a.kmPerLiter).slice(0, 15), [byVehicleData]);
 
-  const vehicleCostArray = useMemo(() => Object.entries(byVehicleData)
-    .map(([plate, data]) => ({ placa: plate, km: data.km, costPerKm: data.km > 0 ? parseFloat((data.kmCost / data.km).toFixed(2)) : 0 }))
+  const vehicleCostArray = useMemo(() => Object.values(byVehicleData)
+    .map(d => ({ placa: d.plate, km: d.km, costPerKm: d.km > 0 ? parseFloat((d.cost / d.km).toFixed(2)) : 0 }))
     .filter(d => d.km > 0 && d.costPerKm > 0 && isFinite(d.costPerKm)).sort((a, b) => b.costPerKm - a.costPerKm).slice(0, 15), [byVehicleData]);
 
   const byDriverData = useMemo(() => {
     const map = {};
-    filtered.forEach(d => {
+    filteredMotorista.forEach(d => {
       const key = (d.driver || '-').toUpperCase();
-      if (!map[key]) map[key] = { name: d.driver, liters: 0, km: 0, cost: 0, kmCost: 0 };
-      map[key].liters += d.totalLiters || 0;
+      if (!map[key]) map[key] = { name: d.driver, liters: 0, km: 0, cost: 0 };
+      map[key].liters += d.liters || 0;
+      map[key].km += d.kmPercorrido || 0;
       map[key].cost += d.cost || 0;
-      const excluded = exclusoesSet.has(`${String(d.plate).toUpperCase()}-${d.monthKey}`);
-      if (!excluded) {
-        map[key].km += d.kmDelta || 0;
-        if (d.kmDelta > 0) map[key].kmCost += d.cost || 0;
-      }
     });
     return map;
-  }, [filtered, exclusoesSet]);
+  }, [filteredMotorista]);
 
   const driverKmArray = useMemo(() => Object.values(byDriverData)
-    .map(data => ({ driver: getFirstAndLastName(data.name), km: data.km }))
+    .map(d => ({ driver: getFirstAndLastName(d.name), km: d.km }))
     .filter(d => d.km > 0).sort((a, b) => b.km - a.km).slice(0, 15), [byDriverData]);
 
   const driverKmLiterArray = useMemo(() => Object.values(byDriverData)
-    .map(data => ({ driver: getFirstAndLastName(data.name), kmPerLiter: data.liters > 0 ? parseFloat((data.km / data.liters).toFixed(2)) : 0 }))
+    .map(d => ({ driver: getFirstAndLastName(d.name), kmPerLiter: d.liters > 0 && d.km > 0 ? parseFloat((d.km / d.liters).toFixed(2)) : 0 }))
     .filter(d => d.kmPerLiter > 0).sort((a, b) => b.kmPerLiter - a.kmPerLiter).slice(0, 15), [byDriverData]);
 
   const driverCostArray = useMemo(() => Object.values(byDriverData)
-    .map(data => ({ driver: getFirstAndLastName(data.name), km: data.km, costPerKm: data.km > 0 ? parseFloat((data.kmCost / data.km).toFixed(2)) : 0 }))
+    .map(d => ({ driver: getFirstAndLastName(d.name), km: d.km, costPerKm: d.km > 0 ? parseFloat((d.cost / d.km).toFixed(2)) : 0 }))
     .filter(d => d.km > 0 && d.costPerKm > 0 && isFinite(d.costPerKm)).sort((a, b) => b.costPerKm - a.costPerKm).slice(0, 15), [byDriverData]);
 
   if (isLoading) return <div className="text-slate-600 text-center py-12">Carregando dados...</div>;
