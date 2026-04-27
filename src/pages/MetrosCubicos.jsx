@@ -517,7 +517,7 @@ export default function MetrosCubicos() {
                            <option value="">-- selecione --</option>
                            <option value="CAMINHÃO BETONEIRA">CAMINHÃO BETONEIRA</option>
                            <option value="BOMBA LANÇA">BOMBA LANÇA</option>
-                           <option value="BOMBA ESTACIONARIA">BOMBA ESTACIONARIA</option>
+                           <option value="BOMBA ESTACIONÁRIA">BOMBA ESTACIONÁRIA</option>
                          </select>
                        ) : (placaEquipamentosMap[String(r.placa).toUpperCase()] || r.equipamento || '-')}
                       </TableCell>
