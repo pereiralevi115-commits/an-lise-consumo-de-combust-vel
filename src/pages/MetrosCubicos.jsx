@@ -157,7 +157,7 @@ export default function MetrosCubicos() {
     setInlineEditValues({
       mes: r.mes || '',
       placa: r.placa || '',
-      equipamento: placaEquipamentosMap[String(r.placa).toUpperCase()] || r.equipamento || '',
+      equipamento: r.equipamento || placaEquipamentosMap[String(r.placa).toUpperCase()] || '',
       metros_cubicos: r.metros_cubicos != null ? String(r.metros_cubicos) : '',
     });
   };
@@ -519,7 +519,7 @@ export default function MetrosCubicos() {
                            <option value="BOMBA LANÇA">BOMBA LANÇA</option>
                            <option value="BOMBA ESTACIONÁRIA">BOMBA ESTACIONÁRIA</option>
                          </select>
-                       ) : (placaEquipamentosMap[String(r.placa).toUpperCase()] || r.equipamento || '-')}
+                       ) : (r.equipamento || placaEquipamentosMap[String(r.placa).toUpperCase()] || '-')}
                       </TableCell>
                       <TableCell className="text-slate-800 text-right">
                         {isInlineEditing ? (
