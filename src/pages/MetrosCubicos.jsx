@@ -508,13 +508,18 @@ export default function MetrosCubicos() {
                         ) : r.placa}
                       </TableCell>
                       <TableCell className="text-slate-600">
-                        {isInlineEditing ? (
-                          <Input
-                            value={inlineEditValues.equipamento}
-                            onChange={e => setInlineEditValues(v => ({ ...v, equipamento: e.target.value }))}
-                            className="h-7 text-xs border-blue-300 w-48"
-                          />
-                        ) : (placaEquipamentosMap[String(r.placa).toUpperCase()] || r.equipamento || '-')}
+                       {isInlineEditing ? (
+                         <select
+                           value={inlineEditValues.equipamento}
+                           onChange={e => setInlineEditValues(v => ({ ...v, equipamento: e.target.value }))}
+                           className="h-7 text-xs border border-blue-300 rounded px-2 w-52 bg-white text-slate-800"
+                         >
+                           <option value="">-- selecione --</option>
+                           <option value="CAMINHÃO BETONEIRA">CAMINHÃO BETONEIRA</option>
+                           <option value="BOMBA LANÇA">BOMBA LANÇA</option>
+                           <option value="BOMBA ESTACIONARIA">BOMBA ESTACIONARIA</option>
+                         </select>
+                       ) : (placaEquipamentosMap[String(r.placa).toUpperCase()] || r.equipamento || '-')}
                       </TableCell>
                       <TableCell className="text-slate-800 text-right">
                         {isInlineEditing ? (
