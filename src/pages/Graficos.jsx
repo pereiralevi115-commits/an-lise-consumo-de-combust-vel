@@ -171,6 +171,7 @@ export default function Graficos() {
           equipment: placaEquipamentosMap[plateKey] || r.vehicle_type || '',
           vehicle_type: r.vehicle_type,
           driver: r.driver,
+          driverCounts: {},
           totalLiters: 0,
           kmDelta: 0,
           cost: 0,
@@ -178,6 +179,9 @@ export default function Graficos() {
         };
       }
 
+      if (r.driver) {
+        groupedData[groupKey].driverCounts[r.driver] = (groupedData[groupKey].driverCounts[r.driver] || 0) + 1;
+      }
       groupedData[groupKey].totalLiters += r.liters || 0;
       groupedData[groupKey]._unit = r.unit;
       groupedData[groupKey]._month = month;
@@ -200,6 +204,7 @@ export default function Graficos() {
       const korthCost = precoReg ? (item._korthLiters || 0) * precoReg.preco_litro : 0;
       const custoCalculado = korthCost + (item._externalCost || 0);
 
+      const mainDriverCode = Object.entries(item.driverCounts || {}).sort((a, b) => b[1] - a[1])[0]?.[0] || item.driver;
       return {
          month: item.month,
          monthKey: item.monthKey,
@@ -208,7 +213,7 @@ export default function Graficos() {
          unit: pontosMap[String(item.unit)] || item.unit || '-',
          equipment: item.equipment || '-',
          vehicle_type: item.vehicle_type,
-         driver: motoristasMap[String(item.driver)] || item.driver || '-',
+         driver: motoristasMap[String(mainDriverCode)] || mainDriverCode || '-',
          totalLiters: item.totalLiters,
          kmDelta: item.kmDelta,
          m3: (() => {
