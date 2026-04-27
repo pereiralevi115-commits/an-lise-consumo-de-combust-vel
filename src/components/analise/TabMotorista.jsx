@@ -56,7 +56,12 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
     const inconsistentes = data.filter(item => !item.oculto && detectInconsistencias(item).length > 0);
     if (inconsistentes.length === 0) return;
     setOcultandoTodas(true);
-    await Promise.all(inconsistentes.map(item => base44.entities.FuelRecord.update(item.id, { oculto: true })));
+    const BATCH = 10;
+    for (let i = 0; i < inconsistentes.length; i += BATCH) {
+      const lote = inconsistentes.slice(i, i + BATCH);
+      await Promise.all(lote.map(item => base44.entities.FuelRecord.update(item.id, { oculto: true })));
+      if (i + BATCH < inconsistentes.length) await new Promise(r => setTimeout(r, 300));
+    }
     queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
     setOcultandoTodas(false);
   };
