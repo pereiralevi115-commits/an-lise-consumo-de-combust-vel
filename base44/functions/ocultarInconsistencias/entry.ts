@@ -11,16 +11,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'ids array required' }, { status: 400 });
     }
 
-    // Processa em lotes de 20 com 100ms entre lotes
-    const BATCH = 20;
+    // Lotes de 3 simultâneos com 300ms entre lotes
+    const BATCH = 3;
     let updated = 0;
     for (let i = 0; i < ids.length; i += BATCH) {
       const lote = ids.slice(i, i + BATCH);
-      await Promise.all(
-        lote.map(id => base44.asServiceRole.entities.FuelRecord.update(id, { oculto: true }))
-      );
+      await Promise.all(lote.map(id => base44.asServiceRole.entities.FuelRecord.update(id, { oculto: true })));
       updated += lote.length;
-      if (i + BATCH < ids.length) await new Promise(r => setTimeout(r, 100));
+      if (i + BATCH < ids.length) await new Promise(r => setTimeout(r, 300));
     }
 
     return Response.json({ updated });
