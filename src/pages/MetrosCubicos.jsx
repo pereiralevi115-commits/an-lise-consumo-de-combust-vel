@@ -156,6 +156,7 @@ export default function MetrosCubicos() {
     setInlineEditId(r.id);
     setInlineEditValues({
       mes: r.mes || '',
+      placa: r.placa || '',
       equipamento: placaEquipamentosMap[String(r.placa).toUpperCase()] || r.equipamento || '',
       metros_cubicos: r.metros_cubicos != null ? String(r.metros_cubicos) : '',
     });
@@ -166,6 +167,7 @@ export default function MetrosCubicos() {
   const saveInlineEdit = async (r) => {
     await base44.entities.CubicMetros.update(r.id, {
       mes: inlineEditValues.mes,
+      placa: inlineEditValues.placa,
       equipamento: inlineEditValues.equipamento,
       metros_cubicos: parseFloat(String(inlineEditValues.metros_cubicos).replace(',', '.')),
     });
@@ -496,7 +498,15 @@ export default function MetrosCubicos() {
                           />
                         ) : formatMes(r.mes)}
                       </TableCell>
-                      <TableCell className="text-slate-800 font-mono">{r.placa}</TableCell>
+                      <TableCell className="text-slate-800 font-mono">
+                        {isInlineEditing ? (
+                          <Input
+                            value={inlineEditValues.placa}
+                            onChange={e => setInlineEditValues(v => ({ ...v, placa: e.target.value.toUpperCase() }))}
+                            className="h-7 text-xs border-blue-300 w-28 font-mono"
+                          />
+                        ) : r.placa}
+                      </TableCell>
                       <TableCell className="text-slate-600">
                         {isInlineEditing ? (
                           <Input
