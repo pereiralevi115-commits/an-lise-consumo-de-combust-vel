@@ -21,25 +21,50 @@ export default function TabPlaca({ data, cubicMetros, placaEquipamentos, excluso
   const [editValues, setEditValues] = useState({ unit: '', equipment: '' });
   const queryClient = useQueryClient();
 
-  const filtered = data.filter(item => {
+  // Primeiro filtra
+  const prefiltred = data.filter(item => {
     if (filters.month && monthNames[parseInt(filters.month)] !== item.month) return false;
     if (filters.year && String(item.monthKey).split('-')[0] !== filters.year) return false;
     if (filters.plate && !item.plate.toUpperCase().includes(filters.plate.toUpperCase())) return false;
     if (filters.unit && item.unitCode !== filters.unit && !item.unit.includes(filters.unit)) return false;
     if (filters.equipment && item.equipment !== filters.equipment) return false;
-    if (filters.driver) {
-      const selectedName = (motoristasMap[String(filters.driver)] || frentistasMap[String(filters.driver)] || filters.driver).toUpperCase();
-      const itemName = (item.driver || '').toUpperCase();
-      if (!itemName.includes(selectedName) && itemName !== selectedName) return false;
-    }
     return true;
-  }).sort((a, b) => {
+  });
+
+  // Consolida: uma linha por placa + mês (soma totais, recalcula eficiências)
+  const consolidatedMap = {};
+  prefiltred.forEach(item => {
+    const key = `${item.monthKey}-${String(item.plate).toUpperCase()}`;
+    if (!consolidatedMap[key]) {
+      consolidatedMap[key] = { ...item, totalLiters: 0, kmDelta: 0, m3: 0, cost: 0 };
+    }
+    const row = consolidatedMap[key];
+    row.totalLiters += item.totalLiters || 0;
+    row.kmDelta += item.kmDelta || 0;
+    row.m3 += item.m3 || 0;
+    row.cost += item.cost || 0;
+    // Mantém equipamento/usina do primeiro registro não-vazio
+    if (row.equipment === '-' && item.equipment !== '-') row.equipment = item.equipment;
+    if (row.unit === '-' && item.unit !== '-') row.unit = item.unit;
+    if (row.fuelType === '-' && item.fuelType && item.fuelType !== '-') row.fuelType = item.fuelType;
+  });
+
+  // Recalcula eficiências após consolidação
+  const consolidated = Object.values(consolidatedMap).map(row => {
+    const excluded = exclusoesSet.has(`${String(row.plate).toUpperCase()}-${row.monthKey}`);
+    return {
+      ...row,
+      efficiency: (!excluded && row.totalLiters > 0 && row.kmDelta > 0) ? parseFloat((row.kmDelta / row.totalLiters).toFixed(2)) : 0,
+      efficiencyCost: (!excluded && row.kmDelta > 0) ? parseFloat((row.cost / row.kmDelta).toFixed(2)) : 0,
+    };
+  });
+
+  const filtered = consolidated.sort((a, b) => {
     let valA, valB;
     if (sortBy === 'month') { valA = monthNames.indexOf(a.month); valB = monthNames.indexOf(b.month); }
     else if (sortBy === 'plate') { valA = a.plate; valB = b.plate; }
     else if (sortBy === 'unit') { valA = a.unit; valB = b.unit; }
     else if (sortBy === 'equipment') { valA = a.equipment; valB = b.equipment; }
-    else if (sortBy === 'driver') { valA = a.driver; valB = b.driver; }
     else if (sortBy === 'fuelType') { valA = a.fuelType; valB = b.fuelType; }
     else if (sortBy === 'totalLiters') { valA = a.totalLiters; valB = b.totalLiters; }
     else if (sortBy === 'kmDelta') { valA = a.kmDelta; valB = b.kmDelta; }
