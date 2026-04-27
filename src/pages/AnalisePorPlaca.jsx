@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import DebugDriverPanel from '@/components/DebugDriverPanel';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format, parseISO } from 'date-fns';
@@ -464,6 +465,13 @@ export default function AnalisePorPlaca() {
             {drivers.map(d => <option key={d} value={d}>{motoristasMap[String(d)] || frentistasMap[String(d)] || d}</option>)}
           </select>
         </div>
+
+        {filters.driver && (
+          <DebugDriverPanel
+            driverCode={filters.driver}
+            driverName={motoristasMap[String(filters.driver)] || filters.driver}
+          />
+        )}
 
         <div className="flex items-center justify-between mb-6">
           <p className="text-slate-500">Total de {filtered.length} registros</p>
