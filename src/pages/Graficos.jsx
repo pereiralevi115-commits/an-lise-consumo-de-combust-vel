@@ -246,7 +246,7 @@ export default function Graficos() {
         litersPerM3: data.m3 > 0 ? (data.liters / data.m3).toFixed(2) : 0,
         costPerM3: data.m3 > 0 ? (data.cost / data.m3).toFixed(2) : 0
       }))
-      .filter(d => d.m3 > 0 && !normalizeEquipment(d.name).includes('BOMBA ESTACIONARIA'))
+      .filter(d => d.m3 > 0)
       .sort((a, b) => b.m3 - a.m3);
 
   const CustomBarLabel = (props) => {
