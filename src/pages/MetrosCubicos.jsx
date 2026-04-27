@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload, Trash2, CheckCircle, AlertCircle, Loader2, Info } from 'lucide-react';
+import { Upload, Trash2, CheckCircle, AlertCircle, Loader2, Info, Pencil, Check, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -20,6 +20,8 @@ export default function MetrosCubicos() {
   const [editField, setEditField] = useState(null); // 'equipamento' ou 'metros_cubicos'
   const [editValue, setEditValue] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [inlineEditId, setInlineEditId] = useState(null);
+  const [inlineEditValues, setInlineEditValues] = useState({ mes: '', equipamento: '', metros_cubicos: '' });
   const [filterMes, setFilterMes] = useState('');
   const [filterPlaca, setFilterPlaca] = useState('');
   const [filterEquipamento, setFilterEquipamento] = useState('');
@@ -148,6 +150,27 @@ export default function MetrosCubicos() {
     } finally {
       setIsEditing(false);
     }
+  };
+
+  const startInlineEdit = (r) => {
+    setInlineEditId(r.id);
+    setInlineEditValues({
+      mes: r.mes || '',
+      equipamento: placaEquipamentosMap[String(r.placa).toUpperCase()] || r.equipamento || '',
+      metros_cubicos: r.metros_cubicos != null ? String(r.metros_cubicos) : '',
+    });
+  };
+
+  const cancelInlineEdit = () => setInlineEditId(null);
+
+  const saveInlineEdit = async (r) => {
+    await base44.entities.CubicMetros.update(r.id, {
+      mes: inlineEditValues.mes,
+      equipamento: inlineEditValues.equipamento,
+      metros_cubicos: parseFloat(String(inlineEditValues.metros_cubicos).replace(',', '.')),
+    });
+    queryClient.invalidateQueries({ queryKey: ['CubicMetros'] });
+    setInlineEditId(null);
   };
 
   const handleDeleteMes = async () => {
@@ -451,8 +474,10 @@ export default function MetrosCubicos() {
                     <TableCell colSpan={5} className="text-center text-slate-400 py-8">Nenhum registro encontrado</TableCell>
                   </TableRow>
                 ) : (
-                  sortedRecords.map((r) => (
-                    <TableRow key={r.id} className={`border-slate-200 hover:bg-slate-50 ${selected.has(r.id) ? 'bg-blue-100' : ''}`}>
+                  sortedRecords.map((r) => {
+                    const isInlineEditing = inlineEditId === r.id;
+                    return (
+                    <TableRow key={r.id} className={`border-slate-200 hover:bg-slate-50 ${selected.has(r.id) ? 'bg-blue-50' : ''}`}>
                       <TableCell className="text-center w-10">
                         <input
                           type="checkbox"
@@ -461,24 +486,63 @@ export default function MetrosCubicos() {
                           className="cursor-pointer"
                         />
                       </TableCell>
-                      <TableCell className="text-slate-800">{formatMes(r.mes)}</TableCell>
+                      <TableCell className="text-slate-800">
+                        {isInlineEditing ? (
+                          <Input
+                            type="month"
+                            value={inlineEditValues.mes}
+                            onChange={e => setInlineEditValues(v => ({ ...v, mes: e.target.value }))}
+                            className="h-7 text-xs border-blue-300 w-36"
+                          />
+                        ) : formatMes(r.mes)}
+                      </TableCell>
                       <TableCell className="text-slate-800 font-mono">{r.placa}</TableCell>
-                      <TableCell className="text-slate-600">{placaEquipamentosMap[String(r.placa).toUpperCase()] || r.equipamento || '-'}</TableCell>
+                      <TableCell className="text-slate-600">
+                        {isInlineEditing ? (
+                          <Input
+                            value={inlineEditValues.equipamento}
+                            onChange={e => setInlineEditValues(v => ({ ...v, equipamento: e.target.value }))}
+                            className="h-7 text-xs border-blue-300 w-48"
+                          />
+                        ) : (placaEquipamentosMap[String(r.placa).toUpperCase()] || r.equipamento || '-')}
+                      </TableCell>
                       <TableCell className="text-slate-800 text-right">
-                        {r.metros_cubicos?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {isInlineEditing ? (
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={inlineEditValues.metros_cubicos}
+                            onChange={e => setInlineEditValues(v => ({ ...v, metros_cubicos: e.target.value }))}
+                            className="h-7 text-xs border-blue-300 w-24 text-right ml-auto"
+                          />
+                        ) : r.metros_cubicos?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(r.id)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-900/30 h-7 w-7"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-1 justify-end">
+                          {isInlineEditing ? (
+                            <>
+                              <Button variant="ghost" size="icon" onClick={() => saveInlineEdit(r)} className="text-green-600 hover:text-green-500 h-7 w-7">
+                                <Check className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={cancelInlineEdit} className="text-slate-400 hover:text-slate-600 h-7 w-7">
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button variant="ghost" size="icon" onClick={() => startInlineEdit(r)} className="text-blue-400 hover:text-blue-600 h-7 w-7">
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleDelete(r.id)} className="text-red-400 hover:text-red-300 hover:bg-red-900/30 h-7 w-7">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ))
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
