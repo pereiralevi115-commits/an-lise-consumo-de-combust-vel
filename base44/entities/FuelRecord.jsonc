@@ -1,0 +1,71 @@
+{
+  "name": "FuelRecord",
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do abastecimento"
+    },
+    "time": {
+      "type": "string",
+      "description": "Hora do abastecimento"
+    },
+    "vehicle_plate": {
+      "type": "string",
+      "description": "Placa do ve\u00edculo"
+    },
+    "vehicle_type": {
+      "type": "string",
+      "description": "Tipo de ve\u00edculo"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Usina"
+    },
+    "attendant": {
+      "type": "string",
+      "description": "Frentista"
+    },
+    "driver": {
+      "type": "string",
+      "description": "Motorista"
+    },
+    "fuel_type": {
+      "type": "string",
+      "description": "Tipo de combust\u00edvel"
+    },
+    "liters": {
+      "type": "number",
+      "description": "Quantidade em litros"
+    },
+    "km_driven": {
+      "type": "number",
+      "description": "Km rodados"
+    },
+    "cost": {
+      "type": "number",
+      "description": "Valor gasto"
+    },
+    "cubic_meters": {
+      "type": "number",
+      "description": "Metros c\u00fabicos (M\u00b3)"
+    },
+    "korth_id": {
+      "type": "string",
+      "description": "ID \u00fanico do registro no Korth Guardian"
+    },
+    "oculto": {
+      "type": "boolean",
+      "description": "Ocultar registro do c\u00e1lculo de m\u00e9dia",
+      "default": false
+    }
+  },
+  "required": [
+    "date",
+    "vehicle_plate",
+    "unit",
+    "liters",
+    "cost"
+  ]
+}

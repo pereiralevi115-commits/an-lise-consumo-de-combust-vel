@@ -203,7 +203,7 @@ export function useAnaliseData() {
       });
     });
 
-    // Um registro por abastecimento
+    // Um registro por abastecimento (exclui ocultos do cálculo, mas os mantém na lista para exibição)
     return records
       .filter(r => r.date && r.vehicle_plate)
       .map(r => {
@@ -241,8 +241,9 @@ export function useAnaliseData() {
           liters,
           kmPercorrido,
           cost,
-          efficiency: liters > 0 && kmPercorrido > 0 ? parseFloat((kmPercorrido / liters).toFixed(2)) : 0,
-          efficiencyCost: cost > 0 && kmPercorrido > 0 ? parseFloat((cost / kmPercorrido).toFixed(2)) : 0,
+          oculto: r.oculto === true,
+          efficiency: !r.oculto && liters > 0 && kmPercorrido > 0 ? parseFloat((kmPercorrido / liters).toFixed(2)) : 0,
+          efficiencyCost: !r.oculto && cost > 0 && kmPercorrido > 0 ? parseFloat((cost / kmPercorrido).toFixed(2)) : 0,
         };
       })
       .sort((a, b) => {
