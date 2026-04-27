@@ -14,32 +14,25 @@ Deno.serve(async (req) => {
     // Filter março 2026
     const marco2026 = cubicMetros.filter(cm => cm.mes === '2026-03');
 
-    // Group by equipment type
+    // Group by equipment type - summary only
     const byEquipment = {};
+    let grandTotal = 0;
     marco2026.forEach(cm => {
       const placa = String(cm.placa).toUpperCase();
       const tipo = placaMap[placa] || cm.equipamento || 'SEM TIPO';
-      if (!byEquipment[tipo]) byEquipment[tipo] = { total: 0, records: [] };
+      if (!byEquipment[tipo]) byEquipment[tipo] = { total: 0, count: 0 };
       byEquipment[tipo].total += Number(cm.metros_cubicos);
-      byEquipment[tipo].records.push({ placa, metros_cubicos: Number(cm.metros_cubicos) });
+      byEquipment[tipo].count += 1;
+      grandTotal += Number(cm.metros_cubicos);
     });
-
-    const betoneiras = Object.entries(byEquipment)
-      .filter(([tipo]) => tipo.toUpperCase().includes('BETONEIRA'))
-      .map(([tipo, data]) => ({ tipo, total: data.total, count: data.records.length, records: data.records }));
-
-    const totalBetoneira = betoneiras.reduce((sum, b) => sum + b.total, 0);
 
     return Response.json({
       mes: '2026-03',
-      totalRegistrosMarco: marco2026.length,
-      totalBetoneira,
-      betoneiras,
-      todosEquipamentos: Object.entries(byEquipment).map(([tipo, data]) => ({
-        tipo,
-        total: data.total,
-        count: data.records.length
-      }))
+      totalRegistros: marco2026.length,
+      grandTotal: parseFloat(grandTotal.toFixed(2)),
+      porEquipamento: Object.entries(byEquipment)
+        .map(([tipo, data]) => ({ tipo, total: parseFloat(data.total.toFixed(2)), count: data.count }))
+        .sort((a, b) => b.total - a.total)
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
