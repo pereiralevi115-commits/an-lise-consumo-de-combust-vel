@@ -52,18 +52,26 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
   const [ocultandoTodas, setOcultandoTodas] = useState(false);
   const queryClient = useQueryClient();
 
+  const [progresso, setProgresso] = useState(null);
+
   const ocultarTodasInconsistencias = async () => {
     const inconsistentes = data.filter(item => !item.oculto && detectInconsistencias(item).length > 0);
     if (inconsistentes.length === 0) return;
     setOcultandoTodas(true);
-    const BATCH = 5;
-    for (let i = 0; i < inconsistentes.length; i += BATCH) {
-      const lote = inconsistentes.slice(i, i + BATCH);
-      await Promise.all(lote.map(item => base44.entities.FuelRecord.update(item.id, { oculto: true })));
-      if (i + BATCH < inconsistentes.length) await new Promise(r => setTimeout(r, 600));
+    setProgresso(`0 / ${inconsistentes.length}`);
+    const ids = inconsistentes.map(item => item.id);
+    // Envia em blocos de 200 para a função backend (evita payload muito grande)
+    const CHUNK = 200;
+    let done = 0;
+    for (let i = 0; i < ids.length; i += CHUNK) {
+      const chunk = ids.slice(i, i + CHUNK);
+      const res = await base44.functions.invoke('ocultarInconsistencias', { ids: chunk });
+      done += res.data?.updated ?? chunk.length;
+      setProgresso(`${done} / ${ids.length}`);
     }
     queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
     setOcultandoTodas(false);
+    setProgresso(null);
   };
 
   const toggleOculto = async (item) => {
@@ -220,7 +228,7 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100 transition disabled:opacity-50"
             >
               <EyeOff className="w-4 h-4" />
-              {ocultandoTodas ? 'Ocultando...' : `Ocultar ${totalInconsistencias} inconsistência${totalInconsistencias > 1 ? 's' : ''}`}
+              {ocultandoTodas ? (progresso ? `Ocultando... ${progresso}` : 'Ocultando...') : `Ocultar ${totalInconsistencias} inconsistência${totalInconsistencias > 1 ? 's' : ''}`}
             </button>
           )}
           <button
