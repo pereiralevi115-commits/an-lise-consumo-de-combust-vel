@@ -120,11 +120,15 @@ export default function AnalisePorPlaca() {
         totalLiters: 0,
         kmRecords: [],
         cost: 0,
-        recordCount: 0
+        recordCount: 0,
+        driverCounts: {}
       };
     }
 
     groupedData[groupKey].totalLiters += r.liters || 0;
+    if (r.driver) {
+      groupedData[groupKey].driverCounts[r.driver] = (groupedData[groupKey].driverCounts[r.driver] || 0) + 1;
+    }
     groupedData[groupKey]._unit = r.unit;
     groupedData[groupKey]._month = month;
     groupedData[groupKey]._year = year;
@@ -141,6 +145,8 @@ export default function AnalisePorPlaca() {
 
   // Calcular delta KM e M³
   const fuelAnalysis = Object.values(groupedData).map(item => {
+    // Usar o motorista mais frequente naquela placa/mês
+    const mainDriver = Object.entries(item.driverCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || item.driver;
     const precoReg = precosCombustivel.find(p =>
       String(p.ponto) === String(item._unit) &&
       Number(p.mes) === Number(item._month) &&
@@ -166,7 +172,7 @@ export default function AnalisePorPlaca() {
       unit: pontosMap[String(item.unit)] || item.unit || '-',
       equipment: placaEquipamentosMap[String(item.plate).toUpperCase()] || '-',
       vehicle_type: item.vehicle_type || '-',
-      driver: motoristasMap[String(item.driver)] || item.driver || '-',
+      driver: motoristasMap[String(mainDriver)] || mainDriver || '-',
       fuelType: combustiveisMap[String(item.fuelType)] || item.fuelType || '-',
       totalLiters: item.totalLiters,
       kmDelta: kmDelta,
@@ -210,8 +216,8 @@ export default function AnalisePorPlaca() {
 
   // Aplicar filtros
   const filtered = analysisData.filter(item => {
-    if (filters.month && !item.month.includes(monthNames[parseInt(filters.month)])) return false;
-    if (filters.year && !item.month.includes(filters.year)) return false;
+    if (filters.month && monthNames[parseInt(filters.month)] !== item.month) return false;
+    if (filters.year && String(item.monthKey).split('-')[0] !== filters.year) return false;
     if (filters.plate && !item.plate.toUpperCase().includes(filters.plate.toUpperCase())) return false;
     if (filters.unit && !item.unit.includes(filters.unit)) return false;
     if (filters.equipment && item.equipment !== filters.equipment) return false;
