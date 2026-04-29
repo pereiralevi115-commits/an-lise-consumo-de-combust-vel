@@ -248,36 +248,7 @@ export default function Dados() {
 
   const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']; // months pt-BR
 
-  const InconsistencyTooltip = ({ reasons }) => {
-    const [open, setOpen] = useState(false);
-    return (
-      <div className="relative inline-block ml-1">
-        <button
-          onMouseEnter={() => setOpen(true)}
-          onMouseLeave={() => setOpen(false)}
-          onClick={() => setOpen(v => !v)}
-          className="text-red-400 hover:text-red-300 align-middle"
-        >
-          <AlertTriangle className="w-3.5 h-3.5" />
-        </button>
-        {open && (
-          <div className="absolute z-50 left-5 top-0 w-72 bg-slate-900 border border-red-600 rounded-lg shadow-xl p-3 text-xs text-slate-200">
-            <p className="font-bold text-red-400 mb-2 flex items-center gap-1">
-              <AlertTriangle className="w-3.5 h-3.5" /> Inconsistência de KM
-            </p>
-            <ul className="space-y-1.5">
-              {reasons.map((r, i) => (
-                <li key={i} className="border-l-2 border-red-500 pl-2 leading-snug">{r}</li>
-              ))}
-            </ul>
-            <p className="mt-2 text-slate-400 border-t border-slate-700 pt-2">
-              💡 Clique no campo KM da linha para editar e corrigir.
-            </p>
-          </div>
-        )}
-      </div>
-    );
-  };
+
 
   if (isLoading) {
     return <div className="text-slate-600 text-center py-12">Carregando dados...</div>;
@@ -343,12 +314,12 @@ export default function Dados() {
           <p className="text-slate-500">Total de {filtered.length} registros</p>
           {kmInconsistencyIds.size > 0 && (
             <span
-              className="flex items-center gap-2 text-red-400 text-sm cursor-pointer hover:text-red-300 select-none"
+              className={`flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full cursor-pointer select-none transition ${filters.onlyInconsistent ? 'bg-orange-200 text-orange-800' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'}`}
               onClick={() => setFilters(f => ({...f, onlyInconsistent: !f.onlyInconsistent}))}
               title="Clique para filtrar inconsistências"
             >
-              <span className={`inline-block w-3 h-3 rounded ${filters.onlyInconsistent ? 'bg-red-400' : 'bg-red-700'}`}></span>
-              {kmInconsistencyIds.size} registro(s) com inconsistência de KM {filters.onlyInconsistent ? '(mostrando apenas)' : ''}
+              <AlertTriangle className="w-3 h-3" />
+              {kmInconsistencyIds.size} inconsistência{kmInconsistencyIds.size > 1 ? 's' : ''}{filters.onlyInconsistent ? ' (mostrando)' : ''}
             </span>
           )}
         </div>
@@ -382,16 +353,29 @@ export default function Dados() {
                         Nenhum registro encontrado
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    filtered.map((record) => (
-                    <TableRow key={record.id} className={`border-slate-200 ${kmInconsistencyIds.has(record.id) ? 'bg-red-50 hover:bg-red-100' : !record.korth_id ? 'bg-green-50 hover:bg-green-100' : 'hover:bg-slate-50'}`}>
+                  ) : filtered.map((record) => {
+                    const hasIssue = kmInconsistencyIds.has(record.id);
+                    const reasons = kmInconsistencyReasons[record.id] || [];
+                    let rowClass = !record.korth_id ? 'border-slate-200 bg-green-50 hover:bg-green-100' : 'border-slate-200 hover:bg-slate-50';
+                    if (hasIssue) rowClass = 'border-orange-200 bg-orange-50 hover:bg-orange-100';
+                    return (
+                    <TableRow key={record.id} className={rowClass}>
                       <TableCell className="text-slate-800">
-                        <span className="flex items-center gap-1">
-                          {record.date ? format(parseISO(record.date), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
-                          {kmInconsistencyIds.has(record.id) && kmInconsistencyReasons[record.id] && (
-                            <InconsistencyTooltip reasons={kmInconsistencyReasons[record.id]} />
+                        <div className="flex flex-col">
+                          <span className="flex items-center gap-1">
+                            {record.date ? format(parseISO(record.date), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
+                            {hasIssue && (
+                              <span title={reasons.join(' | ')} className="cursor-help">
+                                <AlertTriangle className="w-3.5 h-3.5 text-orange-500 flex-shrink-0" />
+                              </span>
+                            )}
+                          </span>
+                          {hasIssue && (
+                            <div className="text-xs text-orange-600 mt-0.5 font-normal">
+                              {reasons.join(' · ')}
+                            </div>
                           )}
-                        </span>
+                        </div>
                       </TableCell>
                       <TableCell className="text-slate-800">
                          {editingTime?.id === record.id ? (
@@ -552,7 +536,7 @@ export default function Dados() {
                           </div>
                         ) : (
                           <span
-                            className={`cursor-pointer underline decoration-dotted hover:text-[#FDB913] ${kmInconsistencyIds.has(record.id) ? 'text-red-600' : 'text-slate-800'}`}
+                            className={`cursor-pointer underline decoration-dotted hover:text-[#FDB913] ${hasIssue ? 'text-orange-600' : 'text-slate-800'}`}
                             title="Clique para editar"
                             onClick={() => setEditingKm({ id: record.id, value: record.km_driven || '' })}
                           >
@@ -584,8 +568,8 @@ export default function Dados() {
                         </button>
                       </TableCell>
                       </TableRow>
-                  ))
-                )}
+                  );
+                  })}
               </TableBody>
             </Table>
           </div>
