@@ -329,7 +329,7 @@ export default function Dados() {
       <Card className="bg-white border-slate-200 shadow-lg">
         <CardContent className="p-0">
           <div className="overflow-x-auto w-full">
-            <Table className="min-w-[1100px]">
+            <Table className="min-w-[1400px]">
               <TableHeader>
                 <TableRow className="border-slate-200 hover:bg-slate-50 bg-slate-50">
                   <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('date')}>Data<SortIcon field="date" /></TableHead>
