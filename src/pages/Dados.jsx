@@ -332,17 +332,17 @@ export default function Dados() {
             <Table className="min-w-[1400px]">
               <TableHeader>
                 <TableRow className="border-slate-200 hover:bg-slate-50 bg-slate-50">
-                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('date')}>Data<SortIcon field="date" /></TableHead>
-                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('time')}>Hora<SortIcon field="time" /></TableHead>
-                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
-                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
-                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('equipment')}>Equipamentos<SortIcon field="equipment" /></TableHead>
-                  <TableHead className="text-slate-600">Frentista</TableHead>
-                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
-                  <TableHead className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort('fuel')}>Combustível<SortIcon field="fuel" /></TableHead>
-                  <TableHead className="text-slate-600 text-right">Litros</TableHead>
-                  <TableHead className="text-slate-600 text-right">KM</TableHead>
-                  <TableHead className="text-slate-600 text-right">Valor (R$)</TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none w-28" onClick={() => toggleSort('date')}>Data<SortIcon field="date" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none w-20" onClick={() => toggleSort('time')}>Hora<SortIcon field="time" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none w-24" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none w-28" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none w-36" onClick={() => toggleSort('equipment')}>Equipamentos<SortIcon field="equipment" /></TableHead>
+                  <TableHead className="text-slate-600 w-36">Frentista</TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none w-40" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none w-24" onClick={() => toggleSort('fuel')}>Combustível<SortIcon field="fuel" /></TableHead>
+                  <TableHead className="text-slate-600 text-right w-20">Litros</TableHead>
+                  <TableHead className="text-slate-600 text-right w-24">KM</TableHead>
+                  <TableHead className="text-slate-600 text-right w-24">Valor (R$)</TableHead>
                   <TableHead className="text-slate-600 text-center w-10"></TableHead>
                   </TableRow>
               </TableHeader>
