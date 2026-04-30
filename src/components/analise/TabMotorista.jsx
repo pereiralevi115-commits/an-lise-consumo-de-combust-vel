@@ -22,13 +22,13 @@ function detectInconsistencias(item) {
   if (item.liters <= 0) {
     issues.push('Litros zerados');
   }
-  if (item.liters > 500) {
+  if (item.liters > 900) {
     issues.push(`Litros muito alto (${item.liters.toFixed(0)} L)`);
   }
   if (item.kmPercorrido === 0 && item.liters > 0) {
     issues.push('KM percorrido zerado');
   }
-  if (item.kmPercorrido > 1000) {
+  if (item.kmPercorrido > 1700) {
     issues.push(`KM muito alto (${item.kmPercorrido} km)`);
   }
   if (item.efficiency > 0 && item.efficiency < 0.5) {
