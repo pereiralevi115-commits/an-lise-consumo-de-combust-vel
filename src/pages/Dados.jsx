@@ -100,6 +100,17 @@ export default function Dados() {
       if (uniqueDates.size > 1) {
         sameKmRecords.forEach(r => addReason(r.id, `KM ${Number(r.km_driven).toLocaleString('pt-BR')} duplicado em datas diferentes. Verifique e corrija o hodômetro.`));
       }
+      // KM duplicado na mesma data
+      const byDate = {};
+      sameKmRecords.forEach(r => {
+        if (!byDate[r.date]) byDate[r.date] = [];
+        byDate[r.date].push(r);
+      });
+      Object.entries(byDate).forEach(([date, recs]) => {
+        if (recs.length > 1) {
+          recs.forEach(r => addReason(r.id, `KM ${Number(r.km_driven).toLocaleString('pt-BR')} duplicado em ${date} — ${recs.length} registros com o mesmo hodômetro na mesma data.`));
+        }
+      });
     });
 
     for (let i = 0; i < sorted.length; i++) {
