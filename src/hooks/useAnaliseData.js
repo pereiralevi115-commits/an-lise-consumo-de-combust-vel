@@ -53,18 +53,30 @@ export function useAnaliseData() {
     queryFn: () => base44.entities.ExclusaoMedia.list()
   });
 
+  const { data: korthExcluidos = [] } = useQuery({
+    queryKey: ['KorthExcluido'],
+    queryFn: () => base44.entities.KorthExcluido.list('created_date', 10000)
+  });
+
   const pontosMap = useMemo(() => Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome])), [pontos]);
   const motoristasMap = useMemo(() => Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome])), [motoristas]);
   const frentistasMap = useMemo(() => Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome])), [frentistas]);
   const combustiveisMap = useMemo(() => Object.fromEntries(combustiveis.map(c => [String(c.codigo), c.nome])), [combustiveis]);
   const placaEquipamentosMap = useMemo(() => Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo])), [placaEquipamentos]);
   const exclusoesSet = useMemo(() => new Set(exclusoes.map(e => `${String(e.placa).toUpperCase()}-${e.mes}`)), [exclusoes]);
+  const korthExcluidosSet = useMemo(() => new Set(korthExcluidos.map(e => String(e.korth_id))), [korthExcluidos]);
+
+  // Records filtrados (sem os excluídos via KorthExcluido)
+  const activeRecords = useMemo(() =>
+    records.filter(r => !r.korth_id || !korthExcluidosSet.has(String(r.korth_id))),
+    [records, korthExcluidosSet]
+  );
 
   // ===== ANÁLISE POR PLACA =====
   const analiseByPlaca = useMemo(() => {
     const groupedData = {};
 
-    records.forEach(r => {
+    activeRecords.forEach(r => {
       if (!r.date || !r.vehicle_plate) return;
       const month = parseISO(r.date).getMonth();
       const year = parseISO(r.date).getFullYear();
@@ -172,13 +184,13 @@ export function useAnaliseData() {
       });
 
     return [...fuelAnalysis, ...m3OnlyRows];
-  }, [records, cubicMetros, placaEquipamentosMap, motoristasMap, frentistasMap, combustiveisMap, pontosMap, precosCombustivel]);
+  }, [activeRecords, cubicMetros, placaEquipamentosMap, motoristasMap, frentistasMap, combustiveisMap, pontosMap, precosCombustivel]);
 
   // ===== ANÁLISE POR MOTORISTA (registro unitário — um por abastecimento) =====
   const analiseByMotorista = useMemo(() => {
     // Calcula km percorrido por registro (delta entre abastecimentos consecutivos da mesma placa)
     const byPlate = {};
-    records.forEach(r => {
+    activeRecords.forEach(r => {
       if (!r.date || !r.vehicle_plate) return;
       const plate = String(r.vehicle_plate).toUpperCase();
       if (!byPlate[plate]) byPlate[plate] = [];
@@ -204,7 +216,7 @@ export function useAnaliseData() {
     });
 
     // Um registro por abastecimento (exclui ocultos do cálculo, mas os mantém na lista para exibição)
-    return records
+    return activeRecords
       .filter(r => r.date && r.vehicle_plate)
       .map(r => {
         const month = parseISO(r.date).getMonth();
@@ -251,17 +263,17 @@ export function useAnaliseData() {
         if (nameCmp !== 0) return nameCmp;
         return (a.date + a.time).localeCompare(b.date + b.time);
       });
-  }, [records, placaEquipamentosMap, motoristasMap, frentistasMap, combustiveisMap, pontosMap, precosCombustivel]);
+  }, [activeRecords, placaEquipamentosMap, motoristasMap, frentistasMap, combustiveisMap, pontosMap, precosCombustivel]);
 
   // Filter options
-  const months = useMemo(() => [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b), [records]);
-  const years = useMemo(() => [...new Set(records.map(r => r.date ? parseISO(r.date).getFullYear() : null))].filter(Boolean).sort((a, b) => b - a), [records]);
-  const plates = useMemo(() => [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort(), [records]);
-  const units = useMemo(() => [...new Set(records.map(r => r.unit))].filter(Boolean).sort(), [records]);
+  const months = useMemo(() => [...new Set(activeRecords.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b), [activeRecords]);
+  const years = useMemo(() => [...new Set(activeRecords.map(r => r.date ? parseISO(r.date).getFullYear() : null))].filter(Boolean).sort((a, b) => b - a), [activeRecords]);
+  const plates = useMemo(() => [...new Set(activeRecords.map(r => r.vehicle_plate))].filter(Boolean).sort(), [activeRecords]);
+  const units = useMemo(() => [...new Set(activeRecords.map(r => r.unit))].filter(Boolean).sort(), [activeRecords]);
   const equipments = useMemo(() => [...new Set(placaEquipamentos.map(p => p.tipo))].filter(Boolean).sort(), [placaEquipamentos]);
   const drivers = useMemo(() => {
     const seen = new Set();
-    return [...new Set(records.map(r => r.driver))].filter(Boolean)
+    return [...new Set(activeRecords.map(r => r.driver))].filter(Boolean)
       .filter(code => {
         const name = (motoristasMap[String(code)] || frentistasMap[String(code)] || code).toUpperCase();
         if (seen.has(name)) return false;
@@ -273,7 +285,7 @@ export function useAnaliseData() {
         const nameB = motoristasMap[String(b)] || frentistasMap[String(b)] || b;
         return nameA.localeCompare(nameB, 'pt-BR');
       });
-  }, [records, motoristasMap, frentistasMap]);
+  }, [activeRecords, motoristasMap, frentistasMap]);
 
   return {
     analiseByPlaca,

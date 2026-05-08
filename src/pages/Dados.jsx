@@ -250,7 +250,15 @@ export default function Dados() {
   };
 
   const deleteRecord = async (record) => {
-    if (!window.confirm(`Excluir o abastecimento externo de ${record.date ? format(parseISO(record.date), 'dd/MM/yyyy') : '?'} — placa ${record.vehicle_plate || '?'}?`)) return;
+    if (!window.confirm(`Excluir o abastecimento de ${record.date ? format(parseISO(record.date), 'dd/MM/yyyy') : '?'} — placa ${record.vehicle_plate || '?'}?\n\nEste registro não será reimportado futuramente.`)) return;
+    // Se tem korth_id, guarda na tabela de excluídos para não reimportar
+    if (record.korth_id) {
+      await base44.entities.KorthExcluido.create({
+        korth_id: record.korth_id,
+        vehicle_plate: record.vehicle_plate || '',
+        date: record.date || '',
+      });
+    }
     await base44.entities.FuelRecord.delete(record.id);
     queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
   };

@@ -1,0 +1,26 @@
+{
+  "name": "KorthExcluido",
+  "type": "object",
+  "properties": {
+    "korth_id": {
+      "type": "string",
+      "description": "ID do registro Korth exclu\u00eddo permanentemente"
+    },
+    "vehicle_plate": {
+      "type": "string",
+      "description": "Placa do ve\u00edculo (para refer\u00eancia)"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do abastecimento exclu\u00eddo"
+    },
+    "motivo": {
+      "type": "string",
+      "description": "Motivo da exclus\u00e3o (opcional)"
+    }
+  },
+  "required": [
+    "korth_id"
+  ]
+}

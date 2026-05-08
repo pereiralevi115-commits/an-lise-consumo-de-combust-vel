@@ -113,19 +113,23 @@ Deno.serve(async (req) => {
     const records = abastecimentos.map(mapearRegistro).filter(r => r.date && r.vehicle_plate);
     console.log(`${records.length} registros válidos`);
 
-    // Verificar registros duplicados
+    // Verificar registros duplicados e excluídos permanentemente
     const korthIds = records.filter(r => r.korth_id).map(r => r.korth_id);
     let existingIds = [];
+    let excludedIds = [];
     if (korthIds.length > 0) {
-      const existing = await base44.asServiceRole.entities.FuelRecord.filter({
-        korth_id: { '$in': korthIds }
-      });
+      const [existing, excluded] = await Promise.all([
+        base44.asServiceRole.entities.FuelRecord.filter({ korth_id: { '$in': korthIds } }),
+        base44.asServiceRole.entities.KorthExcluido.filter({ korth_id: { '$in': korthIds } })
+      ]);
       existingIds = existing.map(e => e.korth_id);
-      console.log(`${existingIds.length} registros já existem`);
+      excludedIds = excluded.map(e => e.korth_id);
+      console.log(`${existingIds.length} registros já existem, ${excludedIds.length} excluídos permanentemente`);
     }
 
-    // Filtrar apenas novos registros
-    const newRecords = records.filter(r => !existingIds.includes(r.korth_id));
+    // Filtrar apenas novos registros (não existentes e não excluídos)
+    const blockedIds = new Set([...existingIds, ...excludedIds]);
+    const newRecords = records.filter(r => !blockedIds.has(r.korth_id));
     console.log(`${newRecords.length} novos registros para salvar`);
 
     let saved = [];
