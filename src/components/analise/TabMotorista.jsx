@@ -3,9 +3,10 @@ import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { FileDown, EyeOff, Eye, AlertTriangle } from 'lucide-react';
+import { FileDown, EyeOff, Eye, AlertTriangle, Edit2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { monthNames } from '@/hooks/useAnaliseData';
+import BulkEditMotorista from './BulkEditMotorista';
 
 const SortIcon = ({ field, sortBy, sortDir }) => {
   if (sortBy !== field) return <span className="text-slate-400 ml-1">↕</span>;
@@ -50,6 +51,8 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
   const [sortDir, setSortDir] = useState('asc');
   const [loadingId, setLoadingId] = useState(null);
   const [ocultandoTodas, setOcultandoTodas] = useState(false);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [showBulkEdit, setShowBulkEdit] = useState(false);
   const queryClient = useQueryClient();
 
   const [progresso, setProgresso] = useState(null);
@@ -112,6 +115,18 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
   const toggleSort = (field) => {
     if (sortBy === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setSortBy(field); setSortDir('asc'); }
+  };
+
+  const toggleSelect = (id) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) newSelected.delete(id);
+    else newSelected.add(id);
+    setSelectedIds(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) setSelectedIds(new Set());
+    else setSelectedIds(new Set(filtered.map(item => item.id)));
   };
 
   const exportPDF = () => {
@@ -206,6 +221,11 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
       <div className="flex flex-wrap items-center gap-3 justify-between">
         <div className="flex items-center gap-3">
           <p className="text-slate-500 text-sm">Total de {filtered.length} registros</p>
+          {selectedIds.size > 0 && (
+            <span className="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
+              {selectedIds.size} selecionados
+            </span>
+          )}
           {totalInconsistencias > 0 && (
             <span className="flex items-center gap-1 bg-orange-100 text-orange-700 text-xs font-semibold px-3 py-1 rounded-full">
               <AlertTriangle className="w-3 h-3" />
@@ -221,6 +241,15 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
             <AlertTriangle className="w-4 h-4" />
             {filters.soInconsistencias ? 'Ver todos' : 'Ver inconsistências'}
           </button>
+          {selectedIds.size > 0 && (
+            <button
+              onClick={() => setShowBulkEdit(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 transition"
+            >
+              <Edit2 className="w-4 h-4" />
+              Editar {selectedIds.size}
+            </button>
+          )}
           {totalInconsistencias > 0 && (
             <button
               onClick={ocultarTodasInconsistencias}
@@ -250,6 +279,14 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
             <Table className="min-w-[1300px]">
               <TableHeader>
                 <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
+                  <TableHead className="text-slate-600 text-center w-10">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.size === filtered.length && filtered.length > 0}
+                      onChange={toggleSelectAll}
+                      className="rounded border-slate-300 cursor-pointer"
+                    />
+                  </TableHead>
                   {[['driver','Motorista'],['month','Mês'],['plate','Placa'],['equipment','Equipamento'],['unit','Usina'],['fuelType','Combustível']].map(([f,l]) => (
                     <TableHead key={f} className="text-slate-600 cursor-pointer select-none" onClick={() => toggleSort(f)}>{l}<SortIcon field={f} sortBy={sortBy} sortDir={sortDir} /></TableHead>
                   ))}
@@ -272,6 +309,14 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
 
                   return (
                     <TableRow key={item.id || idx} className={rowClass}>
+                      <TableCell className="text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(item.id)}
+                          onChange={() => toggleSelect(item.id)}
+                          className="rounded border-slate-300 cursor-pointer"
+                        />
+                      </TableCell>
                       <TableCell className="text-slate-800 font-medium">
                         <div className="flex items-center gap-1">
                           {item.driver}
@@ -319,6 +364,18 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
           </div>
         </CardContent>
       </Card>
+
+      {showBulkEdit && (
+        <BulkEditMotorista
+          selectedIds={Array.from(selectedIds)}
+          onClose={() => {
+            setShowBulkEdit(false);
+            setSelectedIds(new Set());
+          }}
+          data={data}
+          pontosMap={pontosMap}
+        />
+      )}
     </div>
   );
 }
