@@ -1,0 +1,9 @@
+{
+  "name": "An\u00e1lise Consumo de Combust\u00edvel",
+  "site": {
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "serveCommand": "npm run dev",
+    "outputDirectory": "./dist"
+  }
+}
