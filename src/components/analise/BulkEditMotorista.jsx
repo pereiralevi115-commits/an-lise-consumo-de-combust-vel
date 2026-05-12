@@ -15,21 +15,12 @@ export default function BulkEditMotorista({ selectedIds, onClose, data, pontosMa
     if (!editField || !editValue) return;
     setUpdating(true);
 
-    const CHUNK = 5;
-    const DELAY = 500;
+    const updateData = editField === 'oculto' ? { oculto: editValue === 'sim' } : { unit: editValue };
 
     try {
-      for (let i = 0; i < selectedIds.length; i += CHUNK) {
-        const chunk = selectedIds.slice(i, i + CHUNK);
-        const updateData = editField === 'oculto' ? { oculto: editValue === 'sim' } : { unit: editValue };
-
-        for (const id of chunk) {
-          await base44.entities.FuelRecord.update(id, updateData);
-        }
-
-        if (i + CHUNK < selectedIds.length) {
-          await new Promise(resolve => setTimeout(resolve, DELAY));
-        }
+      for (const id of selectedIds) {
+        await base44.entities.FuelRecord.update(id, updateData);
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
 
       queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
