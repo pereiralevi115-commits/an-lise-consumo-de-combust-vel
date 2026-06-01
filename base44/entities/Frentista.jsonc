@@ -1,0 +1,18 @@
+{
+  "name": "Frentista",
+  "type": "object",
+  "properties": {
+    "codigo": {
+      "type": "string",
+      "description": "C\u00f3digo do frentista (vindo da API Korth)"
+    },
+    "nome": {
+      "type": "string",
+      "description": "Nome completo do frentista"
+    }
+  },
+  "required": [
+    "codigo",
+    "nome"
+  ]
+}

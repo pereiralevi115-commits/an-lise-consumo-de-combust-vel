@@ -1,0 +1,28 @@
+{
+  "name": "PrecoCombustivel",
+  "type": "object",
+  "properties": {
+    "mes": {
+      "type": "integer",
+      "description": "M\u00eas (0=Janeiro, 11=Dezembro)"
+    },
+    "ano": {
+      "type": "integer",
+      "description": "Ano"
+    },
+    "ponto": {
+      "type": "string",
+      "description": "C\u00f3digo do ponto/usina"
+    },
+    "preco_litro": {
+      "type": "number",
+      "description": "Pre\u00e7o por litro (R$/L)"
+    }
+  },
+  "required": [
+    "mes",
+    "ano",
+    "ponto",
+    "preco_litro"
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "name": "CubicMetros",
+  "type": "object",
+  "properties": {
+    "mes": {
+      "type": "string",
+      "description": "M\u00eas de refer\u00eancia (ex: 2026-01)"
+    },
+    "placa": {
+      "type": "string",
+      "description": "Placa do ve\u00edculo"
+    },
+    "equipamento": {
+      "type": "string",
+      "description": "Tipo de equipamento"
+    },
+    "metros_cubicos": {
+      "type": "number",
+      "description": "Metros c\u00fabicos (M\u00b3)"
+    }
+  },
+  "required": [
+    "mes",
+    "placa",
+    "metros_cubicos"
+  ]
+}
