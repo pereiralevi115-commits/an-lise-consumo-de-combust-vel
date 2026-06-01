@@ -2,12 +2,12 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 
 Deno.serve(async (req) => {
   try {
-    // Validar API Key
-    const apiKey = req.headers.get('x-api-key');
-    const validKey = Deno.env.get('EXPORT_API_KEY');
+    // Validar senha
+    const url = new URL(req.url);
+    const senha = url.searchParams.get('senha');
 
-    if (!apiKey || apiKey !== validKey) {
-      return Response.json({ error: 'Invalid or missing API key' }, { status: 401 });
+    if (senha !== '123456') {
+      return Response.json({ error: 'Senha inválida' }, { status: 401 });
     }
 
     const base44 = createClientFromRequest(req);
