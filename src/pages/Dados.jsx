@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Check, X, AlertTriangle, Trash2 } from 'lucide-react';
+import { Check, X, AlertTriangle, Trash2, EyeOff } from 'lucide-react';
 
 export default function Dados() {
   const [filters, setFilters] = useState({
@@ -24,7 +24,17 @@ export default function Dados() {
   const [editingTime, setEditingTime] = useState(null); // { id, value }
   const [editingLiters, setEditingLiters] = useState(null); // { id, value }
   const [editingUnit, setEditingUnit] = useState(null); // { id, value }
+  const [ignoredIds, setIgnoredIds] = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('ignoredInconsistencies') || '[]')); } catch { return new Set(); }
+  });
   const queryClient = useQueryClient();
+
+  const ignoreInconsistency = (id) => {
+    const updated = new Set(ignoredIds);
+    updated.add(id);
+    setIgnoredIds(updated);
+    localStorage.setItem('ignoredInconsistencies', JSON.stringify([...updated]));
+  };
 
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['fuelRecords'],
@@ -138,6 +148,9 @@ export default function Dados() {
       }
     }
   });
+
+  // Remove ignored IDs from inconsistency set
+  ignoredIds.forEach(id => kmInconsistencyIds.delete(id));
 
   // Apply filters (kmInconsistencyIds computed above)
   const filtered = records.filter(r => {
@@ -590,13 +603,24 @@ export default function Dados() {
                         return `R$ ${val.toFixed(2)}`;
                       })()}</TableCell>
                       <TableCell className="text-center">
-                        <button
-                          onClick={() => deleteRecord(record)}
-                          className="text-red-500 hover:text-red-400 p-1 rounded hover:bg-red-900/30 transition"
-                          title="Excluir registro"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex items-center justify-center gap-1">
+                          {hasIssue && (
+                            <button
+                              onClick={() => ignoreInconsistency(record.id)}
+                              className="text-orange-400 hover:text-slate-500 p-1 rounded hover:bg-slate-100 transition"
+                              title="Ignorar inconsistência (não aparecerá mais como problema)"
+                            >
+                              <EyeOff className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => deleteRecord(record)}
+                            className="text-red-500 hover:text-red-400 p-1 rounded hover:bg-red-900/30 transition"
+                            title="Excluir registro"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </TableCell>
                       </TableRow>
                   );
