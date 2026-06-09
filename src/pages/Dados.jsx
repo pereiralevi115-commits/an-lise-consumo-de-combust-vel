@@ -176,6 +176,18 @@ export default function Dados() {
     else if (sortBy === 'equipment') { valA = placaEquipamentosMap[String(a.vehicle_plate).toUpperCase()] || ''; valB = placaEquipamentosMap[String(b.vehicle_plate).toUpperCase()] || ''; }
     else if (sortBy === 'driver') { valA = motoristasMap[String(a.driver)] || a.driver || ''; valB = motoristasMap[String(b.driver)] || b.driver || ''; }
     else if (sortBy === 'fuel') { valA = combustiveisMap[String(a.fuel_type)] || a.fuel_type || ''; valB = combustiveisMap[String(b.fuel_type)] || b.fuel_type || ''; }
+    else if (sortBy === 'attendant') { valA = frentistasMap[String(a.attendant)] || motoristasMap[String(a.attendant)] || a.attendant || ''; valB = frentistasMap[String(b.attendant)] || motoristasMap[String(b.attendant)] || b.attendant || ''; }
+    else if (sortBy === 'liters') { return sortDir === 'asc' ? (a.liters || 0) - (b.liters || 0) : (b.liters || 0) - (a.liters || 0); }
+    else if (sortBy === 'km') { return sortDir === 'asc' ? (a.km_driven || 0) - (b.km_driven || 0) : (b.km_driven || 0) - (a.km_driven || 0); }
+    else if (sortBy === 'cost') {
+      const getCost = (r) => {
+        if (!r.korth_id) return r.cost || 0;
+        const d = r.date ? parseISO(r.date) : null;
+        const precoReg = d ? precosCombustivel.find(p => String(p.ponto) === String(r.unit) && Number(p.mes) === d.getMonth() && Number(p.ano) === d.getFullYear()) : null;
+        return precoReg ? (r.liters || 0) * precoReg.preco_litro : 0;
+      };
+      return sortDir === 'asc' ? getCost(a) - getCost(b) : getCost(b) - getCost(a);
+    }
     else { valA = ''; valB = ''; }
 
     const cmp = valA < valB ? -1 : valA > valB ? 1 : 0;
@@ -356,12 +368,12 @@ export default function Dados() {
                   <TableHead className="text-slate-600 cursor-pointer select-none w-24" onClick={() => toggleSort('plate')}>Placa<SortIcon field="plate" /></TableHead>
                   <TableHead className="text-slate-600 cursor-pointer select-none w-28" onClick={() => toggleSort('unit')}>Usina<SortIcon field="unit" /></TableHead>
                   <TableHead className="text-slate-600 cursor-pointer select-none w-36" onClick={() => toggleSort('equipment')}>Equipamentos<SortIcon field="equipment" /></TableHead>
-                  <TableHead className="text-slate-600 w-36">Frentista</TableHead>
+                  <TableHead className="text-slate-600 cursor-pointer select-none w-36" onClick={() => toggleSort('attendant')}>Frentista<SortIcon field="attendant" /></TableHead>
                   <TableHead className="text-slate-600 cursor-pointer select-none w-40" onClick={() => toggleSort('driver')}>Motorista<SortIcon field="driver" /></TableHead>
                   <TableHead className="text-slate-600 cursor-pointer select-none w-24" onClick={() => toggleSort('fuel')}>Combustível<SortIcon field="fuel" /></TableHead>
-                  <TableHead className="text-slate-600 text-right w-20">Litros</TableHead>
-                  <TableHead className="text-slate-600 text-right w-24">KM</TableHead>
-                  <TableHead className="text-slate-600 text-right w-24">Valor (R$)</TableHead>
+                  <TableHead className="text-slate-600 text-right w-20 cursor-pointer select-none" onClick={() => toggleSort('liters')}>Litros<SortIcon field="liters" /></TableHead>
+                  <TableHead className="text-slate-600 text-right w-24 cursor-pointer select-none" onClick={() => toggleSort('km')}>KM<SortIcon field="km" /></TableHead>
+                  <TableHead className="text-slate-600 text-right w-24 cursor-pointer select-none" onClick={() => toggleSort('cost')}>Valor (R$)<SortIcon field="cost" /></TableHead>
                   <TableHead className="text-slate-600 text-center w-10"></TableHead>
                   </TableRow>
               </TableHeader>
