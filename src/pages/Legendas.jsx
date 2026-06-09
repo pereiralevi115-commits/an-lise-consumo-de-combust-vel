@@ -4,13 +4,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Plus, Users, Fuel, MapPin, Truck, Upload, Edit2, Check, X } from 'lucide-react';
+import { Trash2, Plus, Users, Fuel, MapPin, Truck, Upload, Edit2, Check, X, Search } from 'lucide-react';
 import ValorCalculado from '@/components/ValorCalculado';
 
 function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, color }) {
   const queryClient = useQueryClient();
   const [novo, setNovo] = useState({ codigo: '', nome: '', entity: entities[0].name });
   const [editing, setEditing] = useState(null); // { entityName, id, codigo, nome }
+  const [search, setSearch] = useState('');
 
   // Fetch entities individually (hooks cannot be called in loops)
   const query0 = useQuery({ queryKey: [entities[0]?.name], queryFn: () => base44.entities[entities[0].name].list('codigo'), enabled: !!entities[0] });
@@ -98,17 +99,33 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
           </Button>
         </div>
 
+        {/* Campo de pesquisa */}
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-slate-400" />
+          <Input
+            placeholder="Pesquisar..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border-slate-200 text-slate-800 pl-8"
+          />
+        </div>
+
         {/* Listas agrupadas por entidade */}
-        {allItems.map(({ entity, items }) => (
+        {allItems.map(({ entity, items }) => {
+          const filtered = items.filter(item =>
+            item.codigo?.toLowerCase().includes(search.toLowerCase()) ||
+            item.nome?.toLowerCase().includes(search.toLowerCase())
+          );
+          return (
           <div key={entity.name}>
             {entities.length > 1 && (
-              <p className="text-slate-400 text-xs uppercase tracking-wide mb-1">{entity.label} ({items.length})</p>
+              <p className="text-slate-400 text-xs uppercase tracking-wide mb-1">{entity.label} ({filtered.length})</p>
             )}
             <div className="space-y-1 max-h-56 overflow-y-auto">
-              {items.length === 0 ? (
+              {filtered.length === 0 ? (
                 <p className="text-slate-400 text-sm text-center py-2">Nenhum cadastro ainda</p>
               ) : (
-                items.map((item) => (
+                filtered.map((item) => (
                    <div key={item.id}>
                      {editing?.id === item.id && editing?.entityName === entity.name ? (
                        <div className="flex items-center gap-1 bg-slate-100 rounded px-2 py-1.5">
@@ -168,7 +185,7 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
               )}
             </div>
           </div>
-        ))}
+        )})}
       </CardContent>
     </Card>
   );
@@ -179,6 +196,7 @@ function PlacaEquipamentoSection() {
   const [nova, setNova] = useState({ placa: '', tipo: '' });
   const [bulkText, setBulkText] = useState('');
   const [showBulk, setShowBulk] = useState(false);
+  const [search, setSearch] = useState('');
 
   const { data: items = [] } = useQuery({
     queryKey: ['PlacaEquipamento'],
@@ -288,9 +306,23 @@ function PlacaEquipamentoSection() {
           </div>
         )}
 
+        {/* Campo de pesquisa */}
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-slate-400" />
+          <Input
+            placeholder="Pesquisar placa ou equipamento..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border-slate-200 text-slate-800 pl-8"
+          />
+        </div>
+
         {/* Lista */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 max-h-72 overflow-y-auto">
-          {items.map((item) => (
+          {items.filter(item =>
+            item.placa?.toLowerCase().includes(search.toLowerCase()) ||
+            item.tipo?.toLowerCase().includes(search.toLowerCase())
+          ).map((item) => (
             <div key={item.id} className="flex items-center justify-between bg-slate-50 border border-slate-100 rounded px-2 py-1.5 gap-1">
               <div className="min-w-0">
                 <p className="text-slate-800 font-mono text-xs truncate">{item.placa}</p>
