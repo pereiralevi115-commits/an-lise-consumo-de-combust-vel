@@ -441,6 +441,42 @@ export default function MetrosCubicos() {
         </CardContent>
       </Card>
 
+      {/* Soma por Equipamento */}
+      {filteredRecords.length > 0 && (() => {
+        const somaEquip = {};
+        filteredRecords.forEach(r => {
+          const eq = r.equipamento || placaEquipamentosMap[String(r.placa).toUpperCase()] || 'Sem equipamento';
+          somaEquip[eq] = (somaEquip[eq] || 0) + (r.metros_cubicos || 0);
+        });
+        const total = Object.values(somaEquip).reduce((a, b) => a + b, 0);
+        return (
+          <Card className="bg-white border-slate-200 shadow-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-slate-800 text-base flex items-center gap-2">
+                Soma de M³ por Equipamento
+                {filterMes && <span className="text-sm font-normal text-slate-500">— {filterMes}</span>}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {Object.entries(somaEquip).sort((a, b) => b[1] - a[1]).map(([eq, soma]) => (
+                  <div key={eq} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                    <div className="text-xs text-slate-500 font-medium uppercase tracking-wide mb-1">{eq}</div>
+                    <div className="text-2xl font-bold text-slate-800">{soma.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                    <div className="text-xs text-slate-400 mt-0.5">m³</div>
+                  </div>
+                ))}
+                <div className="bg-[#FDB913]/10 rounded-lg p-4 border border-[#FDB913]/40">
+                  <div className="text-xs text-slate-500 font-medium uppercase tracking-wide mb-1">TOTAL</div>
+                  <div className="text-2xl font-bold text-slate-800">{total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                  <div className="text-xs text-slate-400 mt-0.5">m³</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
+
       {/* Table */}
       <Card className="bg-white border-slate-200 shadow-lg">
         <CardHeader className="pb-2">
