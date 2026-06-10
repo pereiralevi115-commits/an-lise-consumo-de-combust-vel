@@ -123,44 +123,31 @@ export default function Graficos() {
   const totalCost = filtered.reduce((sum, d) => sum + (d.cost || 0), 0);
   const totalKm = filtered.reduce((sum, d) => sum + (d.kmDelta || 0), 0);
 
-  // Chaves já contabilizadas no filtered (placa+mês com FuelRecord)
-  const filteredKeys = new Set(filtered.map(d => `${d.monthKey}-${String(d.plate).toUpperCase()}`));
-
-  // Registros do CubicMetros de placas SEM FuelRecord no mês (não aparecem no filtered)
-  const cubicMetrosSemFuel = cubicMetros.filter(cm => {
+  // M³ totais: calculado diretamente da entidade CubicMetros (mesma fonte da página M³)
+  // Aplica apenas filtros de mês e ano (M³ não tem usina/motorista/placa específica no contexto geral)
+  const cubicMetrosFiltrados = cubicMetros.filter(cm => {
+    if (!cm.mes) return false;
     if (filters.year && !cm.mes.startsWith(filters.year)) return false;
     if (filters.month && cm.mes !== filters.month) return false;
-    const key = `${cm.mes}-${String(cm.placa).toUpperCase()}`;
-    return !filteredKeys.has(key);
+    if (filters.plate && String(cm.placa).toUpperCase() !== String(filters.plate).toUpperCase()) return false;
+    return true;
   });
 
-  // M³ totais: filtered + CubicMetros sem FuelRecord (placas que não abasteceram no mês)
-  const totalM3Betoneira = filtered.filter(d => {
-    const eq = (d.equipment || '').toUpperCase();
-    return eq.includes('CAMINHÃO BETONEIRA') || eq.includes('BETONEIRA');
-  }).reduce((sum, d) => sum + (d.m3 || 0), 0)
-  + cubicMetrosSemFuel.filter(cm => {
-    const tipo = (placaEquipamentosMap[String(cm.placa).toUpperCase()] || cm.equipamento || '').toUpperCase();
-    return tipo.includes('CAMINHÃO BETONEIRA') || tipo.includes('BETONEIRA');
-  }).reduce((sum, cm) => sum + Number(cm.metros_cubicos), 0);
+  const getTipoEquipamento = (cm) => {
+    return (placaEquipamentosMap[String(cm.placa).toUpperCase()] || cm.equipamento || '').toUpperCase();
+  };
 
-  const totalM3BombaLanca = filtered.filter(d => {
-    const eq = (d.equipment || '').toUpperCase();
-    return eq.includes('BOMBA LANÇA') || eq.includes('BOMBAL LANÇA');
-  }).reduce((sum, d) => sum + (d.m3 || 0), 0)
-  + cubicMetrosSemFuel.filter(cm => {
-    const tipo = (placaEquipamentosMap[String(cm.placa).toUpperCase()] || cm.equipamento || '').toUpperCase();
-    return tipo.includes('BOMBA LANÇA') || tipo.includes('BOMBAL LANÇA');
-  }).reduce((sum, cm) => sum + Number(cm.metros_cubicos), 0);
+  const totalM3Betoneira = cubicMetrosFiltrados
+    .filter(cm => { const t = getTipoEquipamento(cm); return t.includes('BETONEIRA'); })
+    .reduce((sum, cm) => sum + Number(cm.metros_cubicos || 0), 0);
 
-  const totalM3BombaEstacionaria = filtered.filter(d => {
-    const eq = (d.equipment || '').toUpperCase();
-    return eq.includes('BOMBA ESTACIONÁRIA') || eq.includes('BOMBA ESTACIONARIA');
-  }).reduce((sum, d) => sum + (d.m3 || 0), 0)
-  + cubicMetrosSemFuel.filter(cm => {
-    const tipo = (placaEquipamentosMap[String(cm.placa).toUpperCase()] || cm.equipamento || '').toUpperCase();
-    return tipo.includes('BOMBA ESTACIONÁRIA') || tipo.includes('BOMBA ESTACIONARIA');
-  }).reduce((sum, cm) => sum + Number(cm.metros_cubicos), 0);
+  const totalM3BombaLanca = cubicMetrosFiltrados
+    .filter(cm => { const t = getTipoEquipamento(cm); return t.includes('BOMBA LANÇA') || t.includes('BOMBAL LANCA') || t.includes('BOMBA LANCA'); })
+    .reduce((sum, cm) => sum + Number(cm.metros_cubicos || 0), 0);
+
+  const totalM3BombaEstacionaria = cubicMetrosFiltrados
+    .filter(cm => { const t = getTipoEquipamento(cm); return t.includes('BOMBA ESTACIONÁRIA') || t.includes('BOMBA ESTACIONARIA'); })
+    .reduce((sum, cm) => sum + Number(cm.metros_cubicos || 0), 0);
 
   const totalM3 = totalM3Betoneira + totalM3BombaLanca + totalM3BombaEstacionaria;
 
