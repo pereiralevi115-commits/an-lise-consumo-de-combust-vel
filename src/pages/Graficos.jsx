@@ -89,6 +89,7 @@ export default function Graficos() {
     motoristasMap,
     placaEquipamentosMap,
     months,
+    monthYears,
     years,
     plates,
     equipments,
@@ -110,7 +111,7 @@ export default function Graficos() {
   // Apply filters
   const filtered = useMemo(() => analysisData.filter(d => {
     if (filters.year && String(d.year) !== filters.year) return false;
-    if (filters.month && monthNames[parseInt(filters.month)] !== d.month) return false;
+    if (filters.month && d.monthKey !== filters.month) return false;
     if (filters.unit && d.unit !== filters.unit) return false;
     if (filters.equipment && d.equipment !== filters.equipment) return false;
     if (filters.plate && d.plate !== filters.plate) return false;
@@ -128,10 +129,7 @@ export default function Graficos() {
   // Registros do CubicMetros de placas SEM FuelRecord no mês (não aparecem no filtered)
   const cubicMetrosSemFuel = cubicMetros.filter(cm => {
     if (filters.year && !cm.mes.startsWith(filters.year)) return false;
-    if (filters.month) {
-      const mesNum = String(parseInt(filters.month) + 1).padStart(2, '0');
-      if (!cm.mes.endsWith(`-${mesNum}`)) return false;
-    }
+    if (filters.month && cm.mes !== filters.month) return false;
     const key = `${cm.mes}-${String(cm.placa).toUpperCase()}`;
     return !filteredKeys.has(key);
   });
@@ -419,7 +417,7 @@ export default function Graficos() {
   const filteredMotorista = useMemo(() => analiseByMotorista.filter(d => {
     if (d.oculto) return false;
     if (filters.year && String(d.year) !== filters.year) return false;
-    if (filters.month && monthNames[parseInt(filters.month)] !== d.month) return false;
+    if (filters.month && d.monthKey !== filters.month) return false;
     if (filters.unit && d.unitCode !== filters.unit) return false;
     if (filters.equipment && d.equipment !== filters.equipment) return false;
     if (filters.plate && d.plate.toUpperCase() !== filters.plate.toUpperCase()) return false;
@@ -503,7 +501,7 @@ export default function Graficos() {
             className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm"
           >
             <option value="">Todos meses</option>
-            {months.map(m => <option key={m} value={m}>{monthNames[m]}</option>)}
+            {monthYears.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
           </select>
 
           <select 

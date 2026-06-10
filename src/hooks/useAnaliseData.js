@@ -267,6 +267,19 @@ export function useAnaliseData() {
 
   // Filter options
   const months = useMemo(() => [...new Set(activeRecords.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b), [activeRecords]);
+  const monthYears = useMemo(() => {
+    const set = new Set();
+    activeRecords.forEach(r => {
+      if (!r.date) return;
+      const d = parseISO(r.date);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      set.add(key);
+    });
+    return [...set].sort().map(key => {
+      const [year, month] = key.split('-');
+      return { value: key, label: `${monthNames[parseInt(month) - 1]}/${year}` };
+    });
+  }, [activeRecords]);
   const years = useMemo(() => [...new Set(activeRecords.map(r => r.date ? parseISO(r.date).getFullYear() : null))].filter(Boolean).sort((a, b) => b - a), [activeRecords]);
   const plates = useMemo(() => [...new Set(activeRecords.map(r => r.vehicle_plate))].filter(Boolean).sort(), [activeRecords]);
   const units = useMemo(() => [...new Set(activeRecords.map(r => r.unit))].filter(Boolean).sort(), [activeRecords]);
@@ -299,6 +312,7 @@ export function useAnaliseData() {
     combustiveisMap,
     placaEquipamentosMap,
     months,
+    monthYears,
     years,
     plates,
     units,
