@@ -458,15 +458,15 @@ export default function MetrosCubicos() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="flex flex-wrap gap-3">
                 {Object.entries(somaEquip).sort((a, b) => b[1] - a[1]).map(([eq, soma]) => (
-                  <div key={eq} className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                  <div key={eq} className="bg-slate-50 rounded-lg p-3 border border-slate-200 min-w-[160px]">
                     <div className="text-xs text-slate-500 font-medium uppercase tracking-wide mb-1">{eq}</div>
                     <div className="text-2xl font-bold text-slate-800">{soma.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                     <div className="text-xs text-slate-400 mt-0.5">m³</div>
                   </div>
                 ))}
-                <div className="bg-[#FDB913]/10 rounded-lg p-4 border border-[#FDB913]/40">
+                <div className="bg-[#FDB913]/10 rounded-lg p-3 border border-[#FDB913]/40 min-w-[160px]">
                   <div className="text-xs text-slate-500 font-medium uppercase tracking-wide mb-1">TOTAL</div>
                   <div className="text-2xl font-bold text-slate-800">{total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                   <div className="text-xs text-slate-400 mt-0.5">m³</div>
