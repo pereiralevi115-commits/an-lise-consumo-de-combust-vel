@@ -197,9 +197,8 @@ export default function MetrosCubicos() {
         setDeleteStatus({ type: 'error', message: 'Nenhum registro encontrado para este mês.' });
         return;
       }
-      const batchSize = 20;
-      for (let i = 0; i < toDelete.length; i += batchSize) {
-        await Promise.all(toDelete.slice(i, i + batchSize).map(r => base44.entities.CubicMetros.delete(r.id).catch(() => {})));
+      for (const r of toDelete) {
+        await base44.entities.CubicMetros.delete(r.id).catch(() => {});
       }
       setDeleteStatus({ type: 'success', message: `${toDelete.length} registros excluídos com sucesso!` });
       queryClient.invalidateQueries({ queryKey: ['CubicMetros'] });
