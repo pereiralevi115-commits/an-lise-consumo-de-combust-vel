@@ -336,6 +336,17 @@ export default function MetrosCubicos() {
                     onChange={(e) => setEditValue(e.target.value)}
                     className="border-blue-300 text-slate-800"
                   />
+                ) : editField === 'equipamento' ? (
+                  <select
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    className="w-full bg-white text-slate-800 border border-blue-300 rounded px-3 py-2 text-sm"
+                  >
+                    <option value="">-- selecione --</option>
+                    <option value="CAMINHÃO BETONEIRA">CAMINHÃO BETONEIRA</option>
+                    <option value="BOMBA LANÇA">BOMBA LANÇA</option>
+                    <option value="BOMBA ESTACIONÁRIA">BOMBA ESTACIONÁRIA</option>
+                  </select>
                 ) : (
                   <Input
                     type={editField === 'metros_cubicos' ? 'number' : 'text'}
