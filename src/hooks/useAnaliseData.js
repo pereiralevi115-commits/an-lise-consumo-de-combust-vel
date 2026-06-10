@@ -15,7 +15,18 @@ export function useAnaliseData() {
 
   const { data: cubicMetros = [] } = useQuery({
     queryKey: ['cubicMetros'],
-    queryFn: () => base44.entities.CubicMetros.list()
+    queryFn: async () => {
+      const all = [];
+      let offset = 0;
+      const limit = 1000;
+      let hasMore = true;
+      while (hasMore) {
+        const batch = await base44.entities.CubicMetros.list('-mes', limit, offset);
+        if (batch.length === 0) hasMore = false;
+        else { all.push(...batch); offset += limit; }
+      }
+      return all;
+    }
   });
 
   const { data: pontos = [] } = useQuery({
