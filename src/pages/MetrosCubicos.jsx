@@ -55,7 +55,13 @@ export default function MetrosCubicos() {
 
   const uniqueMeses = [...new Set(records.map(r => r.mes))].filter(Boolean).sort((a, b) => b.localeCompare(a));
   const uniquePlacas = [...new Set(records.map(r => String(r.placa).toUpperCase()))].filter(Boolean).sort();
-  const uniqueEquipamentos = [...new Set(records.map(r => placaEquipamentosMap[String(r.placa).toUpperCase()] || r.equipamento))].filter(Boolean).sort();
+  const normalizeEquipamento = (eq) => {
+    if (!eq) return eq;
+    return eq.toUpperCase()
+      .replace(/ESTACIONARIA/g, 'ESTACIONÁRIA')
+      .replace(/CAMINHAO/g, 'CAMINHÃO');
+  };
+  const uniqueEquipamentos = [...new Set(records.map(r => normalizeEquipamento(placaEquipamentosMap[String(r.placa).toUpperCase()] || r.equipamento)))].filter(Boolean).sort();
 
   const toggleSort = (field) => {
     if (sortBy === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -70,7 +76,7 @@ export default function MetrosCubicos() {
   const filteredRecords = records.filter(r => {
     const mes = r.mes || '';
     const placa = String(r.placa || '').toUpperCase();
-    const equipamento = (placaEquipamentosMap[placa] || r.equipamento || '').toUpperCase();
+    const equipamento = normalizeEquipamento(placaEquipamentosMap[placa] || r.equipamento || '');
     
     if (filterMes && !mes.includes(filterMes)) return false;
     if (filterPlaca && !placa.includes(filterPlaca.toUpperCase())) return false;
@@ -456,7 +462,7 @@ export default function MetrosCubicos() {
       {filteredRecords.length > 0 && (() => {
         const somaEquip = {};
         filteredRecords.forEach(r => {
-          const eq = r.equipamento || placaEquipamentosMap[String(r.placa).toUpperCase()] || 'Sem equipamento';
+          const eq = normalizeEquipamento(r.equipamento || placaEquipamentosMap[String(r.placa).toUpperCase()]) || 'Sem equipamento';
           somaEquip[eq] = (somaEquip[eq] || 0) + (r.metros_cubicos || 0);
         });
         const total = Object.values(somaEquip).reduce((a, b) => a + b, 0);
