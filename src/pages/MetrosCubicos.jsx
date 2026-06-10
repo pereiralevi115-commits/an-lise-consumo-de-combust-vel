@@ -140,15 +140,14 @@ export default function MetrosCubicos() {
     
     setIsEditing(true);
     try {
-      const updates = Array.from(selected).map(id => {
+      for (const id of Array.from(selected)) {
         const record = records.find(r => r.id === id);
         const updateData = { ...record };
         if (editField === 'mes') updateData.mes = editValue;
         else if (editField === 'equipamento') updateData.equipamento = editValue;
         else if (editField === 'metros_cubicos') updateData.metros_cubicos = parseFloat(editValue.replace(',', '.'));
-        return base44.entities.CubicMetros.update(id, updateData).catch(() => {});
-      });
-      await Promise.all(updates);
+        await base44.entities.CubicMetros.update(id, updateData).catch(() => {});
+      }
       setSelected(new Set());
       setEditField(null);
       setEditValue('');
