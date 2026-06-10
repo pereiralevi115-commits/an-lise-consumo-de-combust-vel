@@ -134,7 +134,10 @@ export default function Graficos() {
   });
 
   const getTipoEquipamento = (cm) => {
-    return (placaEquipamentosMap[String(cm.placa).toUpperCase()] || cm.equipamento || '').toUpperCase();
+    const raw = cm.equipamento || placaEquipamentosMap[String(cm.placa).toUpperCase()] || '';
+    return raw.toUpperCase()
+      .replace(/ESTACIONARIA/g, 'ESTACIONÁRIA')
+      .replace(/CAMINHAO/g, 'CAMINHÃO');
   };
 
   const totalM3Betoneira = cubicMetrosFiltrados
