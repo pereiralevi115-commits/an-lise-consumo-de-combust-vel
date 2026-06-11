@@ -10,18 +10,33 @@ Deno.serve(async (req) => {
 
     const motoristas = await base44.asServiceRole.entities.Motorista.list('codigo', 10000);
 
-    let csv = 'Código,Nome\n';
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<motoristas>\n';
     motoristas.forEach(m => {
-      csv += `${m.codigo},"${m.nome}"\n`;
+      xml += `  <motorista>\n`;
+      xml += `    <codigo>${escapeXml(m.codigo)}</codigo>\n`;
+      xml += `    <nome>${escapeXml(m.nome)}</nome>\n`;
+      xml += `  </motorista>\n`;
     });
+    xml += '</motoristas>';
 
-    return new Response(csv, {
+    return new Response(xml, {
       headers: {
-        'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': 'attachment; filename=motoristas.csv'
+        'Content-Type': 'application/xml; charset=utf-8',
+        'Content-Disposition': 'attachment; filename=motoristas.xml'
       }
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
 });
+
+function escapeXml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
