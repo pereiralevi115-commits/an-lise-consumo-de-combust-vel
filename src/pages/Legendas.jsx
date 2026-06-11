@@ -4,14 +4,15 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, Plus, Users, Fuel, MapPin, Truck, Upload, Edit2, Check, X, Search } from 'lucide-react';
+import { Trash2, Plus, Users, Fuel, MapPin, Truck, Upload, Edit2, Check, X, Search, Download } from 'lucide-react';
 import ValorCalculado from '@/components/ValorCalculado';
 
-function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, color }) {
+function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, color, showDownload }) {
   const queryClient = useQueryClient();
   const [novo, setNovo] = useState({ codigo: '', nome: '', entity: entities[0].name });
   const [editing, setEditing] = useState(null); // { entityName, id, codigo, nome }
   const [search, setSearch] = useState('');
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Fetch entities individually (hooks cannot be called in loops)
   const query0 = useQuery({ queryKey: [entities[0]?.name], queryFn: () => base44.entities[entities[0].name].list('codigo'), enabled: !!entities[0] });
@@ -48,6 +49,26 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
     createMutation.mutate({ entityName: novo.entity, data: { codigo: novo.codigo.trim(), nome: novo.nome.trim() } });
   };
 
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    try {
+      const response = await base44.functions.invoke('exportMotoristas', {});
+      const blob = new Blob([response.data], { type: 'text/csv; charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'motoristas.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Erro ao baixar:', err);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const totalItems = allItems.reduce((acc, e) => acc + e.items.length, 0);
 
   const borderColors = { yellow: 'border-amber-200', blue: 'border-blue-200', green: 'border-green-200' };
@@ -61,6 +82,18 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
           <Icon className={`w-5 h-5 ${iconColors[color]}`} />
           {title}
           <span className="ml-auto text-sm font-normal text-slate-500">{totalItems} cadastrados</span>
+          {showDownload && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDownload}
+              disabled={isDownloading}
+              className={`text-blue-400 hover:text-blue-300 hover:bg-blue-900/30 ml-2 ${btnColors[color]}`}
+            >
+              <Download className="w-4 h-4 mr-1" />
+              {isDownloading ? 'Baixando...' : 'CSV'}
+            </Button>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -375,6 +408,7 @@ export default function Legendas() {
           labelCodigo="Código"
           labelNome="Nome"
           color="blue"
+          showDownload={true}
         />
         <LegendaSection
           title="Pontos / Usinas"
