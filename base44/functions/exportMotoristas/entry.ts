@@ -10,13 +10,9 @@ Deno.serve(async (req) => {
 
     const motoristas = await base44.asServiceRole.entities.Motorista.list('codigo', 10000);
 
-    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    xml += '<motoristas>\n';
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<motoristas>\n';
     motoristas.forEach(m => {
-      xml += `  <motorista>\n`;
-      xml += `    <codigo>${escapeXml(m.codigo)}</codigo>\n`;
-      xml += `    <nome>${escapeXml(m.nome)}</nome>\n`;
-      xml += `  </motorista>\n`;
+      xml += `<motorista codigo="${escapeXml(m.codigo)}" nome="${escapeXml(m.nome)}" />\n`;
     });
     xml += '</motoristas>';
 
