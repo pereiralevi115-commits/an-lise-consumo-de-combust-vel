@@ -54,6 +54,7 @@ import Graficos from './pages/Graficos';
 import Legendas from './pages/Legendas';
 import MetrosCubicos from './pages/MetrosCubicos';
 import Upload from './pages/Upload';
+import AbastecimentoDois from './pages/AbastecimentoDois';
 import __Layout from './Layout.jsx';
 
 
@@ -65,6 +66,7 @@ export const PAGES = {
     "MetrosCubicos": MetrosCubicos,
     "Upload": Upload,
     "RankingMotoristas": RankingMotoristas,
+    "AbastecimentoDois": AbastecimentoDois,
 }
 
 export const pagesConfig = {
