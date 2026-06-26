@@ -3,7 +3,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
-    const apiKey = url.searchParams.get('api_key');
+    const apiKey = url.searchParams.get('api_key') || req.headers.get('x-api-key');
     const card = url.searchParams.get('card'); // opcional: filtrar por card específico
 
     if (apiKey !== Deno.env.get('EXPORT_API_KEY')) {
