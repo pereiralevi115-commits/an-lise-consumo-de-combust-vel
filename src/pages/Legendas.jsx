@@ -233,6 +233,7 @@ function FrentistasExternosSection() {
   ].filter(a => {
     if (!a) return false;
     const val = String(a).trim();
+    if (/^\d+$/.test(val)) return false; // oculta valores puramente numéricos (códigos)
     return !codigosCadastrados.has(val) && !nomesCadastrados.has(val.toLowerCase());
   }))].sort();
 
