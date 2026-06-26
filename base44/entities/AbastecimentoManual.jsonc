@@ -1,0 +1,56 @@
+{
+  "name": "AbastecimentoManual",
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Data do abastecimento"
+    },
+    "time": {
+      "type": "string",
+      "description": "Hora do abastecimento (HH:MM)"
+    },
+    "vehicle_plate": {
+      "type": "string",
+      "description": "Placa do ve\u00edculo"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Usina/ponto de abastecimento"
+    },
+    "equipamento": {
+      "type": "string",
+      "description": "Tipo de equipamento"
+    },
+    "attendant": {
+      "type": "string",
+      "description": "Posto/frentista"
+    },
+    "driver": {
+      "type": "string",
+      "description": "Motorista"
+    },
+    "fuel_type": {
+      "type": "string",
+      "description": "Tipo de combust\u00edvel"
+    },
+    "liters": {
+      "type": "number",
+      "description": "Quantidade em litros"
+    },
+    "km_driven": {
+      "type": "number",
+      "description": "KM rodados"
+    },
+    "cost": {
+      "type": "number",
+      "description": "Valor gasto (R$)"
+    }
+  },
+  "required": [
+    "date",
+    "vehicle_plate",
+    "liters"
+  ]
+}

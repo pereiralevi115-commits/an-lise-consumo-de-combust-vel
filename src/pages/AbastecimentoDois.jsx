@@ -1,26 +1,29 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Plus, Pencil, Trash2, X, Check } from 'lucide-react';
 
-const SortIcon = ({ field, sortBy, sortDir }) => {
-  if (sortBy !== field) return <span className="text-slate-400 ml-1">↕</span>;
-  return <span className="text-[#FDB913] ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>;
+const emptyForm = {
+  date: '', time: '', vehicle_plate: '', unit: '', equipamento: '',
+  attendant: '', driver: '', fuel_type: '', liters: '', km_driven: '', cost: ''
 };
 
-const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-
 export default function AbastecimentoDois() {
-  const [filters, setFilters] = useState({ month: '', unit: '', equipment: '', plate: '', driver: '' });
-  const [sortBy, setSortBy] = useState('date');
-  const [sortDir, setSortDir] = useState('desc');
+  const qc = useQueryClient();
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+  const [editId, setEditId] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(null);
 
   const { data: records = [], isLoading } = useQuery({
-    queryKey: ['fuelRecords'],
-    queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
+    queryKey: ['AbastecimentoManual'],
+    queryFn: () => base44.entities.AbastecimentoManual.list('-date', 10000)
   });
 
   const { data: frentistas = [] } = useQuery({ queryKey: ['Frentista'], queryFn: () => base44.entities.Frentista.list() });
@@ -28,163 +31,215 @@ export default function AbastecimentoDois() {
   const { data: pontos = [] } = useQuery({ queryKey: ['Ponto'], queryFn: () => base44.entities.Ponto.list() });
   const { data: combustiveis = [] } = useQuery({ queryKey: ['Combustivel'], queryFn: () => base44.entities.Combustivel.list() });
   const { data: placaEquipamentos = [] } = useQuery({ queryKey: ['PlacaEquipamento'], queryFn: () => base44.entities.PlacaEquipamento.list('placa', 10000) });
-  const { data: precosCombustivel = [] } = useQuery({ queryKey: ['PrecoCombustivel'], queryFn: () => base44.entities.PrecoCombustivel.list() });
 
-  const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
-  const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
-  const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
-  const combustiveisMap = Object.fromEntries(combustiveis.map(c => [String(c.codigo), c.nome]));
   const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
 
-  const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b);
-  const units = [...new Set(records.map(r => r.unit))].filter(Boolean).sort();
-  const equipments = [...new Set(records.map(r => placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()]))].filter(Boolean).sort();
-  const plates = [...new Set(records.map(r => r.vehicle_plate))].filter(Boolean).sort();
-  const drivers = [...new Set(records.map(r => r.driver))].filter(Boolean).sort((a, b) => {
-    const nameA = motoristasMap[String(a)] || a;
-    const nameB = motoristasMap[String(b)] || b;
-    return nameA.localeCompare(nameB, 'pt-BR');
-  });
-
-  const getValor = (record) => {
-    if (!record.korth_id) return record.cost != null && record.cost > 0 ? record.cost : null;
-    const d = record.date ? parseISO(record.date) : null;
-    const preco = d ? precosCombustivel.find(p =>
-      String(p.ponto) === String(record.unit) &&
-      Number(p.mes) === d.getMonth() &&
-      Number(p.ano) === d.getFullYear()
-    ) : null;
-    return preco ? (record.liters || 0) * preco.preco_litro : null;
+  const setField = (k, v) => {
+    const updated = { ...form, [k]: v };
+    // auto-fill equipamento when plate changes
+    if (k === 'vehicle_plate') {
+      const tipo = placaEquipamentosMap[String(v).toUpperCase()];
+      if (tipo) updated.equipamento = tipo;
+    }
+    setForm(updated);
   };
 
-  const filtered = records.filter(r => {
-    if (filters.month && (!r.date || parseISO(r.date).getMonth() !== parseInt(filters.month))) return false;
-    if (filters.unit && r.unit !== filters.unit) return false;
-    if (filters.equipment && placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()] !== filters.equipment) return false;
-    if (filters.plate && r.vehicle_plate !== filters.plate) return false;
-    if (filters.driver && r.driver !== filters.driver) return false;
-    return true;
-  }).sort((a, b) => {
-    let valA, valB;
-    if (sortBy === 'date') {
-      const da = (a.date || '') + ' ' + (a.time || '');
-      const db = (b.date || '') + ' ' + (b.time || '');
-      return sortDir === 'asc' ? (da < db ? -1 : da > db ? 1 : 0) : (da > db ? -1 : da < db ? 1 : 0);
-    }
-    if (sortBy === 'liters') { valA = a.liters || 0; valB = b.liters || 0; }
-    else if (sortBy === 'km') { valA = a.km_driven || 0; valB = b.km_driven || 0; }
-    else if (sortBy === 'cost') { valA = getValor(a) || 0; valB = getValor(b) || 0; }
-    else if (sortBy === 'plate') { valA = a.vehicle_plate || ''; valB = b.vehicle_plate || ''; }
-    else if (sortBy === 'unit') { valA = pontosMap[String(a.unit)] || a.unit || ''; valB = pontosMap[String(b.unit)] || b.unit || ''; }
-    else if (sortBy === 'equipment') { valA = placaEquipamentosMap[String(a.vehicle_plate).toUpperCase()] || ''; valB = placaEquipamentosMap[String(b.vehicle_plate).toUpperCase()] || ''; }
-    else if (sortBy === 'posto') { valA = frentistasMap[String(a.attendant)] || a.attendant || ''; valB = frentistasMap[String(b.attendant)] || b.attendant || ''; }
-    else if (sortBy === 'driver') { valA = motoristasMap[String(a.driver)] || a.driver || ''; valB = motoristasMap[String(b.driver)] || b.driver || ''; }
-    else if (sortBy === 'fuel') { valA = combustiveisMap[String(a.fuel_type)] || a.fuel_type || ''; valB = combustiveisMap[String(b.fuel_type)] || b.fuel_type || ''; }
-    else { valA = ''; valB = ''; }
-    const cmp = typeof valA === 'string' ? valA.localeCompare(valB, 'pt-BR') : (valA < valB ? -1 : valA > valB ? 1 : 0);
-    return sortDir === 'asc' ? cmp : -cmp;
-  });
+  const openNew = () => { setForm(emptyForm); setEditId(null); setShowForm(true); };
+  const openEdit = (r) => {
+    setForm({
+      date: r.date || '', time: r.time || '', vehicle_plate: r.vehicle_plate || '',
+      unit: r.unit || '', equipamento: r.equipamento || '', attendant: r.attendant || '',
+      driver: r.driver || '', fuel_type: r.fuel_type || '',
+      liters: r.liters ?? '', km_driven: r.km_driven ?? '', cost: r.cost ?? ''
+    });
+    setEditId(r.id);
+    setShowForm(true);
+  };
 
-  const toggleSort = (field) => {
-    if (sortBy === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
-    else { setSortBy(field); setSortDir('asc'); }
+  const handleSave = async () => {
+    setSaving(true);
+    const payload = {
+      ...form,
+      liters: form.liters !== '' ? Number(form.liters) : null,
+      km_driven: form.km_driven !== '' ? Number(form.km_driven) : null,
+      cost: form.cost !== '' ? Number(form.cost) : null,
+    };
+    if (editId) {
+      await base44.entities.AbastecimentoManual.update(editId, payload);
+    } else {
+      await base44.entities.AbastecimentoManual.create(payload);
+    }
+    qc.invalidateQueries({ queryKey: ['AbastecimentoManual'] });
+    setShowForm(false);
+    setSaving(false);
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm('Excluir este registro?')) return;
+    setDeleting(id);
+    await base44.entities.AbastecimentoManual.delete(id);
+    qc.invalidateQueries({ queryKey: ['AbastecimentoManual'] });
+    setDeleting(null);
   };
 
   if (isLoading) return <div className="text-slate-600 text-center py-12">Carregando dados...</div>;
 
   return (
     <div className="space-y-6 max-w-full">
-      <div>
-        <h1 className="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight mb-1">Abastecimento</h1>
-        <p className="text-slate-500 mb-6">Registros detalhados de abastecimento</p>
-
-        {/* Filtros */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
-          <select value={filters.month} onChange={e => setFilters({ ...filters, month: e.target.value })} className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm text-sm">
-            <option value="">Todos os meses</option>
-            {months.map(m => <option key={m} value={m}>{monthNames[m]}</option>)}
-          </select>
-          <select value={filters.unit} onChange={e => setFilters({ ...filters, unit: e.target.value })} className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm text-sm">
-            <option value="">Todas as usinas</option>
-            {units.map(u => <option key={u} value={u}>{pontosMap[String(u)] || u}</option>)}
-          </select>
-          <select value={filters.equipment} onChange={e => setFilters({ ...filters, equipment: e.target.value })} className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm text-sm">
-            <option value="">Todos os equipamentos</option>
-            {equipments.map(e => <option key={e} value={e}>{e}</option>)}
-          </select>
-          <select value={filters.plate} onChange={e => setFilters({ ...filters, plate: e.target.value })} className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm text-sm">
-            <option value="">Todas as placas</option>
-            {plates.map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
-          <select value={filters.driver} onChange={e => setFilters({ ...filters, driver: e.target.value })} className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 shadow-sm text-sm">
-            <option value="">Todos os motoristas</option>
-            {drivers.map(d => <option key={d} value={d}>{motoristasMap[String(d)] || d}</option>)}
-          </select>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800 tracking-tight mb-1">Abastecimento</h1>
+          <p className="text-slate-500">Cadastro manual de abastecimentos — {records.length} registro(s)</p>
         </div>
-
-        <p className="text-slate-500 text-sm">Total de {filtered.length} registros</p>
+        <Button onClick={openNew} className="flex items-center gap-2 bg-[#FDB913] text-slate-900 hover:bg-[#e5a710]">
+          <Plus className="w-4 h-4" /> Novo Registro
+        </Button>
       </div>
 
+      {/* Formulário */}
+      {showForm && (
+        <Card className="border-[#FDB913] shadow-lg">
+          <CardContent className="p-6">
+            <h2 className="font-semibold text-slate-800 mb-4">{editId ? 'Editar Registro' : 'Novo Registro'}</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Data *</label>
+                <input type="date" value={form.date} onChange={e => setField('date', e.target.value)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Hora</label>
+                <input type="time" value={form.time} onChange={e => setField('time', e.target.value)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Placa *</label>
+                <input type="text" value={form.vehicle_plate} onChange={e => setField('vehicle_plate', e.target.value.toUpperCase())}
+                  placeholder="EX-0000" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm uppercase" />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Usina</label>
+                <select value={form.unit} onChange={e => setField('unit', e.target.value)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                  <option value="">Selecione...</option>
+                  {pontos.map(p => <option key={p.id} value={p.codigo}>{p.nome}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Equipamento</label>
+                <input type="text" value={form.equipamento} onChange={e => setField('equipamento', e.target.value)}
+                  placeholder="Auto-preenchido pela placa" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Posto/Frentista</label>
+                <select value={form.attendant} onChange={e => setField('attendant', e.target.value)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                  <option value="">Selecione...</option>
+                  {frentistas.map(f => <option key={f.id} value={f.codigo}>{f.nome}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Motorista</label>
+                <select value={form.driver} onChange={e => setField('driver', e.target.value)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                  <option value="">Selecione...</option>
+                  {motoristas.map(m => <option key={m.id} value={m.codigo}>{m.nome}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Combustível</label>
+                <select value={form.fuel_type} onChange={e => setField('fuel_type', e.target.value)}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm">
+                  <option value="">Selecione...</option>
+                  {combustiveis.map(c => <option key={c.id} value={c.codigo}>{c.nome}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Litros *</label>
+                <input type="number" step="0.001" value={form.liters} onChange={e => setField('liters', e.target.value)}
+                  placeholder="0.000" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">KM Rodados</label>
+                <input type="number" value={form.km_driven} onChange={e => setField('km_driven', e.target.value)}
+                  placeholder="0" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">Valor (R$)</label>
+                <input type="number" step="0.01" value={form.cost} onChange={e => setField('cost', e.target.value)}
+                  placeholder="0.00" className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm" />
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4 justify-end">
+              <Button variant="outline" onClick={() => setShowForm(false)} className="flex items-center gap-1">
+                <X className="w-4 h-4" /> Cancelar
+              </Button>
+              <Button onClick={handleSave} disabled={saving || !form.date || !form.vehicle_plate || !form.liters}
+                className="flex items-center gap-1 bg-[#FDB913] text-slate-900 hover:bg-[#e5a710]">
+                <Check className="w-4 h-4" /> {saving ? 'Salvando...' : 'Salvar'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Tabela */}
       <Card className="bg-white border-slate-200 shadow-lg">
         <CardContent className="p-0">
           <div className="overflow-x-auto w-full">
             <Table className="min-w-[1400px]">
               <TableHeader>
                 <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
-                  {[
-                    ['date', 'Data'],
-                    ['date', 'Hora'],
-                    ['plate', 'Placa'],
-                    ['unit', 'Usina'],
-                    ['equipment', 'Equipamento'],
-                    ['posto', 'Posto'],
-                    ['driver', 'Motorista'],
-                    ['fuel', 'Combustível'],
-                  ].map(([field, label], i) => (
-                    <TableHead
-                      key={`${field}-${i}`}
-                      className="text-slate-600 cursor-pointer select-none"
-                      onClick={() => toggleSort(field === 'date' && i === 1 ? 'time' : field)}
-                    >
-                      {label}
-                      <SortIcon field={field === 'date' && i === 1 ? 'time' : field} sortBy={sortBy} sortDir={sortDir} />
-                    </TableHead>
-                  ))}
-                  {[['liters', 'Litros'], ['km', 'KM'], ['cost', 'Valor (R$)']].map(([field, label]) => (
-                    <TableHead key={field} className="text-slate-600 text-right cursor-pointer select-none" onClick={() => toggleSort(field)}>
-                      {label}<SortIcon field={field} sortBy={sortBy} sortDir={sortDir} />
-                    </TableHead>
-                  ))}
+                  <TableHead className="text-slate-600">Data</TableHead>
+                  <TableHead className="text-slate-600">Hora</TableHead>
+                  <TableHead className="text-slate-600">Placa</TableHead>
+                  <TableHead className="text-slate-600">Usina</TableHead>
+                  <TableHead className="text-slate-600">Equipamento</TableHead>
+                  <TableHead className="text-slate-600">Posto</TableHead>
+                  <TableHead className="text-slate-600">Motorista</TableHead>
+                  <TableHead className="text-slate-600">Combustível</TableHead>
+                  <TableHead className="text-slate-600 text-right">Litros</TableHead>
+                  <TableHead className="text-slate-600 text-right">KM</TableHead>
+                  <TableHead className="text-slate-600 text-right">Valor (R$)</TableHead>
+                  <TableHead className="text-slate-600 text-center">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.length === 0 ? (
+                {records.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={11} className="text-center text-slate-400 py-8">Nenhum registro encontrado</TableCell>
+                    <TableCell colSpan={12} className="text-center text-slate-400 py-12">
+                      Nenhum registro cadastrado. Clique em "Novo Registro" para começar.
+                    </TableCell>
                   </TableRow>
-                ) : filtered.map(record => {
-                  const valor = getValor(record);
-                  const rowClass = !record.korth_id ? 'border-slate-200 bg-green-50 hover:bg-green-100' : 'border-slate-200 hover:bg-slate-50';
+                ) : records.map(r => {
+                  const pontoNome = pontos.find(p => String(p.codigo) === String(r.unit))?.nome || r.unit || '-';
+                  const frentistaNome = frentistas.find(f => String(f.codigo) === String(r.attendant))?.nome || r.attendant || '-';
+                  const motoristaNome = motoristas.find(m => String(m.codigo) === String(r.driver))?.nome || r.driver || '-';
+                  const combustivelNome = combustiveis.find(c => String(c.codigo) === String(r.fuel_type))?.nome || r.fuel_type || '-';
                   return (
-                    <TableRow key={record.id} className={rowClass}>
+                    <TableRow key={r.id} className="border-slate-200 hover:bg-slate-50">
                       <TableCell className="text-slate-800">
-                        {record.date ? format(parseISO(record.date), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
+                        {r.date ? format(parseISO(r.date), 'dd/MM/yyyy', { locale: ptBR }) : '-'}
                       </TableCell>
-                      <TableCell className="text-slate-800">{record.time || '-'}</TableCell>
-                      <TableCell className="text-slate-800 font-mono font-bold">{record.vehicle_plate || '-'}</TableCell>
-                      <TableCell className="text-slate-600 text-sm">{pontosMap[String(record.unit)] || record.unit || '-'}</TableCell>
-                      <TableCell className="text-slate-600">{placaEquipamentosMap[String(record.vehicle_plate).toUpperCase()] || '-'}</TableCell>
-                      <TableCell className="text-slate-600">{frentistasMap[String(record.attendant)] || motoristasMap[String(record.attendant)] || record.attendant || '-'}</TableCell>
-                      <TableCell className="text-slate-600">
-                        {(motoristasMap[String(record.driver)] || frentistasMap[String(record.driver)] || record.driver || '-').toUpperCase()}
-                      </TableCell>
-                      <TableCell className="text-slate-600">{combustiveisMap[String(record.fuel_type)] || record.fuel_type || '-'}</TableCell>
-                      <TableCell className="text-slate-800 text-right">{record.liters != null ? record.liters.toFixed(3) : '-'}</TableCell>
-                      <TableCell className="text-slate-800 text-right">
-                        {record.km_driven != null && record.km_driven > 0 ? record.km_driven.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '-'}
-                      </TableCell>
-                      <TableCell className="text-slate-800 text-right">
-                        {valor != null ? `R$ ${valor.toFixed(2)}` : '-'}
+                      <TableCell className="text-slate-600">{r.time || '-'}</TableCell>
+                      <TableCell className="text-slate-800 font-mono font-bold">{r.vehicle_plate || '-'}</TableCell>
+                      <TableCell className="text-slate-600 text-sm">{pontoNome}</TableCell>
+                      <TableCell className="text-slate-600">{r.equipamento || '-'}</TableCell>
+                      <TableCell className="text-slate-600">{frentistaNome}</TableCell>
+                      <TableCell className="text-slate-600">{String(motoristaNome).toUpperCase()}</TableCell>
+                      <TableCell className="text-slate-600">{combustivelNome}</TableCell>
+                      <TableCell className="text-slate-800 text-right">{r.liters != null ? r.liters.toFixed(3) : '-'}</TableCell>
+                      <TableCell className="text-slate-800 text-right">{r.km_driven != null && r.km_driven > 0 ? r.km_driven.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : '-'}</TableCell>
+                      <TableCell className="text-slate-800 text-right">{r.cost != null ? `R$ ${r.cost.toFixed(2)}` : '-'}</TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <button onClick={() => openEdit(r)} className="p-1 text-slate-400 hover:text-blue-600 transition-colors">
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => handleDelete(r.id)} disabled={deleting === r.id} className="p-1 text-slate-400 hover:text-red-600 transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
