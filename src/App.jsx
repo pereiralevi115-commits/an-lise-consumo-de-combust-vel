@@ -8,6 +8,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import DebugM3 from '@/pages/DebugM3';
+import AbastecimentoDois from '@/pages/AbastecimentoDois';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -51,6 +52,11 @@ const AuthenticatedApp = () => {
       <Route path="/DebugM3" element={
         <LayoutWrapper currentPageName="DebugM3">
           <DebugM3 />
+        </LayoutWrapper>
+      } />
+      <Route path="/AbastecimentoDois" element={
+        <LayoutWrapper currentPageName="AbastecimentoDois">
+          <AbastecimentoDois />
         </LayoutWrapper>
       } />
       {Object.entries(Pages).map(([path, Page]) => (
