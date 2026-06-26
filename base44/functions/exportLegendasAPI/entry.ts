@@ -3,8 +3,11 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
-    const apiKey = url.searchParams.get('api_key') || req.headers.get('x-api-key');
-    const card = url.searchParams.get('card'); // opcional: filtrar por card específico
+    let bodyPayload = {};
+    try { bodyPayload = await req.json(); } catch (_) {}
+
+    const apiKey = url.searchParams.get('api_key') || req.headers.get('x-api-key') || bodyPayload.api_key;
+    const card = url.searchParams.get('card') || bodyPayload.card;
 
     if (apiKey !== Deno.env.get('EXPORT_API_KEY')) {
       return Response.json({ error: 'API key inválida' }, { status: 401 });
