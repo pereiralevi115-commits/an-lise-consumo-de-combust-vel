@@ -201,6 +201,11 @@ function FrentistasExternosSection() {
     queryFn: () => base44.entities.AbastecimentoManual.list('-date', 10000)
   });
 
+  const { data: fuelRecords = [] } = useQuery({
+    queryKey: ['FuelRecord'],
+    queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
+  });
+
   const { data: frentistas = [] } = useQuery({
     queryKey: ['Frentista'],
     queryFn: () => base44.entities.Frentista.list('codigo')
@@ -219,13 +224,12 @@ function FrentistasExternosSection() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['Frentista'] })
   });
 
-  // Nomes únicos preenchidos na coluna attendant dos abastecimentos externos
+  // Nomes únicos preenchidos na coluna attendant dos abastecimentos externos E FuelRecord
   const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
-  const nomesExternos = [...new Set(
-    abastecimentos
-      .map(r => r.attendant)
-      .filter(a => a && !frentistasMap[String(a)])
-  )].sort();
+  const nomesExternos = [...new Set([
+    ...abastecimentos.map(r => r.attendant),
+    ...fuelRecords.map(r => r.attendant)
+  ].filter(a => a && !frentistasMap[String(a)]))].sort();
 
   const filtered = frentistas.filter(f =>
     f.codigo?.toLowerCase().includes(search.toLowerCase()) ||
