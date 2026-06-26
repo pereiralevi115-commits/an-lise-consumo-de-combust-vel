@@ -191,6 +191,136 @@ function LegendaSection({ title, icon: Icon, entities, labelCodigo, labelNome, c
   );
 }
 
+function FrentistasExternosSection() {
+  const queryClient = useQueryClient();
+  const [search, setSearch] = useState('');
+  const [novo, setNovo] = useState({ codigo: '', nome: '' });
+
+  const { data: abastecimentos = [] } = useQuery({
+    queryKey: ['AbastecimentoManual'],
+    queryFn: () => base44.entities.AbastecimentoManual.list('-date', 10000)
+  });
+
+  const { data: frentistas = [] } = useQuery({
+    queryKey: ['Frentista'],
+    queryFn: () => base44.entities.Frentista.list('codigo')
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data) => base44.entities.Frentista.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['Frentista'] });
+      setNovo({ codigo: '', nome: '' });
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.Frentista.delete(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['Frentista'] })
+  });
+
+  // Nomes únicos preenchidos na coluna attendant dos abastecimentos externos
+  const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
+  const nomesExternos = [...new Set(
+    abastecimentos
+      .map(r => r.attendant)
+      .filter(a => a && !frentistasMap[String(a)])
+  )].sort();
+
+  const filtered = frentistas.filter(f =>
+    f.codigo?.toLowerCase().includes(search.toLowerCase()) ||
+    f.nome?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <Card className="bg-white border border-orange-200 shadow-lg">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-slate-800 flex items-center gap-2">
+          <Users className="w-5 h-5 text-orange-500" />
+          Frentistas Externos
+          <span className="ml-auto text-sm font-normal text-slate-500">{frentistas.length} cadastrados</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Nomes encontrados nos abastecimentos mas não cadastrados */}
+        {nomesExternos.length > 0 && (
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+            <p className="text-orange-700 text-xs font-medium mb-2">Encontrados nos abastecimentos, não cadastrados ({nomesExternos.length}):</p>
+            <div className="space-y-1 max-h-32 overflow-y-auto">
+              {nomesExternos.map(nome => (
+                <div key={nome} className="flex items-center justify-between bg-white border border-orange-100 rounded px-2 py-1 gap-2">
+                  <span className="text-slate-700 text-sm truncate flex-1">{nome}</span>
+                  <Button
+                    size="sm"
+                    className="h-6 text-xs bg-orange-500 hover:bg-orange-600 text-white px-2"
+                    onClick={() => setNovo({ codigo: nome, nome: nome })}
+                  >
+                    Cadastrar
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Formulário */}
+        <div className="flex gap-2 flex-wrap">
+          <Input
+            placeholder="Código"
+            value={novo.codigo}
+            onChange={(e) => setNovo({ ...novo, codigo: e.target.value })}
+            className="border-slate-200 text-slate-800 w-28"
+          />
+          <Input
+            placeholder="Nome"
+            value={novo.nome}
+            onChange={(e) => setNovo({ ...novo, nome: e.target.value })}
+            className="border-slate-200 text-slate-800 flex-1 min-w-[120px]"
+          />
+          <Button
+            onClick={() => createMutation.mutate({ codigo: novo.codigo.trim(), nome: novo.nome.trim() })}
+            disabled={createMutation.isPending || !novo.codigo || !novo.nome}
+            className="bg-orange-500 hover:bg-orange-600 text-white"
+          >
+            <Plus className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Pesquisa */}
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-slate-400" />
+          <Input
+            placeholder="Pesquisar..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border-slate-200 text-slate-800 pl-8"
+          />
+        </div>
+
+        {/* Lista */}
+        <div className="space-y-1 max-h-56 overflow-y-auto">
+          {filtered.length === 0 ? (
+            <p className="text-slate-400 text-sm text-center py-2">Nenhum cadastro ainda</p>
+          ) : filtered.map(item => (
+            <div key={item.id} className="flex items-center justify-between bg-slate-50 border border-slate-100 rounded px-3 py-1.5 gap-2">
+              <span className="text-slate-500 font-mono text-xs w-24 shrink-0 truncate">{item.codigo}</span>
+              <span className="text-slate-800 flex-1 text-sm truncate">{item.nome}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => deleteMutation.mutate(item.id)}
+                className="h-7 w-7 text-slate-500 hover:text-red-400"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function PlacaEquipamentoSection() {
   const queryClient = useQueryClient();
   const [nova, setNova] = useState({ placa: '', tipo: '' });
@@ -384,6 +514,7 @@ export default function Legendas() {
           labelNome="Nome da usina"
           color="green"
         />
+        <FrentistasExternosSection />
         <PlacaEquipamentoSection />
       </div>
     </div>
