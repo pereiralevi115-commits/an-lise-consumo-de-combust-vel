@@ -225,11 +225,16 @@ function FrentistasExternosSection() {
   });
 
   // Nomes únicos preenchidos na coluna attendant dos abastecimentos externos E FuelRecord
-  const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
+  const codigosCadastrados = new Set(frentistas.map(f => String(f.codigo).trim()));
+  const nomesCadastrados = new Set(frentistas.map(f => String(f.nome).trim().toLowerCase()));
   const nomesExternos = [...new Set([
     ...abastecimentos.map(r => r.attendant),
     ...fuelRecords.map(r => r.attendant)
-  ].filter(a => a && !frentistasMap[String(a)]))].sort();
+  ].filter(a => {
+    if (!a) return false;
+    const val = String(a).trim();
+    return !codigosCadastrados.has(val) && !nomesCadastrados.has(val.toLowerCase());
+  }))].sort();
 
   const filtered = frentistas.filter(f =>
     f.codigo?.toLowerCase().includes(search.toLowerCase()) ||
