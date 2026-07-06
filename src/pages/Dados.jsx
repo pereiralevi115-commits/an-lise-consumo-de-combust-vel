@@ -354,7 +354,7 @@ export default function Dados() {
 
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <p className="text-slate-500">Total de {filtered.length} registros</p>
           {kmInconsistencyIds.size > 0 && (
             <span
@@ -366,6 +366,29 @@ export default function Dados() {
               {kmInconsistencyIds.size} inconsistência{kmInconsistencyIds.size > 1 ? 's' : ''}{filters.onlyInconsistent ? ' (mostrando)' : ''}
             </span>
           )}
+          <div className="flex items-center gap-3 ml-auto">
+            <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-lg">
+              <span className="text-xs font-medium text-slate-500">Total Litros:</span>
+              <span className="text-sm font-bold text-slate-800">
+                {filtered.reduce((sum, r) => sum + (Number(r.liters) || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 bg-[#FDB913]/15 px-3 py-1.5 rounded-lg">
+              <span className="text-xs font-medium text-slate-500">Total Valor:</span>
+              <span className="text-sm font-bold text-slate-800">
+                R$ {filtered.reduce((sum, r) => {
+                  if (!r.korth_id) return sum + (Number(r.cost) || 0);
+                  const d = r.date ? parseISO(r.date) : null;
+                  const precoReg = d ? precosCombustivel.find(p =>
+                    String(p.ponto) === String(r.unit) &&
+                    Number(p.mes) === d.getMonth() &&
+                    Number(p.ano) === d.getFullYear()
+                  ) : null;
+                  return sum + (precoReg ? (Number(r.liters) || 0) * precoReg.preco_litro : 0);
+                }, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+          </div>
         </div>
         </div>
   
