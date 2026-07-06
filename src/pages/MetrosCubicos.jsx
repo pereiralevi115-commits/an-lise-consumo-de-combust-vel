@@ -29,21 +29,7 @@ export default function MetrosCubicos() {
 
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['CubicMetros'],
-    queryFn: async () => {
-      const allRecords = [];
-      let offset = 0;
-      const limit = 1000;
-      let hasMore = true;
-      while (hasMore) {
-        const batch = await base44.entities.CubicMetros.list('-mes', limit, offset);
-        if (batch.length === 0) hasMore = false;
-        else {
-          allRecords.push(...batch);
-          offset += limit;
-        }
-      }
-      return allRecords;
-    }
+    queryFn: () => base44.entities.CubicMetros.list('-mes', 10000)
   });
 
   const { data: placaEquipamentos = [] } = useQuery({

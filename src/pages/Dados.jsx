@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
@@ -47,11 +47,11 @@ export default function Dados() {
   const { data: combustiveis = [] } = useQuery({ queryKey: ['Combustivel'], queryFn: () => base44.entities.Combustivel.list() });
   const { data: placaEquipamentos = [] } = useQuery({ queryKey: ['PlacaEquipamento'], queryFn: () => base44.entities.PlacaEquipamento.list('placa', 10000) });
   const { data: precosCombustivel = [] } = useQuery({ queryKey: ['PrecoCombustivel'], queryFn: () => base44.entities.PrecoCombustivel.list() });
-  const frentistasMap = Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome]));
-  const motoristasMap = Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome]));
-  const pontosMap = Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome]));
-  const combustiveisMap = Object.fromEntries(combustiveis.map(c => [String(c.codigo), c.nome]));
-  const placaEquipamentosMap = Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo]));
+  const frentistasMap = useMemo(() => Object.fromEntries(frentistas.map(f => [String(f.codigo), f.nome])), [frentistas]);
+  const motoristasMap = useMemo(() => Object.fromEntries(motoristas.map(m => [String(m.codigo), m.nome])), [motoristas]);
+  const pontosMap = useMemo(() => Object.fromEntries(pontos.map(p => [String(p.codigo), p.nome])), [pontos]);
+  const combustiveisMap = useMemo(() => Object.fromEntries(combustiveis.map(c => [String(c.codigo), c.nome])), [combustiveis]);
+  const placaEquipamentosMap = useMemo(() => Object.fromEntries(placaEquipamentos.map(p => [String(p.placa).toUpperCase(), p.tipo])), [placaEquipamentos]);
 
   // Get unique filter values
   const months = [...new Set(records.map(r => r.date ? parseISO(r.date).getMonth() : null))].filter(m => m !== null).sort((a, b) => a - b);
@@ -70,6 +70,7 @@ export default function Dados() {
 
 
   // Detectar inconsistências de KM por placa — guarda razão para tooltip
+  const { kmInconsistencyIds, kmInconsistencyReasons } = useMemo(() => {
   const kmInconsistencyIds = new Set();
   const kmInconsistencyReasons = {}; // id -> string[]
   const KM_MAX_DIFF = 1700;
@@ -151,9 +152,11 @@ export default function Dados() {
 
   // Remove ignored IDs from inconsistency set
   ignoredIds.forEach(id => kmInconsistencyIds.delete(id));
+  return { kmInconsistencyIds, kmInconsistencyReasons };
+  }, [records, ignoredIds]);
 
   // Apply filters (kmInconsistencyIds computed above)
-  const filtered = records.filter(r => {
+  const filtered = useMemo(() => records.filter(r => {
     if (filters.month && (!r.date || parseISO(r.date).getMonth() !== parseInt(filters.month))) return false;
     if (filters.unit && r.unit !== filters.unit) return false;
     if (filters.equipment && placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()] !== filters.equipment) return false;
@@ -208,7 +211,7 @@ export default function Dados() {
     if (primarySort !== 0) return primarySort;
     if (dateA !== dateB) return dateA > dateB ? -1 : 1;
     return timeA > timeB ? -1 : timeA < timeB ? 1 : 0;
-  });
+  }), [records, filters, kmInconsistencyIds, pontosMap, placaEquipamentosMap, motoristasMap, frentistasMap, combustiveisMap, precosCombustivel, sortBy, sortDir]);
 
 
 

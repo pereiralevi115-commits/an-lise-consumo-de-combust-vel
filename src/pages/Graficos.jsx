@@ -93,12 +93,8 @@ export default function Graficos() {
     years,
     plates,
     equipments,
+    isLoading,
   } = useAnaliseData();
-
-  const { data: records = [], isLoading } = useQuery({
-    queryKey: ['fuelRecords'],
-    queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
-  });
 
   const units = useMemo(() => [...new Set(analysisData.map(d => d.unit))].filter(Boolean).sort(), [analysisData]);
   const drivers = useMemo(() => [...new Set(analysisData.map(d => d.driver))].filter(d => d && d !== '-').sort((a, b) => a.localeCompare(b, 'pt-BR')).reduce((acc, name) => {

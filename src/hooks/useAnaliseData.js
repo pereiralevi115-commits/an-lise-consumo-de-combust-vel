@@ -8,25 +8,14 @@ const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
 export { monthNames };
 
 export function useAnaliseData() {
-  const { data: records = [] } = useQuery({
+  const { data: records = [], isLoading } = useQuery({
     queryKey: ['fuelRecords'],
     queryFn: () => base44.entities.FuelRecord.list('-date', 10000)
   });
 
   const { data: cubicMetros = [] } = useQuery({
     queryKey: ['cubicMetros'],
-    queryFn: async () => {
-      const all = [];
-      let offset = 0;
-      const limit = 1000;
-      let hasMore = true;
-      while (hasMore) {
-        const batch = await base44.entities.CubicMetros.list('-mes', limit, offset);
-        if (batch.length === 0) hasMore = false;
-        else { all.push(...batch); offset += limit; }
-      }
-      return all;
-    }
+    queryFn: () => base44.entities.CubicMetros.list('-mes', 10000)
   });
 
   const { data: pontos = [] } = useQuery({
@@ -315,6 +304,7 @@ export function useAnaliseData() {
     analiseByPlaca,
     analiseByMotorista,
     cubicMetros,
+    isLoading,
     placaEquipamentos,
     exclusoesSet,
     pontosMap,
