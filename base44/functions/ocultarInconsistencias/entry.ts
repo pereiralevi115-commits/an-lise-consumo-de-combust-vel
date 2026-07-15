@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 Deno.serve(async (req) => {
   try {
@@ -11,14 +11,16 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'ids array required' }, { status: 400 });
     }
 
-    // Lotes de 3 simultâneos com 300ms entre lotes
-    const BATCH = 3;
     let updated = 0;
+    // updateMany atualiza até 500 registros por chamada — muito mais rápido que update individual
+    const BATCH = 500;
     for (let i = 0; i < ids.length; i += BATCH) {
-      const lote = ids.slice(i, i + BATCH);
-      await Promise.all(lote.map(id => base44.asServiceRole.entities.FuelRecord.update(id, { oculto: true })));
-      updated += lote.length;
-      if (i + BATCH < ids.length) await new Promise(r => setTimeout(r, 300));
+      const batch = ids.slice(i, i + BATCH);
+      await base44.asServiceRole.entities.FuelRecord.updateMany(
+        { id: { $in: batch } },
+        { $set: { oculto: true } }
+      );
+      updated += batch.length;
     }
 
     return Response.json({ updated });

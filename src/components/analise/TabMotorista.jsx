@@ -66,7 +66,7 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
     setProgresso(`0 / ${inconsistentes.length}`);
     const ids = inconsistentes.map(item => item.id);
     // Envia em blocos de 200 para a função backend (evita payload muito grande)
-    const CHUNK = 200;
+    const CHUNK = 500;
     let done = 0;
     for (let i = 0; i < ids.length; i += CHUNK) {
       const chunk = ids.slice(i, i + CHUNK);
