@@ -6,6 +6,7 @@ import ChartCard from '@/components/graficos/ChartCard';
 import SectionHeader from '@/components/graficos/SectionHeader';
 import KpiCard from '@/components/graficos/KpiCard';
 import { COLORS, formatAbbrev, formatBR, CustomTooltip, TopLabel, OutsideLabel } from '@/components/graficos/chartHelpers';
+import RankingContent from '@/components/graficos/RankingContent';
 
 const monthNames = MONTH_NAMES;
 
@@ -19,6 +20,7 @@ const getFirstAndLastName = (fullName) => {
 const selectClass = "bg-white text-slate-700 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-200 cursor-pointer";
 
 export default function Graficos() {
+  const [activeTab, setActiveTab] = useState('graficos');
   const [filters, setFilters] = useState({
     year: '',
     month: '',
@@ -228,12 +230,16 @@ export default function Graficos() {
             <h1 className="text-2xl font-semibold text-slate-800">Gráficos de Combustível</h1>
             <p className="text-sm text-slate-500 mt-1">Análise de consumo por período, usina, equipamento e motorista</p>
           </div>
-          <select value={filters.year} onChange={(e) => setFilters({ ...filters, year: e.target.value })} className={selectClass}>
-            <option value="">Todos anos</option>
-            {years.map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
+          {activeTab === 'graficos' && (
+            <select value={filters.year} onChange={(e) => setFilters({ ...filters, year: e.target.value })} className={selectClass}>
+              <option value="">Todos anos</option>
+              {years.map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+          )}
         </div>
 
+        {activeTab === 'graficos' && (
+        <>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-2">
           <select value={filters.month} onChange={(e) => setFilters({ ...filters, month: e.target.value })} className={selectClass}>
             <option value="">Todos meses</option>
@@ -257,8 +263,24 @@ export default function Graficos() {
           </select>
         </div>
         <p className="text-sm text-slate-400">Total de {filtered.length} registros</p>
+        </>
+        )}
+
+        {/* Tab bar */}
+        <div className="flex gap-1 border-b border-slate-200 mt-5">
+          <button onClick={() => setActiveTab('graficos')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'graficos' ? 'border-slate-700 text-slate-700' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
+            Gráficos
+          </button>
+          <button onClick={() => setActiveTab('ranking')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'ranking' ? 'border-slate-700 text-slate-700' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
+            Ranking de Motoristas
+          </button>
+        </div>
       </div>
 
+      {activeTab === 'graficos' && (
+      <>
       {/* SEÇÃO: Visão Geral */}
       <div className="space-y-4">
         <SectionHeader title="Visão Geral" description="Indicadores principais e tendências mensais" />
@@ -455,6 +477,9 @@ export default function Graficos() {
           </ChartCard>
         </div>
       </div>
+      </>
+      )}
+      {activeTab === 'ranking' && <RankingContent />}
     </div>
   );
 }
