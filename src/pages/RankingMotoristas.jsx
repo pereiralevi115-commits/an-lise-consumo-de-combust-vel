@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Trophy, Medal } from 'lucide-react';
+import { Medal } from 'lucide-react';
 import { useAnaliseData, monthNames } from '@/hooks/useAnaliseData';
 
 const getFirstAndLastName = (fullName) => {
@@ -75,58 +75,55 @@ export default function RankingMotoristas() {
   const maxKml = ranking.length > 0 ? ranking[0].kmPerLiter : 1;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Trophy className="w-8 h-8 text-[#FDB913]" />
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-800 tracking-tight">Ranking de Motoristas</h1>
-          <p className="text-slate-500 mt-1">Classificação por KM/Litro</p>
-        </div>
+    <div className="space-y-6 max-w-[1600px] mx-auto">
+      <div>
+        <h1 className="text-2xl font-semibold text-slate-800">Ranking de Motoristas</h1>
+        <p className="text-sm text-slate-500 mt-1">Classificação por KM/Litro</p>
       </div>
 
       {/* Filtros */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <select value={filters.year} onChange={e => setFilters({ ...filters, year: e.target.value })}
-          className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm">
+          className="bg-white text-slate-700 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-200 cursor-pointer">
           <option value="">Ano</option>
           {years.map(y => <option key={y} value={y}>{y}</option>)}
         </select>
 
         <select value={filters.month} onChange={e => setFilters({ ...filters, month: e.target.value })}
-          className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm">
+          className="bg-white text-slate-700 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-200 cursor-pointer">
           <option value="">Mês</option>
           {months.map(m => <option key={m} value={m}>{monthNames[m]}</option>)}
         </select>
 
         <select value={filters.unit} onChange={e => setFilters({ ...filters, unit: e.target.value })}
-          className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm">
+          className="bg-white text-slate-700 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-200 cursor-pointer">
           <option value="">Usina</option>
           {units.map(u => <option key={u} value={u}>{pontosMap[String(u)] || u}</option>)}
         </select>
 
         <select value={filters.equipment} onChange={e => setFilters({ ...filters, equipment: e.target.value })}
-          className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm">
+          className="bg-white text-slate-700 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-200 cursor-pointer">
           <option value="">Equipamento</option>
           {equipments.map(e => <option key={e} value={e}>{e}</option>)}
         </select>
 
         <select value={filters.plate} onChange={e => setFilters({ ...filters, plate: e.target.value })}
-          className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm">
+          className="bg-white text-slate-700 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-200 cursor-pointer">
           <option value="">Placa</option>
           {plates.map(p => <option key={p} value={p}>{p}</option>)}
         </select>
       </div>
 
-      <p className="text-slate-500 text-sm">{ranking.length} motorista(s) encontrado(s)</p>
+      <p className="text-sm text-slate-400">{ranking.length} motorista(s) encontrado(s)</p>
 
       {ranking.length === 0 ? (
-        <Card className="bg-white border-slate-200 shadow-lg">
-          <CardContent className="py-12 text-center text-slate-500">Nenhum dado encontrado para os filtros selecionados.</CardContent>
+        <Card className="bg-white border border-slate-200 shadow-sm rounded-xl">
+          <CardContent className="py-12 text-center text-slate-400">Nenhum dado encontrado para os filtros selecionados.</CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
           {ranking.map((item, idx) => (
-            <Card key={item.driverName} className={`border shadow-sm ${idx === 0 ? 'bg-amber-50 border-amber-200' : idx === 1 ? 'bg-slate-50 border-slate-200' : idx === 2 ? 'bg-orange-50 border-orange-200' : 'bg-white border-slate-200'}`}>
+            <Card key={item.driverName} className={`border rounded-xl shadow-sm ${idx === 0 ? 'bg-amber-50/60 border-amber-200' : idx === 1 ? 'bg-slate-50/60 border-slate-200' : idx === 2 ? 'bg-orange-50/60 border-orange-200' : 'bg-white border-slate-200'}`}>
               <CardContent className="py-4 px-5">
                 <div className="flex items-center gap-4">
                   <div className={`text-2xl font-black w-10 text-center ${medalColor(idx)}`}>
