@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Pagination from '@/components/Pagination';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 import DebugDriverPanel from '@/components/DebugDriverPanel';
@@ -20,6 +21,7 @@ export default function TabPlaca({ data, cubicMetros, placaEquipamentos, excluso
   const [editingRow, setEditingRow] = useState(null);
   const [editValues, setEditValues] = useState({ unit: '', equipment: '' });
   const queryClient = useQueryClient();
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Primeiro filtra
   const prefiltred = data.filter(item => {
@@ -80,6 +82,11 @@ export default function TabPlaca({ data, cubicMetros, placaEquipamentos, excluso
     const cmp = typeof valA === 'string' ? valA.localeCompare(valB) : (valA < valB ? -1 : valA > valB ? 1 : 0);
     return sortDir === 'asc' ? cmp : -cmp;
   });
+
+  const PAGE_SIZE = 100;
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  useEffect(() => { setCurrentPage(1); }, [filters]);
 
   const toggleSort = (field) => {
     if (sortBy === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -212,9 +219,9 @@ export default function TabPlaca({ data, cubicMetros, placaEquipamentos, excluso
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.length === 0 ? (
+                {paginated.length === 0 ? (
                   <TableRow><TableCell colSpan={12} className="text-center text-slate-400 py-8">Nenhum registro encontrado</TableCell></TableRow>
-                ) : filtered.map((item, idx) => {
+                ) : paginated.map((item, idx) => {
                  const isM3Only = item.totalLiters === 0 && item.kmDelta === 0 && item.cost === 0;
                  const isEditing = editingRow && editingRow.plate === item.plate && editingRow.monthKey === item.monthKey;
                  const excluded = exclusoesSet.has(`${String(item.plate).toUpperCase()}-${item.monthKey}`);
@@ -256,6 +263,7 @@ export default function TabPlaca({ data, cubicMetros, placaEquipamentos, excluso
               </TableBody>
             </Table>
           </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={filtered.length} pageSize={PAGE_SIZE} />
         </CardContent>
       </Card>
     </div>

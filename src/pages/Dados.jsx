@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import Pagination from '@/components/Pagination';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
@@ -28,6 +29,7 @@ export default function Dados() {
     try { return new Set(JSON.parse(localStorage.getItem('ignoredInconsistencies') || '[]')); } catch { return new Set(); }
   });
   const queryClient = useQueryClient();
+  const [currentPage, setCurrentPage] = useState(1);
 
   const ignoreInconsistency = (id) => {
     const updated = new Set(ignoredIds);
@@ -212,6 +214,11 @@ export default function Dados() {
     if (dateA !== dateB) return dateA > dateB ? -1 : 1;
     return timeA > timeB ? -1 : timeA < timeB ? 1 : 0;
   }), [records, filters, kmInconsistencyIds, pontosMap, placaEquipamentosMap, motoristasMap, frentistasMap, combustiveisMap, precosCombustivel, sortBy, sortDir]);
+
+  const PAGE_SIZE = 100;
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  useEffect(() => { setCurrentPage(1); }, [filters]);
 
 
 
@@ -417,13 +424,13 @@ export default function Dados() {
                   </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.length === 0 ? (
+                {paginated.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={15} className="text-center text-slate-400 py-8">
                         Nenhum registro encontrado
                       </TableCell>
                     </TableRow>
-                  ) : filtered.map((record) => {
+                  ) : paginated.map((record) => {
                     const hasIssue = kmInconsistencyIds.has(record.id);
                     const reasons = kmInconsistencyReasons[record.id] || [];
                     let rowClass = !record.korth_id ? 'border-slate-200 bg-green-50 hover:bg-green-100' : 'border-slate-200 hover:bg-slate-50';
@@ -654,6 +661,7 @@ export default function Dados() {
               </TableBody>
             </Table>
           </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={filtered.length} pageSize={PAGE_SIZE} />
         </CardContent>
       </Card>
     </div>

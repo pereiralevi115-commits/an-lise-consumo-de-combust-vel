@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Pagination from '@/components/Pagination';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
@@ -54,6 +55,7 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [showBulkEdit, setShowBulkEdit] = useState(false);
   const queryClient = useQueryClient();
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [progresso, setProgresso] = useState(null);
 
@@ -109,6 +111,11 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
     const cmp = typeof valA === 'string' ? valA.localeCompare(valB, 'pt-BR') : (valA < valB ? -1 : valA > valB ? 1 : 0);
     return sortDir === 'asc' ? cmp : -cmp;
   });
+
+  const PAGE_SIZE = 100;
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  useEffect(() => { setCurrentPage(1); }, [filters]);
 
   const totalInconsistencias = data.filter(item => !item.oculto && detectInconsistencias(item).length > 0).length;
 
@@ -297,9 +304,9 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.length === 0 ? (
+                {paginated.length === 0 ? (
                   <TableRow><TableCell colSpan={12} className="text-center text-slate-400 py-8">Nenhum registro encontrado</TableCell></TableRow>
-                ) : filtered.map((item, idx) => {
+                ) : paginated.map((item, idx) => {
                   const inconsistencias = detectInconsistencias(item);
                   const hasIssue = inconsistencias.length > 0;
 
@@ -362,6 +369,7 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
               </TableBody>
             </Table>
           </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={filtered.length} pageSize={PAGE_SIZE} />
         </CardContent>
       </Card>
 
