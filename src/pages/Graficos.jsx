@@ -7,6 +7,7 @@ import SectionHeader from '@/components/graficos/SectionHeader';
 import KpiCard from '@/components/graficos/KpiCard';
 import { COLORS, formatAbbrev, formatBR, CustomTooltip, TopLabel, OutsideLabel } from '@/components/graficos/chartHelpers';
 import RankingContent from '@/components/graficos/RankingContent';
+import RankingPlacasContent from '@/components/graficos/RankingPlacasContent';
 
 const monthNames = MONTH_NAMES;
 
@@ -276,6 +277,10 @@ export default function Graficos() {
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'ranking' ? 'border-slate-700 text-slate-700' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
             Ranking de Motoristas
           </button>
+          <button onClick={() => setActiveTab('rankingPlacas')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'rankingPlacas' ? 'border-slate-700 text-slate-700' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
+            Ranking de Placas
+          </button>
         </div>
       </div>
 
@@ -480,6 +485,7 @@ export default function Graficos() {
       </>
       )}
       {activeTab === 'ranking' && <RankingContent />}
+      {activeTab === 'rankingPlacas' && <RankingPlacasContent />}
     </div>
   );
 }
