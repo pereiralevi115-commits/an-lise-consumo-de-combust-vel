@@ -64,15 +64,29 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
     if (inconsistentes.length === 0) return;
     setOcultandoTodas(true);
     setProgresso(`0 / ${inconsistentes.length}`);
-    const ids = inconsistentes.map(item => item.id);
-    // Envia em blocos de 200 para a função backend (evita payload muito grande)
+
+    // Atualização otimística: marca todos como oculto no cache imediatamente
+    const idsSet = new Set(inconsistentes.map(i => i.id));
+    queryClient.setQueryData(['fuelRecords'], (old) =>
+      old ? old.map(r => idsSet.has(r.id) ? { ...r, oculto: true } : r) : old
+    );
+
+    // bulkUpdate direto no SDK (até 500 por chamada) — sem overhead de função backend
+    const updates = inconsistentes.map(item => ({ id: item.id, oculto: true }));
     const CHUNK = 500;
     let done = 0;
-    for (let i = 0; i < ids.length; i += CHUNK) {
-      const chunk = ids.slice(i, i + CHUNK);
-      const res = await base44.functions.invoke('ocultarInconsistencias', { ids: chunk });
-      done += res.data?.updated ?? chunk.length;
-      setProgresso(`${done} / ${ids.length}`);
+    try {
+      for (let i = 0; i < updates.length; i += CHUNK) {
+        const chunk = updates.slice(i, i + CHUNK);
+        await base44.entities.FuelRecord.bulkUpdate(chunk);
+        done += chunk.length;
+        setProgresso(`${done} / ${inconsistentes.length}`);
+      }
+    } catch (e) {
+      // Reverte em caso de erro
+      queryClient.setQueryData(['fuelRecords'], (old) =>
+        old ? old.map(r => idsSet.has(r.id) ? { ...r, oculto: false } : r) : old
+      );
     }
     queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
     setOcultandoTodas(false);
