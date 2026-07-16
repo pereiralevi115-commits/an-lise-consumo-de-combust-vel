@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Check, X, AlertTriangle, Trash2, EyeOff } from 'lucide-react';
+import { Check, X, AlertTriangle, Trash2, EyeOff, Eye } from 'lucide-react';
 
 export default function Dados() {
   const [filters, setFilters] = useState({
@@ -27,6 +27,7 @@ export default function Dados() {
   const [editingUnit, setEditingUnit] = useState(null); // { id, value }
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
+  const [showHidden, setShowHidden] = useState(false);
 
   const ignoreInconsistency = async (id) => {
     // Atualização otimística: marca oculto=true no cache ANTES da resposta da API
@@ -39,6 +40,20 @@ export default function Dados() {
       // Reverte em caso de erro
       queryClient.setQueryData(['fuelRecords'], (old) =>
         old ? old.map(r => r.id === id ? { ...r, oculto: false } : r) : old
+      );
+    }
+    queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
+  };
+
+  const unhideRecord = async (id) => {
+    queryClient.setQueryData(['fuelRecords'], (old) =>
+      old ? old.map(r => r.id === id ? { ...r, oculto: false } : r) : old
+    );
+    try {
+      await base44.entities.FuelRecord.update(id, { oculto: false });
+    } catch (e) {
+      queryClient.setQueryData(['fuelRecords'], (old) =>
+        old ? old.map(r => r.id === id ? { ...r, oculto: true } : r) : old
       );
     }
     queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
@@ -161,8 +176,12 @@ export default function Dados() {
   return { kmInconsistencyIds, kmInconsistencyReasons };
   }, [records]);
 
+  const hiddenCount = useMemo(() => records.filter(r => r.oculto === true).length, [records]);
+
   // Apply filters (kmInconsistencyIds computed above)
   const filtered = useMemo(() => records.filter(r => {
+    if (!showHidden && r.oculto === true) return false;
+    if (showHidden && r.oculto !== true) return false;
     if (filters.month && (!r.date || parseISO(r.date).getMonth() !== parseInt(filters.month))) return false;
     if (filters.unit && r.unit !== filters.unit) return false;
     if (filters.equipment && placaEquipamentosMap[String(r.vehicle_plate).toUpperCase()] !== filters.equipment) return false;
@@ -380,6 +399,16 @@ export default function Dados() {
               {kmInconsistencyIds.size} inconsistência{kmInconsistencyIds.size > 1 ? 's' : ''}{filters.onlyInconsistent ? ' (mostrando)' : ''}
             </span>
           )}
+          {hiddenCount > 0 && (
+            <span
+              className={`flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full cursor-pointer select-none transition ${showHidden ? 'bg-slate-300 text-slate-800' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+              onClick={() => setShowHidden(!showHidden)}
+              title="Clique para ver os registros ocultos"
+            >
+              <EyeOff className="w-3 h-3" />
+              {hiddenCount} oculto{hiddenCount > 1 ? 's' : ''}{showHidden ? ' (mostrando)' : ''}
+            </span>
+          )}
           <div className="flex items-center gap-3 ml-auto">
             <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-lg">
               <span className="text-xs font-medium text-slate-500">Total Litros:</span>
@@ -439,6 +468,7 @@ export default function Dados() {
                     const reasons = kmInconsistencyReasons[record.id] || [];
                     let rowClass = !record.korth_id ? 'border-slate-200 bg-green-50 hover:bg-green-100' : 'border-slate-200 hover:bg-slate-50';
                     if (hasIssue) rowClass = 'border-orange-200 bg-orange-50 hover:bg-orange-100';
+                    if (record.oculto === true) rowClass = 'border-slate-300 bg-slate-100 hover:bg-slate-200 opacity-60';
                     return (
                     <TableRow key={record.id} className={rowClass}>
                       <TableCell className="text-slate-800">
@@ -648,6 +678,15 @@ export default function Dados() {
                               title="Ignorar inconsistência (não aparecerá mais como problema)"
                             >
                               <EyeOff className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          {record.oculto === true && (
+                            <button
+                              onClick={() => unhideRecord(record.id)}
+                              className="text-slate-500 hover:text-green-600 p-1 rounded hover:bg-slate-100 transition"
+                              title="Desocultar registro"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
                             </button>
                           )}
                           <button
