@@ -29,7 +29,18 @@ export default function Dados() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const ignoreInconsistency = async (id) => {
-    await base44.entities.FuelRecord.update(id, { oculto: true });
+    // Atualização otimística: marca oculto=true no cache ANTES da resposta da API
+    queryClient.setQueryData(['fuelRecords'], (old) =>
+      old ? old.map(r => r.id === id ? { ...r, oculto: true } : r) : old
+    );
+    try {
+      await base44.entities.FuelRecord.update(id, { oculto: true });
+    } catch (e) {
+      // Reverte em caso de erro
+      queryClient.setQueryData(['fuelRecords'], (old) =>
+        old ? old.map(r => r.id === id ? { ...r, oculto: false } : r) : old
+      );
+    }
     queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
   };
 
