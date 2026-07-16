@@ -236,7 +236,7 @@ export default function Dados() {
     if (primarySort !== 0) return primarySort;
     if (dateA !== dateB) return dateA > dateB ? -1 : 1;
     return timeA > timeB ? -1 : timeA < timeB ? 1 : 0;
-  }), [records, filters, kmInconsistencyIds, pontosMap, placaEquipamentosMap, motoristasMap, frentistasMap, combustiveisMap, precosCombustivel, sortBy, sortDir]);
+  }), [records, filters, showHidden, kmInconsistencyIds, pontosMap, placaEquipamentosMap, motoristasMap, frentistasMap, combustiveisMap, precosCombustivel, sortBy, sortDir]);
 
   const PAGE_SIZE = 100;
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
