@@ -105,7 +105,7 @@ export default function Dados() {
   };
 
   const plateGroups = {};
-  records.filter(r => !r.oculto).forEach(r => {
+  records.forEach(r => {
     const plate = r.vehicle_plate;
     if (!plate) return;
     if (!plateGroups[plate]) plateGroups[plate] = [];
@@ -119,10 +119,11 @@ export default function Dados() {
       return da < db ? -1 : da > db ? 1 : 0;
     });
 
-    const kmsWithValue = sorted.filter(r => Number(r.km_driven) > 0).map(r => Number(r.km_driven));
+    const kmsWithValue = sorted.filter(r => !r.oculto && Number(r.km_driven) > 0).map(r => Number(r.km_driven));
 
     const kmDateMap = {};
     sorted.forEach(r => {
+      if (r.oculto) return;
       const km = Number(r.km_driven);
       if (km > 0) {
         if (!kmDateMap[km]) kmDateMap[km] = [];
@@ -149,6 +150,7 @@ export default function Dados() {
 
     for (let i = 0; i < sorted.length; i++) {
       const r = sorted[i];
+      if (r.oculto) continue;
       const km = Number(r.km_driven);
       if ((km == null || km === 0 || isNaN(km)) && kmsWithValue.length > 0) {
         addReason(r.id, `KM não informado (hodômetro zerado). Clique no campo KM para corrigir.`);
@@ -163,7 +165,7 @@ export default function Dados() {
           const diff = km - Number(prev.km_driven);
           if (diff < 0) {
             addReason(r.id, `KM ${km.toLocaleString('pt-BR')} é menor que o anterior (${Number(prev.km_driven).toLocaleString('pt-BR')}). O hodômetro regrediu — verifique se a placa está correta ou corrija o KM.`);
-            addReason(prev.id, `KM ${Number(prev.km_driven).toLocaleString('pt-BR')} seguido de regressão no registro de ${r.date}. Verifique os dois registros.`);
+            if (!prev.oculto) addReason(prev.id, `KM ${Number(prev.km_driven).toLocaleString('pt-BR')} seguido de regressão no registro de ${r.date}. Verifique os dois registros.`);
           }
           if (diff > KM_MAX_DIFF) {
             addReason(r.id, `Variação de KM muito alta: +${diff.toLocaleString('pt-BR')} km desde o abastecimento anterior (limite: ${KM_MAX_DIFF.toLocaleString('pt-BR')} km). Verifique se o hodômetro foi digitado corretamente.`);
