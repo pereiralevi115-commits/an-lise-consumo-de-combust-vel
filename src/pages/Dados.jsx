@@ -25,17 +25,12 @@ export default function Dados() {
   const [editingTime, setEditingTime] = useState(null); // { id, value }
   const [editingLiters, setEditingLiters] = useState(null); // { id, value }
   const [editingUnit, setEditingUnit] = useState(null); // { id, value }
-  const [ignoredIds, setIgnoredIds] = useState(() => {
-    try { return new Set(JSON.parse(localStorage.getItem('ignoredInconsistencies') || '[]')); } catch { return new Set(); }
-  });
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
 
-  const ignoreInconsistency = (id) => {
-    const updated = new Set(ignoredIds);
-    updated.add(id);
-    setIgnoredIds(updated);
-    localStorage.setItem('ignoredInconsistencies', JSON.stringify([...updated]));
+  const ignoreInconsistency = async (id) => {
+    await base44.entities.FuelRecord.update(id, { oculto: true });
+    queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
   };
 
   const { data: records = [], isLoading } = useQuery({
@@ -84,7 +79,7 @@ export default function Dados() {
   };
 
   const plateGroups = {};
-  records.forEach(r => {
+  records.filter(r => !r.oculto).forEach(r => {
     const plate = r.vehicle_plate;
     if (!plate) return;
     if (!plateGroups[plate]) plateGroups[plate] = [];
@@ -152,10 +147,8 @@ export default function Dados() {
     }
   });
 
-  // Remove ignored IDs from inconsistency set
-  ignoredIds.forEach(id => kmInconsistencyIds.delete(id));
   return { kmInconsistencyIds, kmInconsistencyReasons };
-  }, [records, ignoredIds]);
+  }, [records]);
 
   // Apply filters (kmInconsistencyIds computed above)
   const filtered = useMemo(() => records.filter(r => {

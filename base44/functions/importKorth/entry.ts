@@ -114,22 +114,51 @@ Deno.serve(async (req) => {
     console.log(`${records.length} registros válidos`);
 
     // Verificar registros duplicados e excluídos permanentemente
+    // 1. Por korth_id (quando existir)
     const korthIds = records.filter(r => r.korth_id).map(r => r.korth_id);
-    let existingIds = [];
+    let existingKorthIds = [];
     let excludedIds = [];
     if (korthIds.length > 0) {
       const [existing, excluded] = await Promise.all([
         base44.asServiceRole.entities.FuelRecord.filter({ korth_id: { '$in': korthIds } }),
         base44.asServiceRole.entities.KorthExcluido.filter({ korth_id: { '$in': korthIds } })
       ]);
-      existingIds = existing.map(e => e.korth_id);
+      existingKorthIds = existing.map(e => e.korth_id);
       excludedIds = excluded.map(e => e.korth_id);
-      console.log(`${existingIds.length} registros já existem, ${excludedIds.length} excluídos permanentemente`);
     }
 
+    // 2. Por chave composta (placa + data + hora + litros) para registros sem korth_id
+    const recordsWithoutKorthId = records.filter(r => !r.korth_id);
+    const compositeKeys = recordsWithoutKorthId.map(r =>
+      `${String(r.vehicle_plate).toUpperCase()}|${r.date}|${r.time || ''}|${r.liters}`
+    );
+
+    let existingCompositeKeys = new Set();
+    if (recordsWithoutKorthId.length > 0) {
+      const plates = [...new Set(recordsWithoutKorthId.map(r => String(r.vehicle_plate).toUpperCase()))];
+      const existingByPlate = await base44.asServiceRole.entities.FuelRecord.filter({
+        vehicle_plate: { '$in': plates },
+        korth_id: { '$in': [null, ''] }
+      });
+      existingByPlate.forEach(r => {
+        existingCompositeKeys.add(
+          `${String(r.vehicle_plate).toUpperCase()}|${r.date}|${r.time || ''}|${r.liters}`
+        );
+      });
+    }
+
+    console.log(`${existingKorthIds.length} por korth_id, ${existingCompositeKeys.size} por chave composta, ${excludedIds.length} excluídos permanentemente`);
+
     // Filtrar apenas novos registros (não existentes e não excluídos)
-    const blockedIds = new Set([...existingIds, ...excludedIds]);
-    const newRecords = records.filter(r => !blockedIds.has(r.korth_id));
+    const blockedKorthIds = new Set([...existingKorthIds, ...excludedIds]);
+    const newRecords = records.filter(r => {
+      if (blockedKorthIds.has(r.korth_id)) return false;
+      if (!r.korth_id) {
+        const key = `${String(r.vehicle_plate).toUpperCase()}|${r.date}|${r.time || ''}|${r.liters}`;
+        if (existingCompositeKeys.has(key)) return false;
+      }
+      return true;
+    });
     console.log(`${newRecords.length} novos registros para salvar`);
 
     let saved = [];
