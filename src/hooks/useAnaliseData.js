@@ -72,13 +72,12 @@ export function useAnaliseData() {
     [records, korthExcluidosSet]
   );
 
-  // ===== ANÁLISE POR PLACA (exclui registros ocultos do cálculo) =====
+  // ===== ANÁLISE POR PLACA =====
   const analiseByPlaca = useMemo(() => {
     const groupedData = {};
 
     activeRecords.forEach(r => {
       if (!r.date || !r.vehicle_plate) return;
-      if (r.oculto === true) return;
       const month = parseISO(r.date).getMonth();
       const year = parseISO(r.date).getFullYear();
       const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`;

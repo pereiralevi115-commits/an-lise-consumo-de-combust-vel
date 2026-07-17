@@ -159,7 +159,7 @@ export default function Dados() {
       if (km > 0 && i > 0) {
       let prev = null;
       for (let j = i - 1; j >= 0; j--) {
-        if (!sorted[j].oculto && Number(sorted[j].km_driven) > 0) { prev = sorted[j]; break; }
+        if (Number(sorted[j].km_driven) > 0) { prev = sorted[j]; break; }
       }
         if (prev) {
           const diff = km - Number(prev.km_driven);
