@@ -113,11 +113,11 @@ export default function Graficos() {
     .sort((a, b) => monthNames.indexOf(a.name) - monthNames.indexOf(b.name));
 
   const byUnitData = units.map(unit => {
-    const unitData = filtered.filter(d => d.unit === unit);
+    const unitData = filtered.filter(d => d.unit === unit.name);
     const liters = unitData.reduce((sum, d) => sum + (d.totalLiters || 0), 0);
     const km = unitData.reduce((sum, d) => sum + (d.kmDelta || 0), 0);
     const cost = unitData.reduce((sum, d) => sum + (d.cost || 0), 0);
-    return { name: unit.replace('CONCRETAR ', ''), liters, km, cost, kmPerLiter: liters > 0 ? (km / liters) : 0 };
+    return { name: unit.name.replace('CONCRETAR ', ''), liters, km, cost, kmPerLiter: liters > 0 ? (km / liters) : 0 };
   })
     .filter(d => d.liters > 0 || d.km > 0 || d.cost > 0)
     .sort((a, b) => a.cost - b.cost);
