@@ -47,7 +47,13 @@ export default function Graficos() {
     isLoading,
   } = useAnaliseData();
 
-  const units = useMemo(() => [...new Set(analysisData.map(d => d.unit))].filter(Boolean).sort(), [analysisData]);
+  const units = useMemo(() => {
+    const map = {};
+    analysisData.forEach(d => {
+      if (d.unitCode && !map[d.unitCode]) map[d.unitCode] = d.unit || d.unitCode;
+    });
+    return Object.entries(map).map(([code, name]) => ({ code, name })).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  }, [analysisData]);
   const drivers = useMemo(() => [...new Set(analysisData.map(d => d.driver))].filter(d => d && d !== '-').sort((a, b) => a.localeCompare(b, 'pt-BR')).reduce((acc, name) => {
     if (!acc.seen.has(name.toUpperCase())) { acc.seen.add(name.toUpperCase()); acc.list.push(name); }
     return acc;
@@ -56,7 +62,7 @@ export default function Graficos() {
   const filtered = useMemo(() => analysisData.filter(d => {
     if (filters.year && String(d.year) !== filters.year) return false;
     if (filters.month && d.monthKey !== filters.month) return false;
-    if (filters.unit && d.unit !== filters.unit) return false;
+    if (filters.unit && d.unitCode !== filters.unit) return false;
     if (filters.equipment && d.equipment !== filters.equipment) return false;
     if (filters.plate && d.plate !== filters.plate) return false;
     if (filters.driver && d.driver !== filters.driver) return false;
@@ -263,7 +269,7 @@ export default function Graficos() {
           </select>
           <select value={filters.unit} onChange={(e) => setFilters({ ...filters, unit: e.target.value })} className={selectClass}>
             <option value="">Todas usinas</option>
-            {units.map(u => <option key={u} value={u}>{u}</option>)}
+            {units.map(u => <option key={u.code} value={u.code}>{u.name}</option>)}
           </select>
           <select value={filters.equipment} onChange={(e) => setFilters({ ...filters, equipment: e.target.value })} className={selectClass}>
             <option value="">Todos equipamentos</option>
