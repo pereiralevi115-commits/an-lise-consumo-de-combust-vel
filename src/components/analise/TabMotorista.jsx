@@ -93,8 +93,13 @@ function detectInconsistencias(item) {
   return issues;
 }
 
+// Extrai o tipo base da inconsistência (sem o valor entre parênteses)
+function getTipoInconsistencia(inc) {
+  return inc.replace(/\s*\(.*\)$/, '').trim();
+}
+
 export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristasMap, frentistasMap, months, years, plates, units, equipments, drivers }) {
-  const [filters, setFilters] = useState({ month: '', year: '', plate: '', unit: '', equipment: '', driver: '', soInconsistencias: false, mostrarOcultos: false });
+  const [filters, setFilters] = useState({ month: '', year: '', plate: '', unit: '', equipment: '', driver: '', tipoInconsistencia: '', soInconsistencias: false, mostrarOcultos: false });
   const [sortBy, setSortBy] = useState('driver');
   const [sortDir, setSortDir] = useState('asc');
   const [loadingId, setLoadingId] = useState(null);
@@ -159,6 +164,10 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
       if (!(item.driver || '').toUpperCase().includes(selectedName)) return false;
     }
     if (filters.soInconsistencias && detectInconsistencias(item).length === 0) return false;
+    if (filters.tipoInconsistencia) {
+      const tipos = detectInconsistencias(item).map(getTipoInconsistencia);
+      if (!tipos.includes(filters.tipoInconsistencia)) return false;
+    }
     return true;
   }).sort((a, b) => {
     let valA, valB;
@@ -198,6 +207,15 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
   }, [filtered]);
 
   const totalInconsistencias = data.filter(item => !item.oculto && detectInconsistencias(item).length > 0).length;
+
+  const tiposInconsistenciaDisponiveis = useMemo(() => {
+    const set = new Set();
+    data.forEach(item => {
+      if (item.oculto) return;
+      detectInconsistencias(item).forEach(inc => set.add(getTipoInconsistencia(inc)));
+    });
+    return [...set].sort();
+  }, [data]);
 
   const toggleSort = (field) => {
     if (sortBy === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -277,7 +295,7 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
   return (
     <div className="space-y-4">
       {/* Filtros */}
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
         <select value={filters.month} onChange={e => setFilters({ ...filters, month: e.target.value })} className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm">
           <option value="">Mês</option>
           {months.map(m => <option key={m} value={m}>{monthNames[m]}</option>)}
@@ -301,6 +319,10 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
         <select value={filters.driver} onChange={e => setFilters({ ...filters, driver: e.target.value })} className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm">
           <option value="">Motorista</option>
           {drivers.map(d => <option key={d} value={d}>{motoristasMap[String(d)] || frentistasMap[String(d)] || d}</option>)}
+        </select>
+        <select value={filters.tipoInconsistencia} onChange={e => setFilters({ ...filters, tipoInconsistencia: e.target.value })} className="bg-white text-slate-800 border border-slate-200 rounded-lg px-3 py-2 text-sm shadow-sm">
+          <option value="">Tipo de inconsistência</option>
+          {tiposInconsistenciaDisponiveis.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
       </div>
 
