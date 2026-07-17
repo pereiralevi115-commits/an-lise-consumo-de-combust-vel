@@ -203,19 +203,45 @@ export function useAnaliseData() {
         return da < db ? -1 : da > db ? 1 : 0;
       });
     });
+    // Calcula km percorrido pulando registros ocultos.
+    // Litros e custo de registros ocultos são acumulados no próximo registro visível,
+    // preservando a proporção real km/L do trecho.
     const kmPercorridoMap = {};
+    const accHiddenLitersMap = {};
+    const accHiddenCostMap = {};
     Object.values(byPlate).forEach(arr => {
-      let lastKm = null;
+      let lastVisibleKm = null;
+      let accLiters = 0;
+      let accCost = 0;
       arr.forEach(r => {
+        if (r.oculto === true) {
+          // Acumula litros e custo do oculto para o próximo visível
+          accLiters += Number(r.liters) || 0;
+          const m = r.date ? parseISO(r.date).getMonth() : 0;
+          const y = r.date ? parseISO(r.date).getFullYear() : 0;
+          const pr = precosCombustivel.find(p =>
+            String(p.ponto) === String(r.unit) && Number(p.mes) === m && Number(p.ano) === y
+          );
+          accCost += r.korth_id
+            ? (pr ? (Number(r.liters) || 0) * pr.preco_litro : 0)
+            : (Number(r.cost) || 0);
+          return;
+        }
         const km = Number(r.km_driven);
         if (km > 0) {
-          if (lastKm !== null && km > lastKm) kmPercorridoMap[r.id] = km - lastKm;
-          lastKm = km;
+          if (lastVisibleKm !== null && km > lastVisibleKm) {
+            kmPercorridoMap[r.id] = km - lastVisibleKm;
+            accHiddenLitersMap[r.id] = accLiters;
+            accHiddenCostMap[r.id] = accCost;
+          }
+          lastVisibleKm = km;
+          accLiters = 0;
+          accCost = 0;
         }
       });
     });
 
-    // Um registro por abastecimento (exclui ocultos do cálculo, mas os mantém na lista para exibição)
+    // Um registro por abastecimento (ocultos permanecem na lista para exibição mas não calculam eficiência)
     return activeRecords
       .filter(r => r.date && r.vehicle_plate)
       .map(r => {
@@ -226,6 +252,8 @@ export function useAnaliseData() {
         const driverCode = String(r.driver || '');
         const liters = r.liters || 0;
         const kmPercorrido = kmPercorridoMap[r.id] || 0;
+        // Litros e custo efetivos incluem o acúmulo de registros ocultos anteriores
+        const effectiveLiters = liters + (accHiddenLitersMap[r.id] || 0);
 
         const precoReg = precosCombustivel.find(p =>
           String(p.ponto) === String(r.unit) &&
@@ -235,6 +263,7 @@ export function useAnaliseData() {
         const cost = r.korth_id
           ? (precoReg ? liters * precoReg.preco_litro : 0)
           : (r.cost || 0);
+        const effectiveCost = cost + (accHiddenCostMap[r.id] || 0);
 
         return {
           id: r.id,
@@ -254,8 +283,8 @@ export function useAnaliseData() {
           kmPercorrido,
           cost,
           oculto: r.oculto === true,
-          efficiency: !r.oculto && liters > 0 && kmPercorrido > 0 ? parseFloat((kmPercorrido / liters).toFixed(2)) : 0,
-          efficiencyCost: !r.oculto && cost > 0 && kmPercorrido > 0 ? parseFloat((cost / kmPercorrido).toFixed(2)) : 0,
+          efficiency: !r.oculto && effectiveLiters > 0 && kmPercorrido > 0 ? parseFloat((kmPercorrido / effectiveLiters).toFixed(2)) : 0,
+          efficiencyCost: !r.oculto && effectiveCost > 0 && kmPercorrido > 0 ? parseFloat((effectiveCost / kmPercorrido).toFixed(2)) : 0,
         };
       })
       .sort((a, b) => {
