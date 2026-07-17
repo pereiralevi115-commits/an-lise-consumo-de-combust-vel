@@ -210,12 +210,10 @@ export function useAnaliseData() {
       let lastKm = null;
       arr.forEach(r => {
         const km = Number(r.km_driven);
-        if (km > 0) {
-          if (lastKm !== null && km > lastKm) {
-            kmPercorridoMap[r.id] = km - lastKm;
-          }
-          lastKm = km;
+        if (lastKm !== null && km > lastKm) {
+          kmPercorridoMap[r.id] = km - lastKm;
         }
+        lastKm = km;
       });
     });
 
