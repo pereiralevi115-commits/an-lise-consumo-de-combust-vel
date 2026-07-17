@@ -405,10 +405,7 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
               </TableBody>
               <tfoot>
                 <tr className="border-t-2 border-slate-300 bg-slate-50 font-bold">
-                  <td colSpan={7} className="px-3 py-2.5 text-slate-700 text-sm text-right">Média aritmética ({filtered.filter(i => !i.oculto).length} registros):</td>
-                  <td className="px-3 py-2.5 text-slate-800 text-right text-sm">{summary.sumLiters.toFixed(2)} L</td>
-                  <td className="px-3 py-2.5 text-slate-800 text-right text-sm">{summary.sumKm.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} km</td>
-                  <td className="px-3 py-2.5 text-slate-800 text-right text-sm">R$ {summary.sumCost.toFixed(2)}</td>
+                  <td colSpan={10} className="px-3 py-2.5 text-slate-700 text-sm text-right">Média aritmética ({filtered.filter(i => !i.oculto).length} registros):</td>
                   <td className="px-3 py-2.5 text-amber-700 text-right text-sm">{summary.avgEff > 0 ? summary.avgEff.toFixed(2) + ' km/L' : '-'}</td>
                   <td className="px-3 py-2.5 text-amber-700 text-right text-sm">{summary.avgEffCost > 0 ? 'R$ ' + summary.avgEffCost.toFixed(2) + '/km' : '-'}</td>
                   <td></td>
