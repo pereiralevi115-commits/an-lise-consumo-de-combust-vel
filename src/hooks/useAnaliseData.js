@@ -203,38 +203,18 @@ export function useAnaliseData() {
         return da < db ? -1 : da > db ? 1 : 0;
       });
     });
-    // Calcula km percorrido pulando registros ocultos (sem acumular litros/custo em outros registros).
+    // Km percorrido: usa TODOS os registros (inclusive ocultos) como waypoints.
+    // Ocultar um registro NÃO altera o km dos demais — apenas exclui o próprio da média.
     const kmPercorridoMap = {};
-    const spansHiddenMap = {};
-    // Km percorrido considerando TODOS os registros (inclusive ocultos) como pontos intermediários.
-    const kmPercorridoTotalMap = {};
     Object.values(byPlate).forEach(arr => {
-      let lastVisibleKm = null;
-      let hadHiddenSinceLastVisible = false;
-      let lastKmAny = null;
+      let lastKm = null;
       arr.forEach(r => {
         const km = Number(r.km_driven);
-        // Cálculo total: usa todos os registros como waypoints
         if (km > 0) {
-          if (lastKmAny !== null && km > lastKmAny) {
-            kmPercorridoTotalMap[r.id] = km - lastKmAny;
+          if (lastKm !== null && km > lastKm) {
+            kmPercorridoMap[r.id] = km - lastKm;
           }
-          lastKmAny = km;
-        }
-        // Cálculo de eficiência: pula ocultos
-        if (r.oculto === true) {
-          hadHiddenSinceLastVisible = true;
-          return;
-        }
-        if (km > 0) {
-          if (lastVisibleKm !== null && km > lastVisibleKm) {
-            kmPercorridoMap[r.id] = km - lastVisibleKm;
-            spansHiddenMap[r.id] = hadHiddenSinceLastVisible;
-          } else if (hadHiddenSinceLastVisible) {
-            spansHiddenMap[r.id] = true;
-          }
-          lastVisibleKm = km;
-          hadHiddenSinceLastVisible = false;
+          lastKm = km;
         }
       });
     });
@@ -276,10 +256,10 @@ export function useAnaliseData() {
           fuelType: combustiveisMap[String(r.fuel_type)] || r.fuel_type || '-',
           liters,
           kmPercorrido,
-          kmPercorridoTotal: kmPercorridoTotalMap[r.id] || 0,
+          kmPercorridoTotal: kmPercorrido,
           cost,
           oculto: r.oculto === true,
-          spansHidden: spansHiddenMap[r.id] || false,
+          spansHidden: false,
           efficiency: !r.oculto && liters > 0 && kmPercorrido > 0 ? parseFloat((kmPercorrido / liters).toFixed(2)) : 0,
           efficiencyCost: !r.oculto && cost > 0 && kmPercorrido > 0 ? parseFloat((cost / kmPercorrido).toFixed(2)) : 0,
         };
