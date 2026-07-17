@@ -206,15 +206,26 @@ export function useAnaliseData() {
     // Calcula km percorrido pulando registros ocultos (sem acumular litros/custo em outros registros).
     const kmPercorridoMap = {};
     const spansHiddenMap = {};
+    // Km percorrido considerando TODOS os registros (inclusive ocultos) como pontos intermediários.
+    const kmPercorridoTotalMap = {};
     Object.values(byPlate).forEach(arr => {
       let lastVisibleKm = null;
       let hadHiddenSinceLastVisible = false;
+      let lastKmAny = null;
       arr.forEach(r => {
+        const km = Number(r.km_driven);
+        // Cálculo total: usa todos os registros como waypoints
+        if (km > 0) {
+          if (lastKmAny !== null && km > lastKmAny) {
+            kmPercorridoTotalMap[r.id] = km - lastKmAny;
+          }
+          lastKmAny = km;
+        }
+        // Cálculo de eficiência: pula ocultos
         if (r.oculto === true) {
           hadHiddenSinceLastVisible = true;
           return;
         }
-        const km = Number(r.km_driven);
         if (km > 0) {
           if (lastVisibleKm !== null && km > lastVisibleKm) {
             kmPercorridoMap[r.id] = km - lastVisibleKm;
@@ -265,6 +276,7 @@ export function useAnaliseData() {
           fuelType: combustiveisMap[String(r.fuel_type)] || r.fuel_type || '-',
           liters,
           kmPercorrido,
+          kmPercorridoTotal: kmPercorridoTotalMap[r.id] || 0,
           cost,
           oculto: r.oculto === true,
           spansHidden: spansHiddenMap[r.id] || false,

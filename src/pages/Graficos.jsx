@@ -169,7 +169,7 @@ export default function Graficos() {
     return true;
   }), [analiseByMotorista, filters, monthNames]);
 
-  const totalKm = filteredMotorista.reduce((sum, d) => sum + (d.kmPercorrido || 0), 0);
+  const totalKm = filteredMotorista.reduce((sum, d) => sum + (d.kmPercorridoTotal || 0), 0);
 
   const byVehicleData = useMemo(() => {
     const map = {};
