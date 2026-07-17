@@ -30,14 +30,17 @@ function detectInconsistencias(item) {
   if (item.kmPercorrido === 0 && item.liters > 0) {
     issues.push('KM percorrido zerado');
   }
-  if (item.kmPercorrido > 1700) {
-    issues.push(`KM muito alto (${item.kmPercorrido} km)`);
-  }
-  if (item.efficiency > 0 && item.efficiency < 0.5) {
-    issues.push(`Eficiência muito baixa (${item.efficiency} km/L)`);
-  }
-  if (item.efficiency > 15) {
-    issues.push(`Eficiência muito alta (${item.efficiency} km/L)`);
+  // Não re-flagar KM/eficiência de registros cujo delta foi afetado por ocultos
+  if (!item.spansHidden) {
+    if (item.kmPercorrido > 1700) {
+      issues.push(`KM muito alto (${item.kmPercorrido} km)`);
+    }
+    if (item.efficiency > 0 && item.efficiency < 0.5) {
+      issues.push(`Eficiência muito baixa (${item.efficiency} km/L)`);
+    }
+    if (item.efficiency > 15) {
+      issues.push(`Eficiência muito alta (${item.efficiency} km/L)`);
+    }
   }
   if (item.cost <= 0 && item.liters > 0) {
     issues.push('Custo zerado');

@@ -209,13 +209,15 @@ export function useAnaliseData() {
     const kmPercorridoMap = {};
     const accHiddenLitersMap = {};
     const accHiddenCostMap = {};
+    const spansHiddenMap = {};
     Object.values(byPlate).forEach(arr => {
       let lastVisibleKm = null;
       let accLiters = 0;
       let accCost = 0;
+      let hadHiddenSinceLastVisible = false;
       arr.forEach(r => {
         if (r.oculto === true) {
-          // Acumula litros e custo do oculto para o próximo visível
+          hadHiddenSinceLastVisible = true;
           accLiters += Number(r.liters) || 0;
           const m = r.date ? parseISO(r.date).getMonth() : 0;
           const y = r.date ? parseISO(r.date).getFullYear() : 0;
@@ -233,10 +235,12 @@ export function useAnaliseData() {
             kmPercorridoMap[r.id] = km - lastVisibleKm;
             accHiddenLitersMap[r.id] = accLiters;
             accHiddenCostMap[r.id] = accCost;
+            spansHiddenMap[r.id] = hadHiddenSinceLastVisible;
           }
           lastVisibleKm = km;
           accLiters = 0;
           accCost = 0;
+          hadHiddenSinceLastVisible = false;
         }
       });
     });
@@ -283,6 +287,7 @@ export function useAnaliseData() {
           kmPercorrido,
           cost,
           oculto: r.oculto === true,
+          spansHidden: spansHiddenMap[r.id] || false,
           efficiency: !r.oculto && effectiveLiters > 0 && kmPercorrido > 0 ? parseFloat((kmPercorrido / effectiveLiters).toFixed(2)) : 0,
           efficiencyCost: !r.oculto && effectiveCost > 0 && kmPercorrido > 0 ? parseFloat((effectiveCost / kmPercorrido).toFixed(2)) : 0,
         };
