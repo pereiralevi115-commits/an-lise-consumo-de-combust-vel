@@ -159,8 +159,9 @@ export default function Graficos() {
     .filter(d => d.m3 > 0)
     .sort((a, b) => b.m3 - a.m3);
 
+  // Ocultar registro só afeta a média de eficiência (efficiency=0 para ocultos) —
+  // km, litros e custo continuam contando no total e nos gráficos
   const filteredMotorista = useMemo(() => analiseByMotorista.filter(d => {
-    if (d.oculto) return false;
     if (filters.year && String(d.year) !== filters.year) return false;
     if (filters.month && d.monthKey !== filters.month) return false;
     if (filters.unit && d.unitCode !== filters.unit) return false;
@@ -170,16 +171,7 @@ export default function Graficos() {
     return true;
   }), [analiseByMotorista, filters, monthNames]);
 
-  // Total Km inclui registros ocultos — ocultar só afeta a média de eficiência, não o total de km
-  const totalKm = useMemo(() => analiseByMotorista.filter(d => {
-    if (filters.year && String(d.year) !== filters.year) return false;
-    if (filters.month && d.monthKey !== filters.month) return false;
-    if (filters.unit && d.unitCode !== filters.unit) return false;
-    if (filters.equipment && d.equipment !== filters.equipment) return false;
-    if (filters.plate && d.plate.toUpperCase() !== filters.plate.toUpperCase()) return false;
-    if (filters.driver && d.driver !== filters.driver) return false;
-    return true;
-  }).reduce((sum, d) => sum + (d.kmPercorridoTotal || 0), 0), [analiseByMotorista, filters]);
+  const totalKm = filteredMotorista.reduce((sum, d) => sum + (d.kmPercorridoTotal || 0), 0);
 
   const unitEquipmentArray = useMemo(() => {
     const map = {};
