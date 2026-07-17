@@ -143,11 +143,6 @@ export default function Graficos() {
     byEquipmentData[eqType].km += d.kmDelta || 0;
   });
 
-  const unitEquipmentArray = Object.entries(byEquipmentData)
-    .map(([type, data]) => ({ name: type, kmPerLiter: data.liters > 0 ? parseFloat((data.km / data.liters).toFixed(2)) : 0 }))
-    .filter(d => d.kmPerLiter > 0)
-    .sort((a, b) => a.kmPerLiter - b.kmPerLiter);
-
   const equipmentArray = Object.entries(byEquipmentData)
     .map(([type, data]) => ({
       name: type,
@@ -170,6 +165,21 @@ export default function Graficos() {
   }), [analiseByMotorista, filters, monthNames]);
 
   const totalKm = filteredMotorista.reduce((sum, d) => sum + (d.kmPercorridoTotal || 0), 0);
+
+  const unitEquipmentArray = useMemo(() => {
+    const map = {};
+    filteredMotorista.forEach(d => {
+      const rawEq = d.equipment && d.equipment !== '-' ? d.equipment : null;
+      if (!rawEq) return;
+      const eqType = equipmentDisplayName(rawEq);
+      if (!map[eqType]) map[eqType] = { effSum: 0, effCount: 0 };
+      if (d.efficiency > 0) { map[eqType].effSum += d.efficiency; map[eqType].effCount++; }
+    });
+    return Object.entries(map)
+      .map(([type, data]) => ({ name: type, kmPerLiter: data.effCount > 0 ? parseFloat((data.effSum / data.effCount).toFixed(2)) : 0 }))
+      .filter(d => d.kmPerLiter > 0)
+      .sort((a, b) => a.kmPerLiter - b.kmPerLiter);
+  }, [filteredMotorista]);
 
   const byVehicleData = useMemo(() => {
     const map = {};
