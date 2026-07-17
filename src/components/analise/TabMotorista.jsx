@@ -27,11 +27,11 @@ function detectInconsistencias(item) {
   if (item.liters > 900) {
     issues.push(`Litros muito alto (${item.liters.toFixed(0)} L)`);
   }
-  if (item.kmPercorrido === 0 && item.liters > 0) {
-    issues.push('KM percorrido zerado');
-  }
   // Não re-flagar KM/eficiência de registros cujo delta foi afetado por ocultos
   if (!item.spansHidden) {
+    if (item.kmPercorrido === 0 && item.liters > 0) {
+      issues.push('KM percorrido zerado');
+    }
     if (item.kmPercorrido > 1700) {
       issues.push(`KM muito alto (${item.kmPercorrido} km)`);
     }

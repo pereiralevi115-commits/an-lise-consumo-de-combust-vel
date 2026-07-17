@@ -236,6 +236,9 @@ export function useAnaliseData() {
             accHiddenLitersMap[r.id] = accLiters;
             accHiddenCostMap[r.id] = accCost;
             spansHiddenMap[r.id] = hadHiddenSinceLastVisible;
+          } else if (hadHiddenSinceLastVisible) {
+            // Registro visível após ocultos mas sem delta válido (primeiro da placa ou regressivo)
+            spansHiddenMap[r.id] = true;
           }
           lastVisibleKm = km;
           accLiters = 0;
