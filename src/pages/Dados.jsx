@@ -157,10 +157,10 @@ export default function Dados() {
         continue;
       }
       if (km > 0 && i > 0) {
-        let prev = null;
-        for (let j = i - 1; j >= 0; j--) {
-          if (Number(sorted[j].km_driven) > 0) { prev = sorted[j]; break; }
-        }
+      let prev = null;
+      for (let j = i - 1; j >= 0; j--) {
+        if (!sorted[j].oculto && Number(sorted[j].km_driven) > 0) { prev = sorted[j]; break; }
+      }
         if (prev) {
           const diff = km - Number(prev.km_driven);
           if (diff < 0) {
