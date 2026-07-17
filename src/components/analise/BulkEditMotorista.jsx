@@ -7,6 +7,7 @@ export default function BulkEditMotorista({ selectedIds, onClose, data, pontosMa
   const [editField, setEditField] = useState(''); // 'oculto', 'unit'
   const [editValue, setEditValue] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [progress, setProgress] = useState('');
   const queryClient = useQueryClient();
 
   const units = [...new Set(data.map(r => r.unitCode))].filter(Boolean).sort();
@@ -17,16 +18,31 @@ export default function BulkEditMotorista({ selectedIds, onClose, data, pontosMa
 
     const updateData = editField === 'oculto' ? { oculto: editValue === 'sim' } : { unit: editValue };
 
-    try {
-      for (const id of selectedIds) {
-        await base44.entities.FuelRecord.update(id, updateData);
-        await new Promise(resolve => setTimeout(resolve, 200));
-      }
+    // Atualização otimística no cache
+    const idsSet = new Set(selectedIds);
+    queryClient.setQueryData(['fuelRecords'], (old) =>
+      old ? old.map(r => idsSet.has(r.id) ? { ...r, ...updateData } : r) : old
+    );
 
+    // bulkUpdate em lotes de 500 (muito mais rápido que um-por-um)
+    const updates = [...selectedIds].map(id => ({ id, ...updateData }));
+    const CHUNK = 500;
+    let done = 0;
+    try {
+      for (let i = 0; i < updates.length; i += CHUNK) {
+        const chunk = updates.slice(i, i + CHUNK);
+        await base44.entities.FuelRecord.bulkUpdate(chunk);
+        done += chunk.length;
+        setProgress(`${done} / ${updates.length}`);
+      }
       queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
       onClose();
+    } catch (e) {
+      // Reverte cache em caso de erro
+      queryClient.invalidateQueries({ queryKey: ['fuelRecords'] });
     } finally {
       setUpdating(false);
+      setProgress('');
     }
   };
 
@@ -117,7 +133,7 @@ export default function BulkEditMotorista({ selectedIds, onClose, data, pontosMa
             className="flex-1 py-2 px-4 bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 disabled:cursor-not-allowed text-slate-900 font-bold rounded-lg transition flex items-center justify-center gap-2"
           >
             <Check className="w-4 h-4" />
-            {updating ? 'Atualizando...' : 'Confirmar'}
+            {updating ? (progress || 'Atualizando...') : 'Confirmar'}
           </button>
         </div>
       </div>
