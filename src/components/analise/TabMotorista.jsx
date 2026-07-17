@@ -30,9 +30,30 @@ const EFICIENCIA_MAXIMA_POR_EQUIPAMENTO = {
   'OUTROS': 5,
 };
 
+// Limites mínimos de eficiência (km/L) por tipo de equipamento
+const EFICIENCIA_MINIMA_POR_EQUIPAMENTO = {
+  'CAMINHÃO BETONEIRA': 0.5,
+  'CAMINHAO BETONEIRA': 0.5,
+  'VEICULO DE APOIO': 7,
+  'VEICULOS DIREÇÃO': 7,
+  'VEICULOS DIRECAO': 7,
+  'BOMBA LANÇA': 0.5,
+  'BOMBA LANCA': 0.5,
+  'BOMBA ESTACIONÁRIA': 0.5,
+  'BOMBA ESTACIONARIA': 0.5,
+  'CAMINHÃO BASCULANTE': 7,
+  'CAMINHAO BASCULANTE': 7,
+  'OUTROS': 7,
+};
+
 function getLimiteEficiencia(equipment) {
   const key = (equipment || 'OUTROS').toUpperCase().trim();
   return EFICIENCIA_MAXIMA_POR_EQUIPAMENTO[key] ?? 5;
+}
+
+function getLimiteMinimoEficiencia(equipment) {
+  const key = (equipment || 'OUTROS').toUpperCase().trim();
+  return EFICIENCIA_MINIMA_POR_EQUIPAMENTO[key] ?? 7;
 }
 
 // Detecta inconsistências em um registro unitário
@@ -56,7 +77,8 @@ function detectInconsistencias(item) {
     if (item.kmPercorrido > 1700) {
       issues.push(`KM muito alto (${item.kmPercorrido} km)`);
     }
-    if (item.efficiency > 0 && item.efficiency < 0.5) {
+    const limiteMin = getLimiteMinimoEficiencia(item.equipment);
+    if (item.efficiency > 0 && item.efficiency < limiteMin) {
       issues.push(`Eficiência muito baixa (${item.efficiency} km/L)`);
     }
     const limite = getLimiteEficiencia(item.equipment);
