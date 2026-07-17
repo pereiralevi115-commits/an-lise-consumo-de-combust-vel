@@ -170,7 +170,16 @@ export default function Graficos() {
     return true;
   }), [analiseByMotorista, filters, monthNames]);
 
-  const totalKm = filteredMotorista.reduce((sum, d) => sum + (d.kmPercorridoTotal || 0), 0);
+  // Total Km inclui registros ocultos — ocultar só afeta a média de eficiência, não o total de km
+  const totalKm = useMemo(() => analiseByMotorista.filter(d => {
+    if (filters.year && String(d.year) !== filters.year) return false;
+    if (filters.month && d.monthKey !== filters.month) return false;
+    if (filters.unit && d.unitCode !== filters.unit) return false;
+    if (filters.equipment && d.equipment !== filters.equipment) return false;
+    if (filters.plate && d.plate.toUpperCase() !== filters.plate.toUpperCase()) return false;
+    if (filters.driver && d.driver !== filters.driver) return false;
+    return true;
+  }).reduce((sum, d) => sum + (d.kmPercorridoTotal || 0), 0), [analiseByMotorista, filters]);
 
   const unitEquipmentArray = useMemo(() => {
     const map = {};
