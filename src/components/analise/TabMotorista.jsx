@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Pagination from '@/components/Pagination';
 import { base44 } from '@/api/base44Client';
 import { useQueryClient } from '@tanstack/react-query';
@@ -133,6 +133,25 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   useEffect(() => { setCurrentPage(1); }, [filters]);
+
+  // Médias aritméticas (soma dos valores individuais ÷ quantidade)
+  const summary = useMemo(() => {
+    let sumLiters = 0, sumKm = 0, sumCost = 0;
+    let effSum = 0, effCount = 0, effCostSum = 0, effCostCount = 0;
+    filtered.forEach(item => {
+      if (item.oculto) return;
+      sumLiters += item.liters || 0;
+      sumKm += item.kmPercorrido || 0;
+      sumCost += item.cost || 0;
+      if (item.efficiency > 0) { effSum += item.efficiency; effCount++; }
+      if (item.efficiencyCost > 0) { effCostSum += item.efficiencyCost; effCostCount++; }
+    });
+    return {
+      sumLiters, sumKm, sumCost,
+      avgEff: effCount > 0 ? effSum / effCount : 0,
+      avgEffCost: effCostCount > 0 ? effCostSum / effCostCount : 0,
+    };
+  }, [filtered]);
 
   const totalInconsistencias = data.filter(item => !item.oculto && detectInconsistencias(item).length > 0).length;
 
@@ -384,6 +403,17 @@ export default function TabMotorista({ data, exclusoesSet, pontosMap, motoristas
                   );
                 })}
               </TableBody>
+              <tfoot>
+                <tr className="border-t-2 border-slate-300 bg-slate-50 font-bold">
+                  <td colSpan={7} className="px-3 py-2.5 text-slate-700 text-sm text-right">Média aritmética ({filtered.filter(i => !i.oculto).length} registros):</td>
+                  <td className="px-3 py-2.5 text-slate-800 text-right text-sm">{summary.sumLiters.toFixed(2)} L</td>
+                  <td className="px-3 py-2.5 text-slate-800 text-right text-sm">{summary.sumKm.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} km</td>
+                  <td className="px-3 py-2.5 text-slate-800 text-right text-sm">R$ {summary.sumCost.toFixed(2)}</td>
+                  <td className="px-3 py-2.5 text-amber-700 text-right text-sm">{summary.avgEff > 0 ? summary.avgEff.toFixed(2) + ' km/L' : '-'}</td>
+                  <td className="px-3 py-2.5 text-amber-700 text-right text-sm">{summary.avgEffCost > 0 ? 'R$ ' + summary.avgEffCost.toFixed(2) + '/km' : '-'}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
             </Table>
           </div>
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={filtered.length} pageSize={PAGE_SIZE} />
