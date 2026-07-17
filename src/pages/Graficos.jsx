@@ -65,7 +65,6 @@ export default function Graficos() {
 
   const totalLiters = filtered.reduce((sum, d) => sum + (d.totalLiters || 0), 0);
   const totalCost = filtered.reduce((sum, d) => sum + (d.cost || 0), 0);
-  const totalKm = filtered.reduce((sum, d) => sum + (d.kmDelta || 0), 0);
 
   const cubicMetrosFiltrados = cubicMetros.filter(cm => {
     if (!cm.mes) return false;
@@ -169,6 +168,8 @@ export default function Graficos() {
     if (filters.driver && d.driver !== filters.driver) return false;
     return true;
   }), [analiseByMotorista, filters, monthNames]);
+
+  const totalKm = filteredMotorista.reduce((sum, d) => sum + (d.kmPercorrido || 0), 0);
 
   const byVehicleData = useMemo(() => {
     const map = {};
