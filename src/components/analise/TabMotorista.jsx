@@ -14,6 +14,27 @@ const SortIcon = ({ field, sortBy, sortDir }) => {
   return <span className="text-[#FDB913] ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>;
 };
 
+// Limites máximos de eficiência (km/L) por tipo de equipamento
+const EFICIENCIA_MAXIMA_POR_EQUIPAMENTO = {
+  'CAMINHÃO BETONEIRA': 2.5,
+  'CAMINHAO BETONEIRA': 2.5,
+  'VEICULO DE APOIO': 16,
+  'VEICULOS DIREÇÃO': 18,
+  'VEICULOS DIRECAO': 18,
+  'BOMBA LANÇA': 2.5,
+  'BOMBA LANCA': 2.5,
+  'BOMBA ESTACIONÁRIA': 2.5,
+  'BOMBA ESTACIONARIA': 2.5,
+  'CAMINHÃO BASCULANTE': 5,
+  'CAMINHAO BASCULANTE': 5,
+  'OUTROS': 5,
+};
+
+function getLimiteEficiencia(equipment) {
+  const key = (equipment || 'OUTROS').toUpperCase().trim();
+  return EFICIENCIA_MAXIMA_POR_EQUIPAMENTO[key] ?? 5;
+}
+
 // Detecta inconsistências em um registro unitário
 function detectInconsistencias(item) {
   const issues = [];
@@ -38,7 +59,8 @@ function detectInconsistencias(item) {
     if (item.efficiency > 0 && item.efficiency < 0.5) {
       issues.push(`Eficiência muito baixa (${item.efficiency} km/L)`);
     }
-    if (item.efficiency > 15) {
+    const limite = getLimiteEficiencia(item.equipment);
+    if (item.efficiency > limite) {
       issues.push(`Eficiência muito alta (${item.efficiency} km/L)`);
     }
   }
