@@ -25,18 +25,20 @@ export default function RankingPlacasContent() {
       if (!d.plate) return;
       const key = String(d.plate).toUpperCase();
       if (!byPlate[key]) {
-        byPlate[key] = { plate: d.plate, totalLiters: 0, totalKm: 0, totalCost: 0 };
+        byPlate[key] = { plate: d.plate, totalLiters: 0, totalKm: 0, totalCost: 0, effSum: 0, effCount: 0, effCostSum: 0, effCostCount: 0 };
       }
       byPlate[key].totalLiters += d.liters || 0;
       byPlate[key].totalKm += d.kmPercorrido || 0;
       byPlate[key].totalCost += d.cost || 0;
+      if (d.efficiency > 0) { byPlate[key].effSum += d.efficiency; byPlate[key].effCount++; }
+      if (d.efficiencyCost > 0) { byPlate[key].effCostSum += d.efficiencyCost; byPlate[key].effCostCount++; }
     });
 
     return Object.values(byPlate)
       .map(d => ({
         ...d,
-        kmPerLiter: d.totalLiters > 0 && d.totalKm > 0 ? d.totalKm / d.totalLiters : 0,
-        costPerKm: d.totalKm > 0 ? d.totalCost / d.totalKm : 0,
+        kmPerLiter: d.effCount > 0 ? d.effSum / d.effCount : 0,
+        costPerKm: d.effCostCount > 0 ? d.effCostSum / d.effCostCount : 0,
       }))
       .filter(d => d.kmPerLiter > 0)
       .sort((a, b) => b.kmPerLiter - a.kmPerLiter);

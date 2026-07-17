@@ -33,18 +33,20 @@ export default function RankingContent() {
       if (!d.driver || d.driver === '-') return;
       const key = d.driver.toUpperCase();
       if (!byDriver[key]) {
-        byDriver[key] = { driverName: d.driver, totalLiters: 0, totalKm: 0, totalCost: 0 };
+        byDriver[key] = { driverName: d.driver, totalLiters: 0, totalKm: 0, totalCost: 0, effSum: 0, effCount: 0, effCostSum: 0, effCostCount: 0 };
       }
       byDriver[key].totalLiters += d.liters || 0;
       byDriver[key].totalKm += d.kmPercorrido || 0;
       byDriver[key].totalCost += d.cost || 0;
+      if (d.efficiency > 0) { byDriver[key].effSum += d.efficiency; byDriver[key].effCount++; }
+      if (d.efficiencyCost > 0) { byDriver[key].effCostSum += d.efficiencyCost; byDriver[key].effCostCount++; }
     });
 
     return Object.values(byDriver)
       .map(d => ({
         ...d,
-        kmPerLiter: d.totalLiters > 0 && d.totalKm > 0 ? d.totalKm / d.totalLiters : 0,
-        costPerKm: d.totalKm > 0 ? d.totalCost / d.totalKm : 0,
+        kmPerLiter: d.effCount > 0 ? d.effSum / d.effCount : 0,
+        costPerKm: d.effCostCount > 0 ? d.effCostSum / d.effCostCount : 0,
       }))
       .filter(d => d.kmPerLiter > 0)
       .sort((a, b) => b.kmPerLiter - a.kmPerLiter);
